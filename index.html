@@ -340,7 +340,7 @@
         .error-message {
             background: rgba(229, 57, 53, 0.1);
             border: 1px solid var(--red-accent);
-            border-radius = 8px;
+            border-radius: 8px;
             padding: 14px;
             color: var(--red-light);
             font-size: 14px;
@@ -641,6 +641,21 @@
                         <input type="email" id="teacher-email" required placeholder="teacher@school.edu">
                     </div>
 
+                    <div class="form-group checkbox">
+                        <input type="checkbox" id="no-advisory">
+                        <label for="no-advisory">No grade level advisory assignment</label>
+                    </div>
+
+                    <div id="grade-section-fields">
+                        <div class="form-group">
+                            <label>GRADE LEVEL & SECTION</label>
+                            <select id="grade-section-select" required>
+                                <option value="">Select grade and section</option>
+                                <!-- Will be populated from database -->
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label>PASSWORD</label>
                         <input type="password" id="teacher-password" required placeholder="Minimum 6 characters">
@@ -705,6 +720,7 @@
         import { supabase } from './supabase.js';
 
         let lastRegisteredEmail = '';
+        let gradeSections = [];
 
         const authContainer = document.getElementById('auth-container');
         const loginForm = document.getElementById('login-form');
@@ -714,6 +730,9 @@
         const loginFormContainer = document.getElementById('login-form-container');
         const registerFormContainer = document.getElementById('register-form-container');
         const roleOptions = document.querySelectorAll('.role-option');
+        const noAdvisoryCheckbox = document.getElementById('no-advisory');
+        const gradeSectionFields = document.getElementById('grade-section-fields');
+        const gradeSectionSelect = document.getElementById('grade-section-select');
         const authMessage = document.getElementById('auth-message');
         const toast = document.getElementById('toast');
         const confirmationModal = document.getElementById('confirmation-modal');
@@ -722,9 +741,39 @@
         const resendEmailLink = document.getElementById('resend-email-link');
         const loginInfoMessage = document.getElementById('login-info-message');
 
+        async function loadGradeSections() {
+            try {
+                const { data, error } = await supabase
+                    .from('grade_sections')
+                    .select('*')
+                    .order('grade_level', { ascending: true })
+                    .order('section', { ascending: true });
+
+                if (error) throw error;
+                
+                gradeSections = data;
+                populateGradeSectionDropdown();
+            } catch (error) {
+                console.error('Error loading grade sections:', error);
+                showToast('❌ Failed to load grade sections', 'error');
+            }
+        }
+
+        function populateGradeSectionDropdown() {
+            gradeSectionSelect.innerHTML = '<option value="">Select grade and section</option>';
+            
+            gradeSections.forEach(gradeSection => {
+                const option = document.createElement('option');
+                option.value = gradeSection.id;
+                option.textContent = `${gradeSection.grade_level} - ${gradeSection.section}`;
+                gradeSectionSelect.appendChild(option);
+            });
+        }
+
         function init() {
             checkAuthState();
             setupEventListeners();
+            loadGradeSections();
         }
 
         async function checkAuthState() {
@@ -754,6 +803,15 @@
                     const role = option.dataset.role;
                     selectRole(role);
                 });
+            });
+
+            noAdvisoryCheckbox.addEventListener('change', function() {
+                gradeSectionFields.style.display = this.checked ? 'none' : 'block';
+                if (this.checked) {
+                    gradeSectionSelect.required = false;
+                } else {
+                    gradeSectionSelect.required = true;
+                }
             });
 
             loginForm.addEventListener('submit', async (e) => {
@@ -962,6 +1020,8 @@
             const email = document.getElementById('teacher-email').value.trim().toLowerCase();
             const password = document.getElementById('teacher-password').value;
             const confirmPassword = document.getElementById('teacher-confirm-password').value;
+            const noAdvisory = document.getElementById('no-advisory').checked;
+            const gradeSectionId = noAdvisory ? null : gradeSectionSelect.value;
 
             if (!fullName || !email || !password || !confirmPassword) {
                 showAuthMessage('All fields required.', 'error');
@@ -975,6 +1035,10 @@
                 showAuthMessage('Passwords do not match.', 'error');
                 return;
             }
+            if (!noAdvisory && !gradeSectionId) {
+                showAuthMessage('Please select a grade and section.', 'error');
+                return;
+            }
 
             const registerButton = document.getElementById('teacher-register-button');
             const originalText = registerButton.textContent;
@@ -982,6 +1046,12 @@
             registerButton.disabled = true;
 
             try {
+                // Get the selected grade section data
+                let gradeSectionData = null;
+                if (gradeSectionId) {
+                    gradeSectionData = gradeSections.find(gs => gs.id === gradeSectionId);
+                }
+
                 // Create auth user
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: email,
@@ -989,7 +1059,11 @@
                     options: {
                         data: {
                             full_name: fullName,
-                            role: 'teacher'
+                            role: 'teacher',
+                            grade_level: gradeSectionData ? gradeSectionData.grade_level : null,
+                            section: gradeSectionData ? gradeSectionData.section : null,
+                            has_advisory: !noAdvisory,
+                            grade_section_id: gradeSectionId
                         },
                         emailRedirectTo: window.location.origin + '?confirm=true'
                     }
@@ -1009,6 +1083,8 @@
 
                 showEmailConfirmation(email);
                 teacherRegisterForm.reset();
+                noAdvisoryCheckbox.checked = false;
+                gradeSectionFields.style.display = 'block';
                 showToast('✅ Teacher registered successfully! Check email for verification.', 'success');
             } catch (error) {
                 let errorMessage = 'Registration failed. ';
