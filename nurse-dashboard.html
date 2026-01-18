@@ -629,6 +629,11 @@
   </div>
 
   <script>
+      // Initialize Supabase client - REPLACE WITH YOUR ACTUAL CREDENTIALS
+    const supabaseUrl = 'https://your-project-id.supabase.co'
+    const supabaseAnonKey = 'your-anon-key'
+    const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey)
+    
     // Global variables
     let currentStudent = null;
     let currentGradeSection = null;
