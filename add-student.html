@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group.required label::after {
+            content: " *";
+            color: #e74c3c;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #999;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .dropdowns-container {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .dropdowns-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-cancel {
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        .btn-cancel:hover {
+            background: #e9ecef;
+        }
+
+        .loading {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+            min-height: 20px;
+        }
+
+        .selected-section-info {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+
+        .selected-section-info.active {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-container {
+                padding: 25px;
+            }
+            
+            .header {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Add New Student</h1>
+            <p>Complete the form below to register a new student</p>
+        </div>
+        
+        <div class="form-container">
+            <div id="message" class="message"></div>
+            
+            <form id="addStudentForm">
+                <div class="form-grid">
+                    <div class="form-group required">
+                        <label for="full_name">Full Name</label>
+                        <input type="text" id="full_name" class="form-control" placeholder="Enter student's full name" required>
+                    </div>
+                    
+                    <div class="form-group required">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" class="form-control" placeholder="Enter student's age" min="3" max="25" required>
+                    </div>
+                    
+                    <div class="dropdowns-container">
+                        <div class="form-group required">
+                            <label for="grade">Grade Level</label>
+                            <select id="grade" class="form-control" required>
+                                <option value="">Select Grade Level</option>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                            <div class="info-text" id="gradeInfo"></div>
+                        </div>
+                        
+                        <div class="form-group required">
+                            <label for="section">Section</label>
+                            <select id="section" class="form-control" required disabled>
+                                <option value="">Select Section</option>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                            <div class="info-text" id="sectionInfo"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="full-width">
+                        <div class="selected-section-info" id="selectedSectionInfo">
+                            <strong>Selected:</strong> <span id="selectedGradeSection"></span>
+                            <input type="hidden" id="grade_section_id">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="allergies">Allergies & Medical Notes</label>
+                        <textarea id="allergies" class="form-control" rows="4" placeholder="List any allergies or medical conditions (optional)"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" id="cancelBtn">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-submit">
+                        <span>Add Student</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <script>
+        // Import supabase client
+        import { supabase } from './supabase.js';
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const form = document.getElementById('addStudentForm');
+            const messageDiv = document.getElementById('message');
+            const loadingDiv = document.getElementById('loading');
+            const gradeSelect = document.getElementById('grade');
+            const sectionSelect = document.getElementById('section');
+            const selectedSectionInfo = document.getElementById('selectedSectionInfo');
+            const selectedGradeSection = document.getElementById('selectedGradeSection');
+            const gradeSectionIdInput = document.getElementById('grade_section_id');
+            const cancelBtn = document.getElementById('cancelBtn');
+            
+            // Store grade sections data
+            let gradeSections = [];
+            let gradeLevels = new Set();
+            let sectionsByGrade = {};
+
+            // Load grade sections and populate dropdowns
+            await loadGradeSections();
+
+            // Handle grade selection change
+            gradeSelect.addEventListener('change', function() {
+                const selectedGrade = this.value;
+                sectionSelect.disabled = !selectedGrade;
+                sectionSelect.value = '';
+                gradeSectionIdInput.value = '';
+                selectedSectionInfo.classList.remove('active');
+                
+                if (selectedGrade) {
+                    populateSections(selectedGrade);
+                    updateGradeInfo(selectedGrade);
+                } else {
+                    document.getElementById('sectionInfo').textContent = '';
+                    document.getElementById('gradeInfo').textContent = '';
+                }
+            });
+
+            // Handle section selection change
+            sectionSelect.addEventListener('change', function() {
+                const selectedSectionId = this.value;
+                
+                if (selectedSectionId) {
+                    const selectedSection = gradeSections.find(s => s.id === selectedSectionId);
+                    if (selectedSection) {
+                        gradeSectionIdInput.value = selectedSection.id;
+                        selectedGradeSection.textContent = `Grade ${selectedSection.grade_level} - Section ${selectedSection.section}`;
+                        selectedSectionInfo.classList.add('active');
+                        updateSectionInfo(selectedSection.section);
+                    }
+                } else {
+                    gradeSectionIdInput.value = '';
+                    selectedSectionInfo.classList.remove('active');
+                    document.getElementById('sectionInfo').textContent = '';
+                }
+            });
+
+            // Handle form submission
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Get current user (assuming user is logged in)
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                
+                if (userError || !user) {
+                    showMessage('Please log in to add students', 'error');
+                    return;
+                }
+
+                // Get form values
+                const studentData = {
+                    full_name: document.getElementById('full_name').value.trim(),
+                    age: parseInt(document.getElementById('age').value),
+                    grade_section_id: gradeSectionIdInput.value || null,
+                    allergies: document.getElementById('allergies').value.trim() || null,
+                    created_by: user.id
+                };
+
+                // Validate form
+                if (!validateForm(studentData)) {
+                    return;
+                }
+
+                // Show loading
+                loadingDiv.classList.add('active');
+
+                try {
+                    // Insert student into database
+                    const { data, error } = await supabase
+                        .from('students')
+                        .insert([studentData])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+
+                    // Show success message
+                    showMessage(`Student "${studentData.full_name}" added successfully!`, 'success');
+                    
+                    // Reset form
+                    form.reset();
+                    sectionSelect.disabled = true;
+                    selectedSectionInfo.classList.remove('active');
+                    document.getElementById('gradeInfo').textContent = '';
+                    document.getElementById('sectionInfo').textContent = '';
+                    
+                    // Clear localStorage draft
+                    localStorage.removeItem('studentDraft');
+                    
+                    // Redirect after 2 seconds (optional)
+                    setTimeout(() => {
+                        window.location.href = 'students.html'; // Change to your students list page
+                    }, 2000);
+
+                } catch (error) {
+                    console.error('Error adding student:', error);
+                    showMessage(`Error: ${error.message}`, 'error');
+                } finally {
+                    loadingDiv.classList.remove('active');
+                }
+            });
+
+            // Handle cancel button
+            cancelBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
+                    window.location.href = 'students.html'; // Change to your students list page
+                }
+            });
+
+            // Function to load grade sections
+            async function loadGradeSections() {
+                try {
+                    const { data: sections, error } = await supabase
+                        .from('grade_sections')
+                        .select('id, grade_level, section')
+                        .order('grade_level')
+                        .order('section');
+
+                    if (error) throw error;
+
+                    gradeSections = sections;
+                    
+                    // Extract unique grade levels
+                    sections.forEach(section => {
+                        gradeLevels.add(section.grade_level);
+                    });
+                    
+                    // Populate grade dropdown
+                    Array.from(gradeLevels).sort((a, b) => a - b).forEach(grade => {
+                        const option = document.createElement('option');
+                        option.value = grade;
+                        option.textContent = `Grade ${grade}`;
+                        gradeSelect.appendChild(option);
+                    });
+                    
+                    // Group sections by grade
+                    sections.forEach(section => {
+                        if (!sectionsByGrade[section.grade_level]) {
+                            sectionsByGrade[section.grade_level] = [];
+                        }
+                        sectionsByGrade[section.grade_level].push(section);
+                    });
+
+                } catch (error) {
+                    console.error('Error loading grade sections:', error);
+                    showMessage('Error loading grade sections. Please refresh the page.', 'error');
+                }
+            }
+
+            // Function to populate sections based on selected grade
+            function populateSections(grade) {
+                // Clear existing options (except the first empty option)
+                sectionSelect.innerHTML = '<option value="">Select Section</option>';
+                
+                if (sectionsByGrade[grade]) {
+                    sectionsByGrade[grade].forEach(section => {
+                        const option = document.createElement('option');
+                        option.value = section.id;
+                        option.textContent = `Section ${section.section}`;
+                        option.setAttribute('data-info', section.section);
+                        sectionSelect.appendChild(option);
+                    });
+                }
+            }
+
+            // Function to update grade info text
+            function updateGradeInfo(grade) {
+                const sections = sectionsByGrade[grade] || [];
+                const count = sections.length;
+                document.getElementById('gradeInfo').textContent = 
+                    count === 1 ? '1 section available' : `${count} sections available`;
+            }
+
+            // Function to update section info text
+            function updateSectionInfo(sectionName) {
+                document.getElementById('sectionInfo').textContent = `Section: ${sectionName}`;
+            }
+
+            // Function to validate form data
+            function validateForm(data) {
+                if (!data.full_name) {
+                    showMessage('Please enter student name', 'error');
+                    return false;
+                }
+
+                if (!data.age || data.age < 3 || data.age > 25) {
+                    showMessage('Please enter a valid age (3-25)', 'error');
+                    return false;
+                }
+
+                if (!data.grade_section_id) {
+                    showMessage('Please select both grade level and section', 'error');
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Function to show messages
+            function showMessage(text, type) {
+                messageDiv.textContent = text;
+                messageDiv.className = 'message ' + type;
+                messageDiv.style.display = 'block';
+
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+
+            // Add auto-save functionality
+            let autoSaveTimeout;
+            const formInputs = form.querySelectorAll('input, select, textarea');
+            
+            formInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    clearTimeout(autoSaveTimeout);
+                    autoSaveTimeout = setTimeout(saveDraft, 2000);
+                });
+            });
+
+            // Save draft to localStorage
+            function saveDraft() {
+                const draft = {
+                    full_name: document.getElementById('full_name').value,
+                    age: document.getElementById('age').value,
+                    grade: gradeSelect.value,
+                    section: sectionSelect.value,
+                    grade_section_id: gradeSectionIdInput.value,
+                    allergies: document.getElementById('allergies').value
+                };
+                localStorage.setItem('studentDraft', JSON.stringify(draft));
+            }
+
+            // Load draft from localStorage
+            function loadDraft() {
+                const draft = JSON.parse(localStorage.getItem('studentDraft'));
+                if (draft) {
+                    document.getElementById('full_name').value = draft.full_name || '';
+                    document.getElementById('age').value = draft.age || '';
+                    
+                    // Restore grade selection
+                    if (draft.grade) {
+                        gradeSelect.value = draft.grade;
+                        gradeSelect.dispatchEvent(new Event('change'));
+                        
+                        // Wait a bit for sections to populate, then restore section
+                        setTimeout(() => {
+                            if (draft.section) {
+                                sectionSelect.value = draft.section;
+                                sectionSelect.dispatchEvent(new Event('change'));
+                            }
+                        }, 100);
+                    }
+                    
+                    document.getElementById('allergies').value = draft.allergies || '';
+                }
+            }
+
+            // Load draft when page loads
+            loadDraft();
+        });
+    </script>
+</body>
+</html>
