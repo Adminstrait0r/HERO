@@ -447,72 +447,6 @@
             font-size: 13px;
         }
 
-        /* Dashboard */
-        .dashboard {
-            display: none;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 28px;
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .dashboard-header h1 {
-            font-size: 24px;
-            letter-spacing: 2px;
-            margin: 0;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: var(--red-main);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .user-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .user-name {
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .user-role {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .dashboard-content {
-            flex: 1;
-            padding: 40px 28px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
         /* Toast */
         .toast {
             position: fixed;
@@ -683,14 +617,14 @@
                     <div class="role-option selected" data-role="teacher">
                         <input type="radio" id="role-teacher" name="role" value="teacher" checked>
                         <label for="role-teacher">
-                           
+                            👨‍🏫
                             <span>TEACHER</span>
                         </label>
                     </div>
                     <div class="role-option" data-role="nurse">
                         <input type="radio" id="role-nurse" name="role" value="nurse">
                         <label for="role-nurse">
-                           
+                            👩‍⚕️
                             <span>NURSE</span>
                         </label>
                     </div>
@@ -699,12 +633,12 @@
                 <form id="teacher-register-form" class="auth-form">
                     <div class="form-group">
                         <label>FULL NAME</label>
-                        <input type="text" id="teacher-fullname" required placeholder="">
+                        <input type="text" id="teacher-fullname" required placeholder="John Doe">
                     </div>
 
                     <div class="form-group">
                         <label>EMAIL ADDRESS</label>
-                        <input type="email" id="teacher-email" required placeholder="">
+                        <input type="email" id="teacher-email" required placeholder="teacher@school.edu">
                     </div>
 
                     <div class="form-group checkbox">
@@ -768,12 +702,12 @@
                 <form id="nurse-register-form" class="auth-form hidden">
                     <div class="form-group">
                         <label>FULL NAME</label>
-                        <input type="text" id="nurse-fullname" required placeholder="">
+                        <input type="text" id="nurse-fullname" required placeholder="Dr. Jane Smith">
                     </div>
 
                     <div class="form-group">
                         <label>EMAIL ADDRESS</label>
-                        <input type="email" id="nurse-email" required placeholder="">
+                        <input type="email" id="nurse-email" required placeholder="nurse@school.edu">
                     </div>
 
                     <div class="form-group">
@@ -815,63 +749,18 @@
         </div>
     </div>
 
-    <!-- Dashboard -->
-    <div id="dashboard" class="dashboard hidden">
-        <div class="dashboard-header">
-            <h1>HERO DASHBOARD</h1>
-            <div class="user-info">
-                <div class="user-avatar" id="user-avatar">U</div>
-                <div class="user-details">
-                    <div class="user-name" id="user-name">User Name</div>
-                    <div class="user-role" id="user-role">Role</div>
-                </div>
-                <button id="logout-button" class="btn btn-secondary btn-sm">LOGOUT</button>
-            </div>
-        </div>
-
-        <div class="dashboard-content">
-            <div style="margin-bottom: 40px;">
-                <h2 style="color: var(--red-main); margin-bottom: 10px; font-size: 32px;">SYSTEM ACTIVE</h2>
-                <p style="color: var(--text-muted); max-width: 600px; line-height: 1.6;">
-                    Health Emergency Response Operations – Monitoring all systems for student health and safety protocols.
-                </p>
-            </div>
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 800px;">
-                <div style="background: var(--btn-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; width: 250px;">
-                    <div style="font-size: 32px; margin-bottom: 10px;">👩‍⚕️</div>
-                    <h3 style="color: var(--red-main); margin-bottom: 8px;">MEDICAL</h3>
-                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.4;">
-                        Health records • Nurse visits • Vital signs • Medication logs
-                    </p>
-                </div>
-                <div style="background: var(--btn-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; width: 250px;">
-                    <div style="font-size: 32px; margin-bottom: 10px;">👨‍🏫</div>
-                    <h3 style="color: var(--red-main); margin-bottom: 8px;">MONITORING</h3>
-                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.4;">
-                        Student alerts • Attendance • Parent notifications • Emergency protocols
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Toast -->
     <div id="toast" class="toast hidden"></div>
 
     <!-- Corner Dot -->
     <div class="corner-dot">N</div>
 
-    <!-- Supabase Integration -->
     <script type="module">
         import { supabase } from './supabase.js';
 
-        let currentUser = null;
-        let userProfile = null;
         let lastRegisteredEmail = '';
 
         const authContainer = document.getElementById('auth-container');
-        const dashboard = document.getElementById('dashboard');
         const loginForm = document.getElementById('login-form');
         const teacherRegisterForm = document.getElementById('teacher-register-form');
         const nurseRegisterForm = document.getElementById('nurse-register-form');
@@ -881,7 +770,6 @@
         const roleOptions = document.querySelectorAll('.role-option');
         const noAdvisoryCheckbox = document.getElementById('no-advisory');
         const gradeSectionFields = document.getElementById('grade-section-fields');
-        const logoutButton = document.getElementById('logout-button');
         const authMessage = document.getElementById('auth-message');
         const toast = document.getElementById('toast');
         const confirmationModal = document.getElementById('confirmation-modal');
@@ -889,10 +777,6 @@
         const confirmationOkBtn = document.getElementById('confirmation-ok-btn');
         const resendEmailLink = document.getElementById('resend-email-link');
         const loginInfoMessage = document.getElementById('login-info-message');
-
-        const userAvatar = document.getElementById('user-avatar');
-        const userName = document.getElementById('user-name');
-        const userRole = document.getElementById('user-role');
 
         function init() {
             checkAuthState();
@@ -902,14 +786,16 @@
         async function checkAuthState() {
             try {
                 const { data, error } = await supabase.auth.getSession();
-                if (error) {
-                    showAuthMessage('Session error. Please login again.', 'error');
-                    return;
-                }
                 if (data.session) {
-                    await loadUserProfile(data.session.user);
+                    // Teacher is logged in via Supabase Auth
+                    const profile = await loadTeacherProfile(data.session.user);
+                    if (profile && profile.role === 'teacher') {
+                        redirectToTeacherDashboard();
+                    }
                 }
-            } catch (error) {}
+            } catch (error) {
+                console.error('Auth state check error:', error);
+            }
         }
 
         function setupEventListeners() {
@@ -952,8 +838,6 @@
                 e.preventDefault();
                 await handleNurseRegistration();
             });
-
-            logoutButton.addEventListener('click', handleLogout);
 
             confirmationOkBtn.addEventListener('click', () => {
                 confirmationModal.classList.add('hidden');
@@ -1032,7 +916,7 @@
         }
 
         async function handleLogin() {
-            const email = document.getElementById('login-email').value;
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
             const password = document.getElementById('login-password').value;
 
             if (!email || !password) {
@@ -1046,25 +930,62 @@
             loginButton.disabled = true;
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email.trim().toLowerCase(),
-                    password: password
-                });
+                // First try to login as teacher (Supabase Auth)
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
 
-                if (error) {
-                    if (error.message.includes('Email not confirmed')) {
-                        loginInfoMessage.style.display = 'block';
-                        showEmailConfirmation(email);
-                        showToast('📧 Email verification required.', 'warning');
+                    if (error) {
+                        if (error.message.includes('Email not confirmed')) {
+                            loginInfoMessage.style.display = 'block';
+                            showEmailConfirmation(email);
+                            showToast('📧 Email verification required.', 'warning');
+                            return;
+                        }
+                        // If teacher login fails, try nurse login
+                        throw new Error('Teacher login failed');
                     }
-                    throw error;
+                    
+                    // Teacher login successful
+                    const profile = await loadTeacherProfile(data.user);
+                    if (profile && profile.role === 'teacher') {
+                        showToast('✅ Teacher access granted', 'success');
+                        redirectToTeacherDashboard();
+                    }
+                    return;
+                } catch (teacherError) {
+                    console.log('Trying nurse login...');
                 }
-                await loadUserProfile(data.user);
-                showToast('✅ ACCESS GRANTED', 'success');
+
+                // Try nurse login - check in profiles table
+                const { data: nurseData, error: nurseError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('nurse_email', email)
+                    .eq('role', 'nurse')
+                    .single();
+
+                if (nurseError || !nurseData) {
+                    throw new Error('Invalid email or password');
+                }
+
+                // For demo purposes, compare plain text password
+                // IMPORTANT: In production, you should hash the password and compare hashes
+                if (nurseData.nurse_password_hash !== password) {
+                    throw new Error('Invalid email or password');
+                }
+
+                // Nurse login successful - store in session storage and redirect
+                sessionStorage.setItem('nurseProfile', JSON.stringify(nurseData));
+                showToast('✅ Nurse access granted', 'success');
+                redirectToNurseDashboard();
+
             } catch (error) {
                 let errorMessage = 'Login failed. ';
-                if (error.message.includes('Invalid login credentials')) {
-                    errorMessage += 'Check credentials.';
+                if (error.message.includes('Invalid email or password')) {
+                    errorMessage = 'Invalid email or password.';
                 } else if (error.message.includes('Email not confirmed')) {
                     errorMessage = 'Email verification required.';
                 } else {
@@ -1077,9 +998,38 @@
             }
         }
 
+        async function loadTeacherProfile(user) {
+            try {
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (error) {
+                    // Create profile if doesn't exist
+                    const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
+                    const { error: insertError } = await supabase
+                        .from('profiles')
+                        .insert({
+                            id: user.id,
+                            full_name: fullName,
+                            email: user.email,
+                            role: 'teacher'
+                        });
+                    if (insertError) throw insertError;
+                    return { id: user.id, full_name: fullName, email: user.email, role: 'teacher' };
+                }
+                return profile;
+            } catch (error) {
+                console.error('Profile load failed:', error);
+                return null;
+            }
+        }
+
         async function handleTeacherRegistration() {
             const fullName = document.getElementById('teacher-fullname').value;
-            const email = document.getElementById('teacher-email').value;
+            const email = document.getElementById('teacher-email').value.trim().toLowerCase();
             const password = document.getElementById('teacher-password').value;
             const confirmPassword = document.getElementById('teacher-confirm-password').value;
             const noAdvisory = document.getElementById('no-advisory').checked;
@@ -1109,8 +1059,34 @@
             registerButton.disabled = true;
 
             try {
+                // First, check if grade_section exists
+                let gradeSectionId = null;
+                if (grade && section) {
+                    const { data: existingGradeSection, error: gradeError } = await supabase
+                        .from('grade_sections')
+                        .select('id')
+                        .eq('grade_level', grade)
+                        .eq('section', section)
+                        .single();
+
+                    if (gradeError && gradeError.code === 'PGRST116') {
+                        // Grade section doesn't exist, create it
+                        const { data: newGradeSection, error: createError } = await supabase
+                            .from('grade_sections')
+                            .insert([{ grade_level: grade, section: section }])
+                            .select()
+                            .single();
+                        
+                        if (createError) throw createError;
+                        gradeSectionId = newGradeSection.id;
+                    } else if (!gradeError) {
+                        gradeSectionId = existingGradeSection.id;
+                    }
+                }
+
+                // Create auth user
                 const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: email.trim().toLowerCase(),
+                    email: email,
                     password: password,
                     options: {
                         data: {
@@ -1118,19 +1094,21 @@
                             role: 'teacher',
                             grade_level: grade,
                             section: section,
-                            has_advisory: !noAdvisory
+                            has_advisory: !noAdvisory,
+                            grade_section_id: gradeSectionId
                         },
-                        emailRedirectTo: window.location.origin
+                        emailRedirectTo: window.location.origin + '?confirm=true'
                     }
                 });
                 if (authError) throw authError;
 
+                // Create profile
                 const { error: profileError } = await supabase
                     .from('profiles')
                     .insert({
                         id: authData.user.id,
                         full_name: fullName,
-                        email: email.trim().toLowerCase(),
+                        email: email,
                         role: 'teacher'
                     });
                 if (profileError) throw new Error('Profile creation failed.');
@@ -1139,11 +1117,11 @@
                 teacherRegisterForm.reset();
                 noAdvisoryCheckbox.checked = false;
                 gradeSectionFields.style.display = 'block';
-                showToast('✅ Teacher registered.', 'success');
+                showToast('✅ Teacher registered successfully! Check email for verification.', 'success');
             } catch (error) {
                 let errorMessage = 'Registration failed. ';
                 if (error.message.includes('User already registered')) {
-                    errorMessage += 'Email exists. Login instead.';
+                    errorMessage += 'Email already exists. Login instead.';
                 } else if (error.message.includes('password')) {
                     errorMessage += 'Weak password.';
                 } else {
@@ -1158,7 +1136,7 @@
 
         async function handleNurseRegistration() {
             const fullName = document.getElementById('nurse-fullname').value;
-            const email = document.getElementById('nurse-email').value;
+            const email = document.getElementById('nurse-email').value.trim().toLowerCase();
             const phone = document.getElementById('nurse-phone').value;
             const password = document.getElementById('nurse-password').value;
             const confirmPassword = document.getElementById('nurse-confirm-password').value;
@@ -1182,41 +1160,50 @@
             registerButton.disabled = true;
 
             try {
+                // Check if nurse already exists
+                const { data: existingNurse, error: checkError } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('nurse_email', email)
+                    .single();
+
+                if (!checkError && existingNurse) {
+                    throw new Error('Nurse with this email already exists');
+                }
+
+                // Generate nurse passcode
                 const nursePasscode = Math.floor(1000 + Math.random() * 9000).toString();
 
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: email.trim().toLowerCase(),
-                    password: password,
-                    options: {
-                        data: {
-                            full_name: fullName,
-                            role: 'nurse',
-                            phone_number: phone,
-                            nurse_passcode: nursePasscode
-                        },
-                        emailRedirectTo: window.location.origin
-                    }
-                });
-                if (authError) throw authError;
-
-                const { error: profileError } = await supabase
+                // Create nurse profile (no Supabase Auth for nurses)
+                const { data: profile, error: profileError } = await supabase
                     .from('profiles')
                     .insert({
-                        id: authData.user.id,
                         full_name: fullName,
-                        email: email.trim().toLowerCase(),
+                        nurse_email: email,
+                        email: email, // Also store in regular email field for consistency
                         role: 'nurse',
-                        nurse_passcode: nursePasscode
-                    });
-                if (profileError) throw new Error('Profile creation failed.');
+                        nurse_passcode: nursePasscode,
+                        nurse_password_hash: password, // In production, hash this!
+                        // Note: id will be auto-generated by database (gen_random_uuid())
+                    })
+                    .select()
+                    .single();
 
-                showEmailConfirmation(email);
+                if (profileError) throw profileError;
+
+                // Show success message
+                showAuthMessage(`✅ Nurse registered successfully! Your passcode: ${nursePasscode}`, 'success');
                 nurseRegisterForm.reset();
-                showToast(`✅ Nurse registered. Passcode: ${nursePasscode}`, 'success');
+                
+                // Switch to login tab after 3 seconds
+                setTimeout(() => {
+                    switchTab('login');
+                }, 3000);
+                
             } catch (error) {
                 let errorMessage = 'Registration failed. ';
-                if (error.message.includes('User already registered')) {
-                    errorMessage += 'Email exists. Login instead.';
+                if (error.message.includes('already exists')) {
+                    errorMessage = 'Nurse with this email already exists.';
                 } else {
                     errorMessage += error.message;
                 }
@@ -1227,73 +1214,12 @@
             }
         }
 
-        async function loadUserProfile(user) {
-            try {
-                const { data: profile, error } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
-
-                if (error) {
-                    const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
-                    const role = user.user_metadata?.role || 'teacher';
-                    const { error: insertError } = await supabase
-                        .from('profiles')
-                        .insert({
-                            id: user.id,
-                            full_name: fullName,
-                            email: user.email,
-                            role: role
-                        });
-                    if (insertError) throw insertError;
-                    userProfile = { id: user.id, full_name: fullName, email: user.email, role: role };
-                } else {
-                    userProfile = profile;
-                }
-
-                updateUserInfo(userProfile);
-                showDashboard();
-            } catch (error) {
-                showToast('Profile load failed.', 'error');
-            }
+        function redirectToTeacherDashboard() {
+            window.location.href = 'teacher-dashboard.html';
         }
 
-        function updateUserInfo(profile) {
-            userName.textContent = profile.full_name || profile.email;
-            userRole.textContent = profile.role === 'nurse' ? 'MEDICAL STAFF' : 'FACULTY';
-            const firstLetter = (profile.full_name || profile.email).charAt(0).toUpperCase();
-            userAvatar.textContent = firstLetter;
-            currentUser = profile;
-        }
-
-        function showDashboard() {
-            authContainer.style.display = 'none';
-            dashboard.classList.remove('hidden');
-            dashboard.style.display = 'flex';
-            showToast(`✅ WELCOME, ${currentUser.full_name || currentUser.email}`, 'success');
-        }
-
-        async function handleLogout() {
-            try {
-                const { error } = await supabase.auth.signOut();
-                if (error) throw error;
-                currentUser = null;
-                userProfile = null;
-                lastRegisteredEmail = '';
-                dashboard.classList.add('hidden');
-                authContainer.style.display = 'flex';
-                confirmationModal.classList.add('hidden');
-                loginForm.reset();
-                teacherRegisterForm.reset();
-                nurseRegisterForm.reset();
-                noAdvisoryCheckbox.checked = false;
-                gradeSectionFields.style.display = 'block';
-                switchTab('login');
-                showToast('✅ LOGGED OUT', 'info');
-            } catch (error) {
-                showToast('❌ Logout failed.', 'error');
-            }
+        function redirectToNurseDashboard() {
+            window.location.href = 'nurse-dashboard.html';
         }
 
         function showAuthMessage(message, type) {
@@ -1315,9 +1241,10 @@
             setTimeout(() => toast.classList.add('hidden'), 4000);
         }
 
+        // Listen for auth state changes (for teachers only)
         supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN' && session) {
-                loadUserProfile(session.user);
+                redirectToTeacherDashboard();
             }
         });
 
