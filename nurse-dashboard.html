@@ -75,8 +75,9 @@
       padding: 10px 20px;
       border-radius: 6px;
       font-weight: 600;
-      cursor: pointer;
+      text-decoration: none;
       transition: all 0.2s;
+      display: inline-block;
     }
 
     .logout-btn:hover {
@@ -455,6 +456,41 @@
       color: var(--text-muted);
     }
 
+    /* Nurse Name Input */
+    .nurse-name-input {
+      width: 200px;
+      padding: 12px 15px;
+      background: #1a1a1a;
+      border: 1px solid #3a3a3a;
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 16px;
+      margin-left: 20px;
+    }
+
+    /* Email Link Button */
+    .email-link-btn {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 250px;
+      margin: 20px auto 0;
+      display: block;
+      transition: all 0.2s;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .email-link-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+    }
+
     /* Bottom Navigation */
     .bottom-nav {
       position: fixed;
@@ -504,12 +540,28 @@
       .students-list { grid-template-columns: 1fr; }
       header { padding: 15px 20px; }
       .main-layout { padding: 15px; }
+      .nurse-name-input { 
+        width: 150px; 
+        margin-left: 10px;
+      }
+      .email-link-btn {
+        width: 200px;
+      }
     }
 
     @media (max-width: 480px) {
       h1 { font-size: 32px; }
       .card { padding: 30px 20px; }
       .form-container { padding: 20px; }
+      header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+      .nurse-name-input {
+        width: 100%;
+        margin: 10px 0 0 0;
+      }
     }
   </style>
 </head>
@@ -520,8 +572,14 @@
       <div class="brand-icon">🚨</div>
       HERO
     </div>
-
-    <a href="index.html" class="logout-btn">Logout</a>
+    
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <select id="nurseSelect" class="nurse-name-input">
+        <option value="">Select Nurse</option>
+        <!-- Nurses loaded dynamically -->
+      </select>
+      <a href="index.html" class="logout-btn">Home</a>
+    </div>
   </header>
 
   <div class="main-layout">
@@ -651,8 +709,13 @@
           </div>
           
           <button id="submitVisitBtn" class="submit-btn">
-            📤 Submit Visit & Notify Parents
+            📤 Submit Visit Record
           </button>
+
+          <!-- This will appear after successful submission -->
+          <a id="emailLinkBtn" class="email-link-btn" style="display: none;" target="_blank">
+            📧 Email Parent Report
+          </a>
         </div>
       </div>
     </div>
@@ -663,27 +726,40 @@
   </div>
 
   <script>
-    // Initialize Supabase client - USING A DIFFERENT VARIABLE NAME
-    const supabaseUrl = 'https://gehcvalwixalqqdssekw.supabase.co';
-    const supabaseAnonKey = 'sb_publishable_0xH493bo2eEKS4Gq6SKdfw_r5F0tNJu';
-    const db = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    // Initialize Supabase client - REPLACE WITH YOUR ACTUAL CREDENTIALS
+    const SUPABASE_URL = 'https://gehcvalwixalqqdssekw.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_0xH493bo2eEKS4Gq6SKdfw_r5F0tNJu';
+    let supabaseClient = null;
     
     // Global variables
     let currentStudent = null;
     let currentGradeSection = null;
+    let currentNurseId = null;
+    let savedVisitId = null;
+    let parentEmail = null;
     
     // DOM Elements
-    const refreshAlertsBtn = document.getElementById('refreshAlerts');
-    const goHelpBtn = document.getElementById('goHelpBtn');
-    const backFromGrades = document.getElementById('backFromGrades');
-    const backFromSections = document.getElementById('backFromSections');
-    const backFromStudents = document.getElementById('backFromStudents');
-    const backFromForm = document.getElementById('backFromForm');
-    const homeNav = document.getElementById('homeNav');
-    const submitVisitBtn = document.getElementById('submitVisitBtn');
+    let refreshAlertsBtn, goHelpBtn, backFromGrades, backFromSections, 
+        backFromStudents, backFromForm, homeNav, submitVisitBtn, 
+        nurseSelect, emailLinkBtn;
     
     // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Supabase client
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      
+      // Get DOM elements
+      refreshAlertsBtn = document.getElementById('refreshAlerts');
+      goHelpBtn = document.getElementById('goHelpBtn');
+      backFromGrades = document.getElementById('backFromGrades');
+      backFromSections = document.getElementById('backFromSections');
+      backFromStudents = document.getElementById('backFromStudents');
+      backFromForm = document.getElementById('backFromForm');
+      homeNav = document.getElementById('homeNav');
+      submitVisitBtn = document.getElementById('submitVisitBtn');
+      nurseSelect = document.getElementById('nurseSelect');
+      emailLinkBtn = document.getElementById('emailLinkBtn');
+      
       // Set current time
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -692,16 +768,13 @@
       // Set up event listeners
       setupEventListeners();
       
-      // Load alerts
+      // Load initial data
       loadAlerts();
-      
-      // Check authentication
-      checkAuth();
+      loadNurses();
     });
 
     // Setup all event listeners
     function setupEventListeners() {
-      // Navigation buttons
       if (refreshAlertsBtn) refreshAlertsBtn.addEventListener('click', loadAlerts);
       if (goHelpBtn) goHelpBtn.addEventListener('click', () => showScreen('gradeLevelScreen'));
       if (backFromGrades) backFromGrades.addEventListener('click', () => showScreen('homeScreen'));
@@ -710,19 +783,9 @@
       if (backFromForm) backFromForm.addEventListener('click', () => showScreen('studentsScreen'));
       if (homeNav) homeNav.addEventListener('click', () => showScreen('homeScreen'));
       if (submitVisitBtn) submitVisitBtn.addEventListener('click', submitVisit);
-    }
-
-    // Check if user is authenticated
-    async function checkAuth() {
-      try {
-        const { data: { user }, error } = await db.auth.getUser();
-        if (error || !user) {
-          window.location.href = 'index.html';
-        }
-      } catch (error) {
-        console.error('Auth check error:', error);
-        window.location.href = 'index.html';
-      }
+      if (nurseSelect) nurseSelect.addEventListener('change', function() {
+        currentNurseId = this.value;
+      });
     }
 
     // Screen navigation
@@ -732,7 +795,10 @@
       screens.forEach(screen => screen.classList.remove('active'));
       
       // Show target screen
-      document.getElementById(screenId).classList.add('active');
+      const targetScreen = document.getElementById(screenId);
+      if (targetScreen) {
+        targetScreen.classList.add('active');
+      }
       
       // Load data for specific screens
       if (screenId === 'gradeLevelScreen') {
@@ -745,11 +811,12 @@
     // Load alerts
     async function loadAlerts() {
       const alertsList = document.getElementById('alertsList');
+      if (!alertsList) return;
+      
       alertsList.innerHTML = '<div class="no-alerts">Loading alerts...</div>';
       
       try {
-        // Replace with your Supabase query
-        const { data, error } = await db
+        const { data, error } = await supabaseClient
           .from('alerts')
           .select('*, profiles(full_name)')
           .eq('status', 'active')
@@ -768,7 +835,7 @@
           const alertDiv = document.createElement('div');
           alertDiv.className = 'alert-item';
           alertDiv.innerHTML = `
-            <div class="alert-room">Alert #${alert.id}</div>
+            <div class="alert-room">Room ${alert.room_number}</div>
             <div class="alert-desc">${alert.description || 'No description'}</div>
             <div class="alert-time">
               From: ${alert.profiles?.full_name || 'Unknown'} • 
@@ -783,30 +850,59 @@
       }
     }
 
+    // Load nurses
+    async function loadNurses() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('profiles')
+          .select('id, full_name, email')
+          .eq('role', 'nurse')
+          .order('full_name');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          nurseSelect.innerHTML = '<option value="">Select Nurse</option>';
+          data.forEach(nurse => {
+            const option = document.createElement('option');
+            option.value = nurse.id;
+            option.textContent = nurse.full_name || nurse.email;
+            nurseSelect.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading nurses:', error);
+      }
+    }
+
     // Load grade levels
     async function loadGradeLevels() {
       const container = document.getElementById('gradeLevelsContainer');
+      if (!container) return;
+      
       container.innerHTML = '<div class="loading">Loading grade levels...</div>';
       
       try {
-        // Replace with your actual table name
-        const { data, error } = await db
-          .from('grade_levels')
-          .select('*')
+        const { data, error } = await supabaseClient
+          .from('grade_sections')
+          .select('grade_level')
           .order('grade_level');
         
         if (error) throw error;
         
-        if (!data || data.length === 0) {
+        // Get unique grade levels
+        const gradeLevels = [...new Set(data.map(item => item.grade_level))];
+        
+        if (gradeLevels.length === 0) {
           container.innerHTML = '<div class="loading">No grade levels found.</div>';
           return;
         }
         
         container.innerHTML = '';
-        data.forEach(grade => {
+        gradeLevels.forEach(grade => {
           const btn = document.createElement('button');
           btn.className = 'grid-btn';
-          btn.textContent = `Grade ${grade.grade_level}`;
+          btn.textContent = `Grade ${grade}`;
           btn.addEventListener('click', () => loadSections(grade));
           container.appendChild(btn);
         });
@@ -817,18 +913,19 @@
     }
 
     // Load sections for a grade level
-    async function loadSections(grade) {
+    async function loadSections(gradeLevel) {
       currentGradeSection = null;
       const container = document.getElementById('sectionsContainer');
+      if (!container) return;
+      
       container.innerHTML = '<div class="loading">Loading sections...</div>';
       
       try {
-        // Replace with your actual table name
-        const { data, error } = await db
-          .from('sections')
+        const { data, error } = await supabaseClient
+          .from('grade_sections')
           .select('*')
-          .eq('grade_level_id', grade.id)
-          .order('section_name');
+          .eq('grade_level', gradeLevel)
+          .order('section');
         
         if (error) throw error;
         
@@ -841,8 +938,8 @@
         data.forEach(section => {
           const btn = document.createElement('button');
           btn.className = 'grid-btn';
-          btn.textContent = section.section_name;
-          btn.addEventListener('click', () => loadStudents(section, grade));
+          btn.textContent = `${section.grade_level} - ${section.section}`;
+          btn.addEventListener('click', () => loadStudents(section));
           container.appendChild(btn);
         });
         
@@ -854,19 +951,19 @@
     }
 
     // Load students for a section
-    async function loadStudents(section, grade) {
-      currentGradeSection = { section, grade };
+    async function loadStudents(section) {
+      currentGradeSection = section;
       const container = document.getElementById('studentsContainer');
+      if (!container) return;
+      
       container.innerHTML = '<div class="loading">Loading students...</div>';
       
       try {
-        // Replace with your actual table name
-        const { data, error } = await db
+        const { data, error } = await supabaseClient
           .from('students')
           .select('*')
-          .eq('section_id', section.id)
-          .eq('grade_level_id', grade.id)
-          .order('last_name, first_name');
+          .eq('grade_section_id', section.id)
+          .order('full_name');
         
         if (error) throw error;
         
@@ -881,7 +978,7 @@
           card.className = 'student-card';
           card.addEventListener('click', () => showStudentForm(student));
           card.innerHTML = `
-            <div class="student-name">${student.first_name} ${student.last_name}</div>
+            <div class="student-name">${student.full_name}</div>
             <div class="student-details">
               Age: ${student.age || 'N/A'}<br>
               ${student.allergies ? `Allergies: ${student.allergies}` : 'No known allergies'}
@@ -898,12 +995,12 @@
     }
 
     // Show form for selected student
-    function showStudentForm(student) {
+    async function showStudentForm(student) {
       currentStudent = student;
       
       // Set form values
       document.getElementById('studentInfo').value = 
-        `${student.first_name} ${student.last_name} - ${currentGradeSection.grade.grade_level} ${currentGradeSection.section.section_name}`;
+        `${student.full_name} - ${currentGradeSection.grade_level} ${currentGradeSection.section}`;
       
       document.getElementById('age').value = student.age || '';
       
@@ -920,8 +1017,27 @@
       document.getElementById('bp').value = '';
       document.getElementById('temp').value = '';
       
-      // Hide status message
+      // Hide status message and email button
       document.getElementById('statusMessage').className = 'status-message';
+      emailLinkBtn.style.display = 'none';
+      
+      // Get parent info for this student
+      try {
+        const { data: parentData, error } = await supabaseClient
+          .from('parents')
+          .select('parent_email')
+          .eq('student_id', student.id)
+          .single();
+        
+        if (parentData && !error) {
+          parentEmail = parentData.parent_email;
+        } else {
+          parentEmail = null;
+        }
+      } catch (error) {
+        parentEmail = null;
+        console.error('Error loading parent info:', error);
+      }
       
       showScreen('nurseVisitForm');
     }
@@ -931,6 +1047,14 @@
       const statusMessage = document.getElementById('statusMessage');
       statusMessage.className = 'status-message';
       
+      // Validate nurse selection
+      if (!currentNurseId) {
+        statusMessage.className = 'status-message error';
+        statusMessage.innerHTML = '❌ Please select a nurse from the dropdown.';
+        nurseSelect.focus();
+        return;
+      }
+      
       // Validate required fields
       if (!document.getElementById('symptoms').value.trim()) {
         statusMessage.className = 'status-message error';
@@ -939,29 +1063,24 @@
       }
       
       try {
-        // Get current user
-        const { data: { user }, error: userError } = await db.auth.getUser();
-        
-        if (userError || !user) {
-          throw new Error('No user logged in');
-        }
-        
         // Create nurse visit
         const visitData = {
           student_id: currentStudent.id,
-          nurse_id: user.id,
+          nurse_id: currentNurseId,
           time_in: document.getElementById('timeIn').value,
           symptoms: document.getElementById('symptoms').value.trim(),
           intervention_given: document.getElementById('intervention').value.trim()
         };
         
-        const { data: visit, error: visitError } = await db
+        const { data: visit, error: visitError } = await supabaseClient
           .from('nurse_visits')
           .insert([visitData])
           .select()
           .single();
         
         if (visitError) throw visitError;
+        
+        savedVisitId = visit.id;
         
         // Create vital signs if any are provided
         const pr = document.getElementById('pr').value.trim();
@@ -978,30 +1097,27 @@
             temperature: temp
           };
           
-          const { error: vitalError } = await db
+          const { error: vitalError } = await supabaseClient
             .from('vital_signs')
             .insert([vitalData]);
           
           if (vitalError) throw vitalError;
         }
         
-        // Try to notify parent (if email exists)
-        if (currentStudent.parent_email) {
-          await notifyParent(currentStudent);
+        // Log SMS/Email notification
+        if (parentEmail) {
+          await logNotification(currentStudent.id, visit.id, parentEmail);
         }
         
-        // Show success
+        // Show success and email button
         statusMessage.className = 'status-message success';
         statusMessage.innerHTML = '✅ Visit recorded successfully!';
         
-        // Auto-return to students after 3 seconds
-        setTimeout(() => {
-          if (currentGradeSection) {
-            loadStudents(currentGradeSection.section, currentGradeSection.grade);
-          } else {
-            showScreen('homeScreen');
-          }
-        }, 3000);
+        // Show email button if parent email exists
+        if (parentEmail) {
+          setupEmailButton(parentEmail);
+          emailLinkBtn.style.display = 'block';
+        }
         
       } catch (error) {
         statusMessage.className = 'status-message error';
@@ -1010,31 +1126,70 @@
       }
     }
 
-    // Notify parent
-    async function notifyParent(student) {
-      // This would be replaced with your actual notification logic
-      // For now, just log it
-      console.log(`Would notify parent at: ${student.parent_email}`);
-      
-      // Example: Send to your backend/AppScript
+    // Log notification in sms_logs table
+    async function logNotification(studentId, visitId, email) {
       try {
-        const scriptUrl = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
-        const emailData = {
-          to: student.parent_email,
-          subject: `Nurse Visit - ${student.first_name} ${student.last_name}`,
-          body: `Your child visited the school clinic today.`
+        const logData = {
+          student_id: studentId,
+          nurse_visit_id: visitId,
+          phone_number: null, // We don't have phone number
+          message: `Email notification sent to parent at ${email}`
         };
         
-        // Uncomment when you have your script URL
-        // await fetch(scriptUrl, {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(emailData)
-        // });
+        await supabaseClient
+          .from('sms_logs')
+          .insert([logData]);
+        
       } catch (error) {
-        // Fail silently - notification is secondary
-        console.log('Notification failed:', error);
+        console.error('Error logging notification:', error);
       }
+    }
+
+    // Setup email button with mailto link
+    function setupEmailButton(email) {
+      if (!email) return;
+      
+      const studentName = currentStudent.full_name;
+      const symptoms = document.getElementById('symptoms').value.trim();
+      const intervention = document.getElementById('intervention').value.trim();
+      const timeIn = document.getElementById('timeIn').value;
+      const pr = document.getElementById('pr').value.trim();
+      const spo2 = document.getElementById('spo2').value.trim();
+      const bp = document.getElementById('bp').value.trim();
+      const temp = document.getElementById('temp').value.trim();
+      
+      // Get selected nurse name
+      const selectedNurseOption = nurseSelect.options[nurseSelect.selectedIndex];
+      const nurseName = selectedNurseOption ? selectedNurseOption.textContent : 'School Nurse';
+      
+      // Create email body
+      let body = `Dear Parent/Guardian,\n\n`;
+      body += `This is to inform you that your child ${studentName} visited the school clinic today.\n\n`;
+      body += `Visit Details:\n`;
+      body += `- Date & Time: ${new Date(timeIn).toLocaleString()}\n`;
+      body += `- Symptoms: ${symptoms || 'Not specified'}\n`;
+      body += `- Intervention Given: ${intervention || 'None'}\n`;
+      
+      if (pr || spo2 || bp || temp) {
+        body += `\nVital Signs:\n`;
+        if (pr) body += `- Pulse Rate: ${pr}\n`;
+        if (spo2) body += `- Oxygen Saturation: ${spo2}\n`;
+        if (bp) body += `- Blood Pressure: ${bp}\n`;
+        if (temp) body += `- Temperature: ${temp}\n`;
+      }
+      
+      body += `\nAttending Nurse: ${nurseName}\n`;
+      body += `\nIf you have any questions or concerns, please contact the school clinic.\n\n`;
+      body += `Best regards,\nSchool Clinic Team\nHERO - Health Emergency Response Operations`;
+      
+      const subject = `Nurse Visit Report - ${studentName}`;
+      
+      // Create mailto link
+      const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      
+      // Set button properties
+      emailLinkBtn.href = mailtoLink;
+      emailLinkBtn.textContent = '📧 Email Parent Report';
     }
 
     // Initialize alerts refresh every 30 seconds
