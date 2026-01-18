@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HERO – Health Emergency Response Operations</title>
-  <script type="module" src="supabase.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg-main: radial-gradient(circle at top, #141414, #000000 70%);
@@ -33,6 +32,7 @@
       flex-direction: column;
     }
 
+    /* Top bar */
     header {
       display: flex;
       justify-content: space-between;
@@ -83,6 +83,7 @@
       border-color: var(--red-accent);
     }
 
+    /* Main Layout */
     .main-layout {
       display: flex;
       flex: 1;
@@ -93,6 +94,7 @@
       width: 100%;
     }
 
+    /* Alerts Panel */
     .alerts-panel {
       flex: 0 0 300px;
       background: var(--card-bg);
@@ -164,6 +166,7 @@
       font-style: italic;
     }
 
+    /* Main Content */
     .main-content {
       flex: 1;
       display: flex;
@@ -231,6 +234,7 @@
       opacity: 0.95;
     }
 
+    /* Navigation Screens */
     .nav-screen {
       display: none;
       flex-direction: column;
@@ -292,6 +296,7 @@
       transform: translateY(-2px);
     }
 
+    /* Students List */
     .students-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -326,6 +331,7 @@
       color: var(--text-muted);
     }
 
+    /* Nurse Visit Form */
     .form-container {
       background: #2b2b2b;
       border: 1px solid #3a3a3a;
@@ -407,6 +413,7 @@
       box-shadow: 0 5px 20px rgba(198, 40, 40, 0.4);
     }
 
+    /* Status Messages */
     .status-message {
       padding: 15px 20px;
       border-radius: 8px;
@@ -428,6 +435,7 @@
       display: block;
     }
 
+    /* Bottom Navigation */
     .bottom-nav {
       position: fixed;
       bottom: 20px;
@@ -450,6 +458,7 @@
       cursor: pointer;
     }
 
+    /* Responsive */
     @media (max-width: 1024px) {
       .main-layout {
         flex-direction: column;
@@ -482,6 +491,7 @@
   </header>
 
   <div class="main-layout">
+    <!-- Alerts Panel -->
     <div class="alerts-panel">
       <div class="alerts-header">
         <div class="alerts-title">ACTIVE ALERTS</div>
@@ -492,7 +502,9 @@
       </div>
     </div>
 
+    <!-- Main Content Area -->
     <div class="main-content">
+      <!-- Home Screen -->
       <div id="homeScreen" class="nav-screen active">
         <div class="card">
           <h1>HERO</h1>
@@ -500,39 +512,46 @@
 
           <div class="actions">
             <button class="btn btn-primary" onclick="showScreen('gradeLevelScreen')">
-            Go Help!
+              🚑 Go Help!
             </button>
           </div>
         </div>
       </div>
 
+      <!-- Grade Level Screen -->
       <div id="gradeLevelScreen" class="nav-screen">
         <div class="screen-header">
           <button class="back-btn" onclick="showScreen('homeScreen')">← Back</button>
           <div class="screen-title">Select Grade Level</div>
         </div>
         <div class="grid-container" id="gradeLevelsContainer">
+          <!-- Grade levels loaded dynamically -->
         </div>
       </div>
 
+      <!-- Sections Screen -->
       <div id="sectionsScreen" class="nav-screen">
         <div class="screen-header">
           <button class="back-btn" onclick="showScreen('gradeLevelScreen')">← Back</button>
           <div class="screen-title">Select Section</div>
         </div>
         <div class="grid-container" id="sectionsContainer">
+          <!-- Sections loaded dynamically -->
         </div>
       </div>
 
+      <!-- Students Screen -->
       <div id="studentsScreen" class="nav-screen">
         <div class="screen-header">
           <button class="back-btn" onclick="showScreen('sectionsScreen')">← Back</button>
           <div class="screen-title">Select Student</div>
         </div>
         <div class="students-list" id="studentsContainer">
+          <!-- Students loaded dynamically -->
         </div>
       </div>
 
+      <!-- Nurse Visit Form -->
       <div id="nurseVisitForm" class="nav-screen">
         <div class="screen-header">
           <button class="back-btn" onclick="showScreen('studentsScreen')">← Back</button>
@@ -610,41 +629,50 @@
   </div>
 
   <script>
+      // Initialize Supabase client - REPLACE WITH YOUR ACTUAL CREDENTIALS
+    const supabaseUrl = 'https://your-project-id.supabase.co'
+    const supabaseAnonKey = 'your-anon-key'
+    const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey)
+    
+    // Global variables
     let currentStudent = null;
     let currentGradeSection = null;
     
-    document.addEventListener('DOMContentLoaded', async function() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        window.location.href = 'index.html';
-        return;
-      }
-      
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set current time
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById('timeIn').value = now.toISOString().slice(0, 16);
       
+      // Load alerts
       loadAlerts();
     });
 
+    // Screen navigation
     function showScreen(screenId) {
+      // Hide all screens
       const screens = document.querySelectorAll('.nav-screen');
       screens.forEach(screen => screen.classList.remove('active'));
       
+      // Show target screen
       document.getElementById(screenId).classList.add('active');
       
+      // Load data for specific screens
       if (screenId === 'gradeLevelScreen') {
         loadGradeLevels();
       } else if (screenId === 'homeScreen') {
-        loadAlerts();
+        loadAlerts(); // Refresh alerts when returning home
       }
     }
 
+    // Load alerts
     async function loadAlerts() {
       const alertsList = document.getElementById('alertsList');
       alertsList.innerHTML = '<div class="no-alerts">Loading alerts...</div>';
       
       try {
+        // Replace with your Supabase query
         const { data, error } = await supabase
           .from('alerts')
           .select('*, profiles(full_name)')
@@ -678,6 +706,7 @@
       }
     }
 
+    // Load grade levels
     async function loadGradeLevels() {
       const container = document.getElementById('gradeLevelsContainer');
       container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 40px;">Loading...</div>';
@@ -690,6 +719,7 @@
         
         if (error) throw error;
         
+        // Get unique grade levels
         const gradeLevels = [...new Set(data.map(item => item.grade_level))];
         
         container.innerHTML = '';
@@ -705,6 +735,7 @@
       }
     }
 
+    // Load sections for a grade level
     async function loadSections(gradeLevel) {
       currentGradeSection = null;
       const container = document.getElementById('sectionsContainer');
@@ -734,6 +765,7 @@
       }
     }
 
+    // Load students for a section
     async function loadStudents(section) {
       currentGradeSection = section;
       const container = document.getElementById('studentsContainer');
@@ -769,18 +801,22 @@
       }
     }
 
+    // Show form for selected student
     function showStudentForm(student) {
       currentStudent = student;
       
+      // Set form values
       document.getElementById('studentInfo').value = 
         `${student.full_name} - ${student.grade_sections.grade_level} ${student.grade_sections.section}`;
       
       document.getElementById('age').value = student.age;
       
+      // Set current time
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById('timeIn').value = now.toISOString().slice(0, 16);
       
+      // Clear previous values
       document.getElementById('symptoms').value = '';
       document.getElementById('intervention').value = '';
       document.getElementById('pr').value = '';
@@ -788,22 +824,26 @@
       document.getElementById('bp').value = '';
       document.getElementById('temp').value = '';
       
+      // Hide status message
       document.getElementById('statusMessage').className = 'status-message';
       
       showScreen('nurseVisitForm');
     }
 
+    // Submit visit form
     async function submitVisit() {
       const statusMessage = document.getElementById('statusMessage');
       statusMessage.className = 'status-message';
       
       try {
+        // Get current user
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
           throw new Error('No user logged in');
         }
         
+        // Create nurse visit
         const visitData = {
           student_id: currentStudent.id,
           nurse_id: user.id,
@@ -820,6 +860,7 @@
         
         if (visitError) throw visitError;
         
+        // Create vital signs
         const vitalData = {
           nurse_visit_id: visit.id,
           pr: document.getElementById('pr').value,
@@ -834,6 +875,7 @@
         
         if (vitalError) throw vitalError;
         
+        // Get parent info and notify
         const { data: parent } = await supabase
           .from('parents')
           .select('*')
@@ -841,8 +883,10 @@
           .single();
         
         if (parent && parent.parent_email) {
+          // Call your AppScript endpoint
           await notifyParent(parent.parent_email, visit, vitalData);
           
+          // Log the notification
           await supabase
             .from('sms_logs')
             .insert([{
@@ -853,9 +897,11 @@
             }]);
         }
         
+        // Show success
         statusMessage.className = 'status-message success';
         statusMessage.innerHTML = '✅ Visit recorded successfully! Parent has been notified via email.';
         
+        // Auto-return to students after 3 seconds
         setTimeout(() => {
           loadStudents(currentGradeSection);
         }, 3000);
@@ -867,6 +913,7 @@
       }
     }
 
+    // Notify parent via AppScript
     async function notifyParent(email, visit, vitals) {
       const scriptUrl = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
       
@@ -877,6 +924,7 @@
       };
       
       try {
+        // This assumes your AppScript is set up to handle POST requests
         await fetch(scriptUrl, {
           method: 'POST',
           mode: 'no-cors',
@@ -886,20 +934,23 @@
           body: JSON.stringify(emailData)
         });
       } catch (error) {
+        // Silent fail - email might still be sent
         console.log('Email notification attempted');
       }
     }
 
+    // Logout
     async function logout() {
       try {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
-        window.location.href = 'index.html';
+        window.location.href = '/login.html';
       } catch (error) {
         alert('Error logging out: ' + error.message);
       }
     }
 
+    // Initialize alerts refresh every 30 seconds
     setInterval(loadAlerts, 30000);
   </script>
 </body>
