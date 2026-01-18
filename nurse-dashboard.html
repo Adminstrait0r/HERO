@@ -522,7 +522,6 @@
     </div>
 
     <a href="index.html" class="logout-btn">Logout</a>
-
   </header>
 
   <div class="main-layout">
@@ -664,17 +663,16 @@
   </div>
 
   <script>
-    // Initialize Supabase client - REPLACE WITH YOUR ACTUAL CREDENTIALS
-    const supabaseUrl = 'https://gehcvalwixalqqdssekw.supabase.co'
-    const supabaseAnonKey = 'sb_publishable_0xH493bo2eEKS4Gq6SKdfw_r5F0tNJu'
-    const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey)
+    // Initialize Supabase client - USING A DIFFERENT VARIABLE NAME
+    const supabaseUrl = 'https://gehcvalwixalqqdssekw.supabase.co';
+    const supabaseAnonKey = 'sb_publishable_0xH493bo2eEKS4Gq6SKdfw_r5F0tNJu';
+    const db = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
     
     // Global variables
     let currentStudent = null;
     let currentGradeSection = null;
     
     // DOM Elements
-    const logoutBtn = document.getElementById('logoutBtn');
     const refreshAlertsBtn = document.getElementById('refreshAlerts');
     const goHelpBtn = document.getElementById('goHelpBtn');
     const backFromGrades = document.getElementById('backFromGrades');
@@ -704,21 +702,20 @@
     // Setup all event listeners
     function setupEventListeners() {
       // Navigation buttons
-      logoutBtn.addEventListener('click', logout);
-      refreshAlertsBtn.addEventListener('click', loadAlerts);
-      goHelpBtn.addEventListener('click', () => showScreen('gradeLevelScreen'));
-      backFromGrades.addEventListener('click', () => showScreen('homeScreen'));
-      backFromSections.addEventListener('click', () => showScreen('gradeLevelScreen'));
-      backFromStudents.addEventListener('click', () => showScreen('sectionsScreen'));
-      backFromForm.addEventListener('click', () => showScreen('studentsScreen'));
-      homeNav.addEventListener('click', () => showScreen('homeScreen'));
-      submitVisitBtn.addEventListener('click', submitVisit);
+      if (refreshAlertsBtn) refreshAlertsBtn.addEventListener('click', loadAlerts);
+      if (goHelpBtn) goHelpBtn.addEventListener('click', () => showScreen('gradeLevelScreen'));
+      if (backFromGrades) backFromGrades.addEventListener('click', () => showScreen('homeScreen'));
+      if (backFromSections) backFromSections.addEventListener('click', () => showScreen('gradeLevelScreen'));
+      if (backFromStudents) backFromStudents.addEventListener('click', () => showScreen('sectionsScreen'));
+      if (backFromForm) backFromForm.addEventListener('click', () => showScreen('studentsScreen'));
+      if (homeNav) homeNav.addEventListener('click', () => showScreen('homeScreen'));
+      if (submitVisitBtn) submitVisitBtn.addEventListener('click', submitVisit);
     }
 
     // Check if user is authenticated
     async function checkAuth() {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const { data: { user }, error } = await db.auth.getUser();
         if (error || !user) {
           window.location.href = 'index.html';
         }
@@ -752,7 +749,7 @@
       
       try {
         // Replace with your Supabase query
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from('alerts')
           .select('*, profiles(full_name)')
           .eq('status', 'active')
@@ -793,7 +790,7 @@
       
       try {
         // Replace with your actual table name
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from('grade_levels')
           .select('*')
           .order('grade_level');
@@ -827,7 +824,7 @@
       
       try {
         // Replace with your actual table name
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from('sections')
           .select('*')
           .eq('grade_level_id', grade.id)
@@ -864,7 +861,7 @@
       
       try {
         // Replace with your actual table name
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from('students')
           .select('*')
           .eq('section_id', section.id)
@@ -943,7 +940,7 @@
       
       try {
         // Get current user
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        const { data: { user }, error: userError } = await db.auth.getUser();
         
         if (userError || !user) {
           throw new Error('No user logged in');
@@ -958,7 +955,7 @@
           intervention_given: document.getElementById('intervention').value.trim()
         };
         
-        const { data: visit, error: visitError } = await supabase
+        const { data: visit, error: visitError } = await db
           .from('nurse_visits')
           .insert([visitData])
           .select()
@@ -981,7 +978,7 @@
             temperature: temp
           };
           
-          const { error: vitalError } = await supabase
+          const { error: vitalError } = await db
             .from('vital_signs')
             .insert([vitalData]);
           
@@ -1037,17 +1034,6 @@
       } catch (error) {
         // Fail silently - notification is secondary
         console.log('Notification failed:', error);
-      }
-    }
-
-    // Logout function
-    async function logout() {
-      try {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-        window.location.href = 'index.html';
-      } catch (error) {
-        alert('Error logging out: ' + error.message);
       }
     }
 
