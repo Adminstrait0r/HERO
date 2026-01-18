@@ -291,12 +291,23 @@
                         <input type="number" id="age" class="form-control" placeholder="Enter student's age" min="3" max="25" required>
                     </div>
                     
+                    <div class="form-group required">
+                        <label for="parent_email">Parent/Guardian Email</label>
+                        <input type="email" id="parent_email" class="form-control" placeholder="parent@example.com" required>
+                        <div class="info-text">Required for notifications and communication</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="parent_phone">Parent/Guardian Phone</label>
+                        <input type="tel" id="parent_phone" class="form-control" placeholder="(123) 456-7890">
+                        <div class="info-text">Optional - for emergency contact</div>
+                    </div>
+                    
                     <div class="dropdowns-container">
                         <div class="form-group required">
                             <label for="grade">Grade Level</label>
                             <select id="grade" class="form-control" required>
                                 <option value="">Select Grade Level</option>
-                                <!-- Options will be populated by JavaScript -->
                             </select>
                             <div class="info-text" id="gradeInfo"></div>
                         </div>
@@ -305,7 +316,6 @@
                             <label for="section">Section</label>
                             <select id="section" class="form-control" required disabled>
                                 <option value="">Select Section</option>
-                                <!-- Options will be populated by JavaScript -->
                             </select>
                             <div class="info-text" id="sectionInfo"></div>
                         </div>
@@ -341,7 +351,6 @@
     </div>
 
     <script>
-        // Import supabase client
         import { supabase } from './supabase.js';
 
         document.addEventListener('DOMContentLoaded', async function() {
@@ -355,15 +364,12 @@
             const gradeSectionIdInput = document.getElementById('grade_section_id');
             const cancelBtn = document.getElementById('cancelBtn');
             
-            // Store grade sections data
             let gradeSections = [];
             let gradeLevels = new Set();
             let sectionsByGrade = {};
 
-            // Load grade sections and populate dropdowns
             await loadGradeSections();
 
-            // Handle grade selection change
             gradeSelect.addEventListener('change', function() {
                 const selectedGrade = this.value;
                 sectionSelect.disabled = !selectedGrade;
@@ -380,7 +386,6 @@
                 }
             });
 
-            // Handle section selection change
             sectionSelect.addEventListener('change', function() {
                 const selectedSectionId = this.value;
                 
@@ -399,11 +404,9 @@
                 }
             });
 
-            // Handle form submission
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                // Get current user (assuming user is logged in)
                 const { data: { user }, error: userError } = await supabase.auth.getUser();
                 
                 if (userError || !user) {
@@ -411,25 +414,23 @@
                     return;
                 }
 
-                // Get form values
                 const studentData = {
                     full_name: document.getElementById('full_name').value.trim(),
                     age: parseInt(document.getElementById('age').value),
+                    parent_email: document.getElementById('parent_email').value.trim(),
+                    parent_phone: document.getElementById('parent_phone').value.trim() || null,
                     grade_section_id: gradeSectionIdInput.value || null,
                     allergies: document.getElementById('allergies').value.trim() || null,
                     created_by: user.id
                 };
 
-                // Validate form
                 if (!validateForm(studentData)) {
                     return;
                 }
 
-                // Show loading
                 loadingDiv.classList.add('active');
 
                 try {
-                    // Insert student into database
                     const { data, error } = await supabase
                         .from('students')
                         .insert([studentData])
@@ -438,22 +439,18 @@
 
                     if (error) throw error;
 
-                    // Show success message
                     showMessage(`Student "${studentData.full_name}" added successfully!`, 'success');
                     
-                    // Reset form
                     form.reset();
                     sectionSelect.disabled = true;
                     selectedSectionInfo.classList.remove('active');
                     document.getElementById('gradeInfo').textContent = '';
                     document.getElementById('sectionInfo').textContent = '';
                     
-                    // Clear localStorage draft
                     localStorage.removeItem('studentDraft');
                     
-                    // Redirect after 2 seconds (optional)
                     setTimeout(() => {
-                        window.location.href = 'students.html'; // Change to your students list page
+                        window.location.href = 'students.html';
                     }, 2000);
 
                 } catch (error) {
@@ -464,14 +461,12 @@
                 }
             });
 
-            // Handle cancel button
             cancelBtn.addEventListener('click', function() {
                 if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
-                    window.location.href = 'students.html'; // Change to your students list page
+                    window.location.href = 'students.html';
                 }
             });
 
-            // Function to load grade sections
             async function loadGradeSections() {
                 try {
                     const { data: sections, error } = await supabase
@@ -484,12 +479,10 @@
 
                     gradeSections = sections;
                     
-                    // Extract unique grade levels
                     sections.forEach(section => {
                         gradeLevels.add(section.grade_level);
                     });
                     
-                    // Populate grade dropdown
                     Array.from(gradeLevels).sort((a, b) => a - b).forEach(grade => {
                         const option = document.createElement('option');
                         option.value = grade;
@@ -497,7 +490,6 @@
                         gradeSelect.appendChild(option);
                     });
                     
-                    // Group sections by grade
                     sections.forEach(section => {
                         if (!sectionsByGrade[section.grade_level]) {
                             sectionsByGrade[section.grade_level] = [];
@@ -511,9 +503,7 @@
                 }
             }
 
-            // Function to populate sections based on selected grade
             function populateSections(grade) {
-                // Clear existing options (except the first empty option)
                 sectionSelect.innerHTML = '<option value="">Select Section</option>';
                 
                 if (sectionsByGrade[grade]) {
@@ -527,7 +517,6 @@
                 }
             }
 
-            // Function to update grade info text
             function updateGradeInfo(grade) {
                 const sections = sectionsByGrade[grade] || [];
                 const count = sections.length;
@@ -535,12 +524,10 @@
                     count === 1 ? '1 section available' : `${count} sections available`;
             }
 
-            // Function to update section info text
             function updateSectionInfo(sectionName) {
                 document.getElementById('sectionInfo').textContent = `Section: ${sectionName}`;
             }
 
-            // Function to validate form data
             function validateForm(data) {
                 if (!data.full_name) {
                     showMessage('Please enter student name', 'error');
@@ -552,6 +539,16 @@
                     return false;
                 }
 
+                if (!data.parent_email) {
+                    showMessage('Please enter parent/guardian email', 'error');
+                    return false;
+                }
+
+                if (!isValidEmail(data.parent_email)) {
+                    showMessage('Please enter a valid email address', 'error');
+                    return false;
+                }
+
                 if (!data.grade_section_id) {
                     showMessage('Please select both grade level and section', 'error');
                     return false;
@@ -560,19 +557,21 @@
                 return true;
             }
 
-            // Function to show messages
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
             function showMessage(text, type) {
                 messageDiv.textContent = text;
                 messageDiv.className = 'message ' + type;
                 messageDiv.style.display = 'block';
 
-                // Auto-hide after 5 seconds
                 setTimeout(() => {
                     messageDiv.style.display = 'none';
                 }, 5000);
             }
 
-            // Add auto-save functionality
             let autoSaveTimeout;
             const formInputs = form.querySelectorAll('input, select, textarea');
             
@@ -583,11 +582,12 @@
                 });
             });
 
-            // Save draft to localStorage
             function saveDraft() {
                 const draft = {
                     full_name: document.getElementById('full_name').value,
                     age: document.getElementById('age').value,
+                    parent_email: document.getElementById('parent_email').value,
+                    parent_phone: document.getElementById('parent_phone').value,
                     grade: gradeSelect.value,
                     section: sectionSelect.value,
                     grade_section_id: gradeSectionIdInput.value,
@@ -596,19 +596,18 @@
                 localStorage.setItem('studentDraft', JSON.stringify(draft));
             }
 
-            // Load draft from localStorage
             function loadDraft() {
                 const draft = JSON.parse(localStorage.getItem('studentDraft'));
                 if (draft) {
                     document.getElementById('full_name').value = draft.full_name || '';
                     document.getElementById('age').value = draft.age || '';
+                    document.getElementById('parent_email').value = draft.parent_email || '';
+                    document.getElementById('parent_phone').value = draft.parent_phone || '';
                     
-                    // Restore grade selection
                     if (draft.grade) {
                         gradeSelect.value = draft.grade;
                         gradeSelect.dispatchEvent(new Event('change'));
                         
-                        // Wait a bit for sections to populate, then restore section
                         setTimeout(() => {
                             if (draft.section) {
                                 sectionSelect.value = draft.section;
@@ -621,7 +620,6 @@
                 }
             }
 
-            // Load draft when page loads
             loadDraft();
         });
     </script>
