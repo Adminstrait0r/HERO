@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HERO – Health Emergency Response Operations</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg-main: radial-gradient(circle at top, #141414, #000000 70%);
@@ -21,10 +21,11 @@
     * {
       box-sizing: border-box;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, sans-serif;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
       min-height: 100vh;
       background: var(--bg-main);
       color: var(--text-main);
@@ -125,6 +126,12 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background: var(--red-main);
+      color: white;
     }
 
     .alert-item {
@@ -263,6 +270,12 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      background: var(--red-main);
+      border-color: var(--red-accent);
     }
 
     .screen-title {
@@ -373,7 +386,7 @@
       color: var(--text-main);
     }
 
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 12px 15px;
       background: #1a1a1a;
@@ -388,7 +401,7 @@
       resize: vertical;
     }
 
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: var(--red-main);
     }
@@ -435,6 +448,13 @@
       display: block;
     }
 
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+
     /* Bottom Navigation */
     .bottom-nav {
       position: fixed;
@@ -456,6 +476,12 @@
       color: var(--text-muted);
       box-shadow: var(--shadow-soft);
       cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-dot:hover {
+      background: var(--red-main);
+      color: white;
     }
 
     /* Responsive */
@@ -476,6 +502,14 @@
       .form-grid { grid-template-columns: 1fr; }
       .grid-container { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
       .students-list { grid-template-columns: 1fr; }
+      header { padding: 15px 20px; }
+      .main-layout { padding: 15px; }
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 32px; }
+      .card { padding: 30px 20px; }
+      .form-container { padding: 20px; }
     }
   </style>
 </head>
@@ -487,7 +521,7 @@
       HERO
     </div>
 
-    <button class="logout-btn" onclick="logout()">Logout</button>
+    <button id="logoutBtn" class="logout-btn">Logout</button>
   </header>
 
   <div class="main-layout">
@@ -495,7 +529,7 @@
     <div class="alerts-panel">
       <div class="alerts-header">
         <div class="alerts-title">ACTIVE ALERTS</div>
-        <button class="refresh-btn" onclick="loadAlerts()">⟳ Refresh</button>
+        <button id="refreshAlerts" class="refresh-btn">⟳ Refresh</button>
       </div>
       <div id="alertsList">
         <div class="no-alerts">No active alerts at the moment.</div>
@@ -511,7 +545,7 @@
           <div class="subtitle">Health Emergency Response Operations</div>
 
           <div class="actions">
-            <button class="btn btn-primary" onclick="showScreen('gradeLevelScreen')">
+            <button id="goHelpBtn" class="btn btn-primary">
               🚑 Go Help!
             </button>
           </div>
@@ -521,7 +555,7 @@
       <!-- Grade Level Screen -->
       <div id="gradeLevelScreen" class="nav-screen">
         <div class="screen-header">
-          <button class="back-btn" onclick="showScreen('homeScreen')">← Back</button>
+          <button id="backFromGrades" class="back-btn">← Back</button>
           <div class="screen-title">Select Grade Level</div>
         </div>
         <div class="grid-container" id="gradeLevelsContainer">
@@ -532,7 +566,7 @@
       <!-- Sections Screen -->
       <div id="sectionsScreen" class="nav-screen">
         <div class="screen-header">
-          <button class="back-btn" onclick="showScreen('gradeLevelScreen')">← Back</button>
+          <button id="backFromSections" class="back-btn">← Back</button>
           <div class="screen-title">Select Section</div>
         </div>
         <div class="grid-container" id="sectionsContainer">
@@ -543,7 +577,7 @@
       <!-- Students Screen -->
       <div id="studentsScreen" class="nav-screen">
         <div class="screen-header">
-          <button class="back-btn" onclick="showScreen('sectionsScreen')">← Back</button>
+          <button id="backFromStudents" class="back-btn">← Back</button>
           <div class="screen-title">Select Student</div>
         </div>
         <div class="students-list" id="studentsContainer">
@@ -554,7 +588,7 @@
       <!-- Nurse Visit Form -->
       <div id="nurseVisitForm" class="nav-screen">
         <div class="screen-header">
-          <button class="back-btn" onclick="showScreen('studentsScreen')">← Back</button>
+          <button id="backFromForm" class="back-btn">← Back</button>
           <div class="screen-title">Nurse Visit Form</div>
         </div>
         
@@ -616,7 +650,7 @@
             </div>
           </div>
           
-          <button class="submit-btn" onclick="submitVisit()">
+          <button id="submitVisitBtn" class="submit-btn">
             📤 Submit Visit & Notify Parents
           </button>
         </div>
@@ -625,11 +659,11 @@
   </div>
 
   <div class="bottom-nav">
-    <div class="nav-dot" onclick="showScreen('homeScreen')">N</div>
+    <div id="homeNav" class="nav-dot">N</div>
   </div>
 
   <script>
-      // Initialize Supabase client - REPLACE WITH YOUR ACTUAL CREDENTIALS
+    // Initialize Supabase client - REPLACE WITH YOUR ACTUAL CREDENTIALS
     const supabaseUrl = 'https://your-project-id.supabase.co'
     const supabaseAnonKey = 'your-anon-key'
     const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey)
@@ -638,6 +672,17 @@
     let currentStudent = null;
     let currentGradeSection = null;
     
+    // DOM Elements
+    const logoutBtn = document.getElementById('logoutBtn');
+    const refreshAlertsBtn = document.getElementById('refreshAlerts');
+    const goHelpBtn = document.getElementById('goHelpBtn');
+    const backFromGrades = document.getElementById('backFromGrades');
+    const backFromSections = document.getElementById('backFromSections');
+    const backFromStudents = document.getElementById('backFromStudents');
+    const backFromForm = document.getElementById('backFromForm');
+    const homeNav = document.getElementById('homeNav');
+    const submitVisitBtn = document.getElementById('submitVisitBtn');
+    
     // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
       // Set current time
@@ -645,9 +690,42 @@
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById('timeIn').value = now.toISOString().slice(0, 16);
       
+      // Set up event listeners
+      setupEventListeners();
+      
       // Load alerts
       loadAlerts();
+      
+      // Check authentication
+      checkAuth();
     });
+
+    // Setup all event listeners
+    function setupEventListeners() {
+      // Navigation buttons
+      logoutBtn.addEventListener('click', logout);
+      refreshAlertsBtn.addEventListener('click', loadAlerts);
+      goHelpBtn.addEventListener('click', () => showScreen('gradeLevelScreen'));
+      backFromGrades.addEventListener('click', () => showScreen('homeScreen'));
+      backFromSections.addEventListener('click', () => showScreen('gradeLevelScreen'));
+      backFromStudents.addEventListener('click', () => showScreen('sectionsScreen'));
+      backFromForm.addEventListener('click', () => showScreen('studentsScreen'));
+      homeNav.addEventListener('click', () => showScreen('homeScreen'));
+      submitVisitBtn.addEventListener('click', submitVisit);
+    }
+
+    // Check if user is authenticated
+    async function checkAuth() {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) {
+          window.location.href = 'index.html';
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = 'index.html';
+      }
+    }
 
     // Screen navigation
     function showScreen(screenId) {
@@ -676,12 +754,13 @@
         const { data, error } = await supabase
           .from('alerts')
           .select('*, profiles(full_name)')
+          .eq('status', 'active')
           .order('created_at', { ascending: false })
           .limit(10);
         
         if (error) throw error;
         
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
           alertsList.innerHTML = '<div class="no-alerts">No active alerts at the moment.</div>';
           return;
         }
@@ -691,8 +770,8 @@
           const alertDiv = document.createElement('div');
           alertDiv.className = 'alert-item';
           alertDiv.innerHTML = `
-            <div class="alert-room">Room ${alert.room_number}</div>
-            <div class="alert-desc">${alert.description}</div>
+            <div class="alert-room">Alert #${alert.id}</div>
+            <div class="alert-desc">${alert.description || 'No description'}</div>
             <div class="alert-time">
               From: ${alert.profiles?.full_name || 'Unknown'} • 
               ${new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -709,87 +788,105 @@
     // Load grade levels
     async function loadGradeLevels() {
       const container = document.getElementById('gradeLevelsContainer');
-      container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 40px;">Loading...</div>';
+      container.innerHTML = '<div class="loading">Loading grade levels...</div>';
       
       try {
+        // Replace with your actual table name
         const { data, error } = await supabase
-          .from('grade_sections')
-          .select('grade_level')
+          .from('grade_levels')
+          .select('*')
           .order('grade_level');
         
         if (error) throw error;
         
-        // Get unique grade levels
-        const gradeLevels = [...new Set(data.map(item => item.grade_level))];
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div class="loading">No grade levels found.</div>';
+          return;
+        }
         
         container.innerHTML = '';
-        gradeLevels.forEach(grade => {
+        data.forEach(grade => {
           const btn = document.createElement('button');
           btn.className = 'grid-btn';
-          btn.innerHTML = `Grade ${grade}`;
-          btn.onclick = () => loadSections(grade);
+          btn.textContent = `Grade ${grade.grade_level}`;
+          btn.addEventListener('click', () => loadSections(grade));
           container.appendChild(btn);
         });
       } catch (error) {
-        container.innerHTML = '<div style="color: #e53935; text-align: center; padding: 40px;">Error loading grade levels</div>';
+        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading grade levels</div>';
+        console.error('Error loading grade levels:', error);
       }
     }
 
     // Load sections for a grade level
-    async function loadSections(gradeLevel) {
+    async function loadSections(grade) {
       currentGradeSection = null;
       const container = document.getElementById('sectionsContainer');
-      container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 40px;">Loading...</div>';
+      container.innerHTML = '<div class="loading">Loading sections...</div>';
       
       try {
+        // Replace with your actual table name
         const { data, error } = await supabase
-          .from('grade_sections')
+          .from('sections')
           .select('*')
-          .eq('grade_level', gradeLevel)
-          .order('section');
+          .eq('grade_level_id', grade.id)
+          .order('section_name');
         
         if (error) throw error;
+        
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div class="loading">No sections found for this grade.</div>';
+          return;
+        }
         
         container.innerHTML = '';
         data.forEach(section => {
           const btn = document.createElement('button');
           btn.className = 'grid-btn';
-          btn.innerHTML = `${section.grade_level} - ${section.section}`;
-          btn.onclick = () => loadStudents(section);
+          btn.textContent = section.section_name;
+          btn.addEventListener('click', () => loadStudents(section, grade));
           container.appendChild(btn);
         });
         
         showScreen('sectionsScreen');
       } catch (error) {
-        container.innerHTML = '<div style="color: #e53935; text-align: center; padding: 40px;">Error loading sections</div>';
+        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading sections</div>';
+        console.error('Error loading sections:', error);
       }
     }
 
     // Load students for a section
-    async function loadStudents(section) {
-      currentGradeSection = section;
+    async function loadStudents(section, grade) {
+      currentGradeSection = { section, grade };
       const container = document.getElementById('studentsContainer');
-      container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 40px;">Loading...</div>';
+      container.innerHTML = '<div class="loading">Loading students...</div>';
       
       try {
+        // Replace with your actual table name
         const { data, error } = await supabase
           .from('students')
-          .select('*, grade_sections(*)')
-          .eq('grade_section_id', section.id)
-          .order('full_name');
+          .select('*')
+          .eq('section_id', section.id)
+          .eq('grade_level_id', grade.id)
+          .order('last_name, first_name');
         
         if (error) throw error;
+        
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div class="loading">No students found in this section.</div>';
+          return;
+        }
         
         container.innerHTML = '';
         data.forEach(student => {
           const card = document.createElement('div');
           card.className = 'student-card';
-          card.onclick = () => showStudentForm(student);
+          card.addEventListener('click', () => showStudentForm(student));
           card.innerHTML = `
-            <div class="student-name">${student.full_name}</div>
+            <div class="student-name">${student.first_name} ${student.last_name}</div>
             <div class="student-details">
-              Age: ${student.age}<br>
-              ${student.allergies ? `Allergies: ${student.allergies}` : ''}
+              Age: ${student.age || 'N/A'}<br>
+              ${student.allergies ? `Allergies: ${student.allergies}` : 'No known allergies'}
             </div>
           `;
           container.appendChild(card);
@@ -797,7 +894,8 @@
         
         showScreen('studentsScreen');
       } catch (error) {
-        container.innerHTML = '<div style="color: #e53935; text-align: center; padding: 40px;">Error loading students</div>';
+        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading students</div>';
+        console.error('Error loading students:', error);
       }
     }
 
@@ -807,9 +905,9 @@
       
       // Set form values
       document.getElementById('studentInfo').value = 
-        `${student.full_name} - ${student.grade_sections.grade_level} ${student.grade_sections.section}`;
+        `${student.first_name} ${student.last_name} - ${currentGradeSection.grade.grade_level} ${currentGradeSection.section.section_name}`;
       
-      document.getElementById('age').value = student.age;
+      document.getElementById('age').value = student.age || '';
       
       // Set current time
       const now = new Date();
@@ -835,11 +933,18 @@
       const statusMessage = document.getElementById('statusMessage');
       statusMessage.className = 'status-message';
       
+      // Validate required fields
+      if (!document.getElementById('symptoms').value.trim()) {
+        statusMessage.className = 'status-message error';
+        statusMessage.innerHTML = '❌ Please describe the symptoms.';
+        return;
+      }
+      
       try {
         // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
         
-        if (!user) {
+        if (userError || !user) {
           throw new Error('No user logged in');
         }
         
@@ -848,8 +953,8 @@
           student_id: currentStudent.id,
           nurse_id: user.id,
           time_in: document.getElementById('timeIn').value,
-          symptoms: document.getElementById('symptoms').value,
-          intervention_given: document.getElementById('intervention').value
+          symptoms: document.getElementById('symptoms').value.trim(),
+          intervention_given: document.getElementById('intervention').value.trim()
         };
         
         const { data: visit, error: visitError } = await supabase
@@ -860,50 +965,44 @@
         
         if (visitError) throw visitError;
         
-        // Create vital signs
-        const vitalData = {
-          nurse_visit_id: visit.id,
-          pr: document.getElementById('pr').value,
-          spo2: document.getElementById('spo2').value,
-          bp: document.getElementById('bp').value,
-          temperature: document.getElementById('temp').value
-        };
+        // Create vital signs if any are provided
+        const pr = document.getElementById('pr').value.trim();
+        const spo2 = document.getElementById('spo2').value.trim();
+        const bp = document.getElementById('bp').value.trim();
+        const temp = document.getElementById('temp').value.trim();
         
-        const { error: vitalError } = await supabase
-          .from('vital_signs')
-          .insert([vitalData]);
-        
-        if (vitalError) throw vitalError;
-        
-        // Get parent info and notify
-        const { data: parent } = await supabase
-          .from('parents')
-          .select('*')
-          .eq('student_id', currentStudent.id)
-          .single();
-        
-        if (parent && parent.parent_email) {
-          // Call your AppScript endpoint
-          await notifyParent(parent.parent_email, visit, vitalData);
+        if (pr || spo2 || bp || temp) {
+          const vitalData = {
+            nurse_visit_id: visit.id,
+            pr: pr,
+            spo2: spo2,
+            bp: bp,
+            temperature: temp
+          };
           
-          // Log the notification
-          await supabase
-            .from('sms_logs')
-            .insert([{
-              student_id: currentStudent.id,
-              nurse_visit_id: visit.id,
-              phone_number: parent.phone_number,
-              message: `Nurse visit for ${currentStudent.full_name}`
-            }]);
+          const { error: vitalError } = await supabase
+            .from('vital_signs')
+            .insert([vitalData]);
+          
+          if (vitalError) throw vitalError;
+        }
+        
+        // Try to notify parent (if email exists)
+        if (currentStudent.parent_email) {
+          await notifyParent(currentStudent);
         }
         
         // Show success
         statusMessage.className = 'status-message success';
-        statusMessage.innerHTML = '✅ Visit recorded successfully! Parent has been notified via email.';
+        statusMessage.innerHTML = '✅ Visit recorded successfully!';
         
         // Auto-return to students after 3 seconds
         setTimeout(() => {
-          loadStudents(currentGradeSection);
+          if (currentGradeSection) {
+            loadStudents(currentGradeSection.section, currentGradeSection.grade);
+          } else {
+            showScreen('homeScreen');
+          }
         }, 3000);
         
       } catch (error) {
@@ -913,33 +1012,34 @@
       }
     }
 
-    // Notify parent via AppScript
-    async function notifyParent(email, visit, vitals) {
-      const scriptUrl = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+    // Notify parent
+    async function notifyParent(student) {
+      // This would be replaced with your actual notification logic
+      // For now, just log it
+      console.log(`Would notify parent at: ${student.parent_email}`);
       
-      const emailData = {
-        to: email,
-        subject: `Nurse Visit - ${currentStudent.full_name}`,
-        body: `Your child ${currentStudent.full_name} visited the school clinic.`
-      };
-      
+      // Example: Send to your backend/AppScript
       try {
-        // This assumes your AppScript is set up to handle POST requests
-        await fetch(scriptUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(emailData)
-        });
+        const scriptUrl = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+        const emailData = {
+          to: student.parent_email,
+          subject: `Nurse Visit - ${student.first_name} ${student.last_name}`,
+          body: `Your child visited the school clinic today.`
+        };
+        
+        // Uncomment when you have your script URL
+        // await fetch(scriptUrl, {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(emailData)
+        // });
       } catch (error) {
-        // Silent fail - email might still be sent
-        console.log('Email notification attempted');
+        // Fail silently - notification is secondary
+        console.log('Notification failed:', error);
       }
     }
 
-    // Logout
+    // Logout function
     async function logout() {
       try {
         const { error } = await supabase.auth.signOut();
