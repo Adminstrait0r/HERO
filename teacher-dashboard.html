@@ -595,21 +595,12 @@
                 <div class="filters">
                     <select class="filter-select" id="gradeFilter">
                         <option value="">All Grades</option>
-                        <option value="Kindergarten">Kindergarten</option>
-                        <option value="1">Grade 1</option>
-                        <option value="2">Grade 2</option>
-                        <option value="3">Grade 3</option>
-                        <option value="4">Grade 4</option>
-                        <option value="5">Grade 5</option>
-                        <option value="6">Grade 6</option>
+                        <!-- Will be populated dynamically -->
                     </select>
                     
                     <select class="filter-select" id="sectionFilter">
                         <option value="">All Sections</option>
-                        <option value="A">Section A</option>
-                        <option value="B">Section B</option>
-                        <option value="C">Section C</option>
-                        <option value="D">Section D</option>
+                        <!-- Will be populated dynamically -->
                     </select>
                 </div>
             </div>
@@ -712,6 +703,7 @@
             document.getElementById('cancelAlert').addEventListener('click', closeAlertModal);
             
             // Filter change listeners
+            document.getElementById('gradeFilter').addEventListener('change', updateSectionFilter);
             document.getElementById('gradeFilter').addEventListener('change', filterStudents);
             document.getElementById('sectionFilter').addEventListener('change', filterStudents);
         }
@@ -726,13 +718,13 @@
                 
                 if (error) throw error;
                 
-                gradeSections = data;
+                gradeSections = data || [];
                 
                 // Populate grade filter with unique grade levels
                 const gradeFilter = document.getElementById('gradeFilter');
                 const uniqueGrades = [...new Set(data.map(gs => gs.grade_level))];
                 
-                // Keep the current "All Grades" option and add new ones
+                // Clear existing options except "All Grades"
                 const gradeOptions = gradeFilter.querySelectorAll('option:not(:first-child)');
                 gradeOptions.forEach(opt => opt.remove());
                 
@@ -743,9 +735,59 @@
                     gradeFilter.appendChild(option);
                 });
                 
+                // Also populate section filter with all unique sections
+                const sectionFilter = document.getElementById('sectionFilter');
+                const uniqueSections = [...new Set(data.map(gs => gs.section))].sort();
+                
+                // Clear existing options except "All Sections"
+                const sectionOptions = sectionFilter.querySelectorAll('option:not(:first-child)');
+                sectionOptions.forEach(opt => opt.remove());
+                
+                uniqueSections.forEach(section => {
+                    const option = document.createElement('option');
+                    option.value = section;
+                    option.textContent = `Section ${section}`;
+                    sectionFilter.appendChild(option);
+                });
+                
             } catch (error) {
                 console.error('Error loading grade sections:', error);
                 showError('Failed to load grade sections. Please try again.');
+            }
+        }
+
+        // Update section filter based on selected grade
+        function updateSectionFilter() {
+            const gradeFilter = document.getElementById('gradeFilter').value;
+            const sectionFilter = document.getElementById('sectionFilter');
+            
+            // Get all sections for the selected grade
+            const sectionsForGrade = gradeSections
+                .filter(gs => !gradeFilter || gs.grade_level === gradeFilter)
+                .map(gs => gs.section);
+            
+            const uniqueSections = [...new Set(sectionsForGrade)].sort();
+            
+            // Save current selection
+            const currentSelection = sectionFilter.value;
+            
+            // Clear options except "All Sections"
+            const sectionOptions = sectionFilter.querySelectorAll('option:not(:first-child)');
+            sectionOptions.forEach(opt => opt.remove());
+            
+            // Add filtered sections
+            uniqueSections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = `Section ${section}`;
+                sectionFilter.appendChild(option);
+            });
+            
+            // Try to restore previous selection if it still exists
+            if (uniqueSections.includes(currentSelection)) {
+                sectionFilter.value = currentSelection;
+            } else {
+                sectionFilter.value = '';
             }
         }
 
@@ -761,7 +803,7 @@
                         allergies,
                         created_at,
                         grade_section_id,
-                        grade_sections (grade_level, section)
+                        grade_sections (id, grade_level, section)
                     `)
                     .order('full_name', { ascending: true });
                 
@@ -784,7 +826,7 @@
             const noStudentsMsg = document.getElementById('noStudentsMessage');
             
             // Hide loading
-            loadingRow.style.display = 'none';
+            if (loadingRow) loadingRow.style.display = 'none';
             
             if (filteredStudents.length === 0) {
                 tbody.innerHTML = '';
@@ -803,7 +845,7 @@
                 
                 // Format allergies
                 let allergiesHtml = '<span class="no-allergies">None</span>';
-                if (student.allergies) {
+                if (student.allergies && student.allergies.trim() !== '') {
                     const allergies = student.allergies.split(',').map(a => a.trim());
                     allergiesHtml = allergies.map(allergy => 
                         `<span class="allergies-badge">${allergy}</span>`
@@ -813,11 +855,11 @@
                 html += `
                     <tr>
                         <td>
-                            <div class="student-name">${student.full_name}</div>
+                            <div class="student-name">${escapeHtml(student.full_name)}</div>
                         </td>
-                        <td>${student.age}</td>
+                        <td>${escapeHtml(student.age)}</td>
                         <td>
-                            <div class="student-grade">${gradeSection}</div>
+                            <div class="student-grade">${escapeHtml(gradeSection)}</div>
                         </td>
                         <td>${allergiesHtml}</td>
                         <td>
@@ -828,7 +870,7 @@
                                 <button class="btn-action btn-edit" data-id="${student.id}">
                                     <i class="fas fa-edit"></i> Edit
                                 </button>
-                                <button class="btn-action btn-delete" data-id="${student.id}" data-name="${student.full_name}">
+                                <button class="btn-action btn-delete" data-id="${student.id}" data-name="${escapeHtml(student.full_name)}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -863,10 +905,22 @@
             const sectionFilter = document.getElementById('sectionFilter').value;
             
             filteredStudents = allStudents.filter(student => {
-                if (!student.grade_sections) return false;
+                // If student has no grade_sections assigned
+                if (!student.grade_sections) {
+                    // If filters are set, this student doesn't match
+                    if (gradeFilter || sectionFilter) return false;
+                    // If no filters, include this student
+                    return true;
+                }
                 
-                const matchesGrade = !gradeFilter || student.grade_sections.grade_level === gradeFilter;
-                const matchesSection = !sectionFilter || student.grade_sections.section === sectionFilter;
+                const gradeLevel = student.grade_sections.grade_level;
+                const section = student.grade_sections.section;
+                
+                // Check grade filter
+                const matchesGrade = !gradeFilter || gradeLevel === gradeFilter;
+                
+                // Check section filter
+                const matchesSection = !sectionFilter || section === sectionFilter;
                 
                 return matchesGrade && matchesSection;
             });
@@ -1004,7 +1058,7 @@
                 box-shadow: var(--shadow-soft);
                 animation: slideIn 0.3s ease;
             `;
-            notification.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 10px;"></i>${message}`;
+            notification.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 10px;"></i>${escapeHtml(message)}`;
             document.body.appendChild(notification);
             
             setTimeout(() => {
@@ -1028,13 +1082,20 @@
                 box-shadow: var(--shadow-soft);
                 animation: slideIn 0.3s ease;
             `;
-            notification.innerHTML = `<i class="fas fa-exclamation-circle" style="margin-right: 10px;"></i>${message}`;
+            notification.innerHTML = `<i class="fas fa-exclamation-circle" style="margin-right: 10px;"></i>${escapeHtml(message)}`;
             document.body.appendChild(notification);
             
             setTimeout(() => {
                 notification.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Add animation styles
