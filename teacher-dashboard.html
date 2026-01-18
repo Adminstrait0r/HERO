@@ -593,7 +593,7 @@
             <div class="section-header">
                 <h3 class="section-title">Student List</h3>
                 <div class="filters">
-                    <select class="filter-select" id="gradeFilter" onchange="filterStudents()">
+                    <select class="filter-select" id="gradeFilter">
                         <option value="">All Grades</option>
                         <option value="Kindergarten">Kindergarten</option>
                         <option value="1">Grade 1</option>
@@ -604,7 +604,7 @@
                         <option value="6">Grade 6</option>
                     </select>
                     
-                    <select class="filter-select" id="sectionFilter" onchange="filterStudents()">
+                    <select class="filter-select" id="sectionFilter">
                         <option value="">All Sections</option>
                         <option value="A">Section A</option>
                         <option value="B">Section B</option>
@@ -651,7 +651,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="fas fa-exclamation-triangle"></i> Send Alert to Nurse</h2>
-                <button class="close-modal" onclick="closeAlertModal()">&times;</button>
+                <button class="close-modal" id="closeAlertModal">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="alertForm">
@@ -666,7 +666,7 @@
                     </div>
                     
                     <div class="form-actions">
-                        <button type="button" class="btn btn-cancel" onclick="closeAlertModal()">Cancel</button>
+                        <button type="button" class="btn btn-cancel" id="cancelAlert">Cancel</button>
                         <button type="submit" class="btn btn-submit">Send Alert</button>
                     </div>
                 </form>
@@ -677,23 +677,10 @@
     <!-- Font Awesome for icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     
-    <!-- Supabase Client -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-    <script>
-        // Initialize Supabase client - REMOVED DUPLICATE DECLARATION
-        // These should be replaced with your actual Supabase credentials
-        const supabaseUrl = 'YOUR_SUPABASE_URL_HERE';
-        const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY_HERE';
-        
-        // Check if supabase is already declared to avoid the error
-        let supabase;
-        if (!window.supabaseClient) {
-            supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-            window.supabaseClient = supabase; // Store globally to avoid re-declaration
-        } else {
-            supabase = window.supabaseClient;
-        }
+    <!-- Import your supabase.js module -->
+    <script type="module">
+        // Import the supabase client from your module
+        import { supabase } from './supabase.js';
         
         // Student data
         let allStudents = [];
@@ -719,6 +706,14 @@
             
             // Alert form submission
             document.getElementById('alertForm').addEventListener('submit', submitAlert);
+            
+            // Alert modal close buttons
+            document.getElementById('closeAlertModal').addEventListener('click', closeAlertModal);
+            document.getElementById('cancelAlert').addEventListener('click', closeAlertModal);
+            
+            // Filter change listeners
+            document.getElementById('gradeFilter').addEventListener('change', filterStudents);
+            document.getElementById('sectionFilter').addEventListener('change', filterStudents);
         }
 
         // Load grade sections for filters
@@ -750,6 +745,7 @@
                 
             } catch (error) {
                 console.error('Error loading grade sections:', error);
+                showError('Failed to load grade sections. Please try again.');
             }
         }
 
@@ -826,13 +822,13 @@
                         <td>${allergiesHtml}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn-action btn-view" onclick="viewStudent('${student.id}')">
+                                <button class="btn-action btn-view" data-id="${student.id}">
                                     <i class="fas fa-eye"></i> View
                                 </button>
-                                <button class="btn-action btn-edit" onclick="editStudent('${student.id}')">
+                                <button class="btn-action btn-edit" data-id="${student.id}">
                                     <i class="fas fa-edit"></i> Edit
                                 </button>
-                                <button class="btn-action btn-delete" onclick="deleteStudent('${student.id}', '${student.full_name}')">
+                                <button class="btn-action btn-delete" data-id="${student.id}" data-name="${student.full_name}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -842,6 +838,23 @@
             });
             
             tbody.innerHTML = html;
+            
+            // Add event listeners to action buttons using event delegation
+            tbody.addEventListener('click', function(e) {
+                const target = e.target.closest('.btn-action');
+                if (!target) return;
+                
+                const studentId = target.getAttribute('data-id');
+                const studentName = target.getAttribute('data-name');
+                
+                if (target.classList.contains('btn-view')) {
+                    viewStudent(studentId);
+                } else if (target.classList.contains('btn-edit')) {
+                    editStudent(studentId);
+                } else if (target.classList.contains('btn-delete')) {
+                    deleteStudent(studentId, studentName);
+                }
+            });
         }
 
         // Filter students by grade and section
