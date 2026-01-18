@@ -1,1 +1,1249 @@
-wdfdfed
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Health System - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Auth Container */
+        .auth-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+
+        .auth-header {
+            background: #667eea;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .auth-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            background: #f8f9ff;
+        }
+
+        .auth-tab:hover:not(.active) {
+            background: #f5f5f5;
+        }
+
+        .auth-content {
+            padding: 2rem;
+        }
+
+        /* Forms */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group.checkbox {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group.checkbox input {
+            width: auto;
+        }
+
+        .form-group.checkbox label {
+            cursor: pointer;
+        }
+
+        /* Role Selection */
+        .role-selection {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .role-option {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .role-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .role-option.selected {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+
+        .role-option input {
+            display: none;
+        }
+
+        .role-option label {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .role-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Conditional Fields */
+        .conditional-fields {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .conditional-fields h4 {
+            margin-bottom: 0.5rem;
+            color: #444;
+            font-size: 0.9rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.875rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Links */
+        .auth-link {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .auth-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Error Messages */
+        .error-message {
+            background: #fee;
+            color: #dc3545;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border-left: 4px solid #dc3545;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Dashboard (Minimal for now) */
+        .dashboard {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 800px;
+            min-height: 500px;
+            overflow: hidden;
+        }
+
+        .dashboard-header {
+            background: #667eea;
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: white;
+            color: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .dashboard-content {
+            padding: 2rem;
+            text-align: center;
+            color: #666;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast.success {
+            background: #10b981;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        .toast.info {
+            background: #3b82f6;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .auth-container {
+                max-width: 100%;
+            }
+            
+            .auth-content {
+                padding: 1.5rem;
+            }
+            
+            .role-selection {
+                flex-direction: column;
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Container -->
+    <div id="auth-container" class="auth-container">
+        <!-- Auth Header -->
+        <div class="auth-header">
+            <h1>School Health System</h1>
+            <p>Login to access the health monitoring dashboard</p>
+        </div>
+
+        <!-- Auth Tabs -->
+        <div class="auth-tabs">
+            <button class="auth-tab active" data-tab="login">Login</button>
+            <button class="auth-tab" data-tab="register">Register</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-form-container" class="auth-content">
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+                    <input type="email" id="login-email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required placeholder="Enter your password">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" id="login-button">
+                    Login to Dashboard
+                </button>
+
+                <div class="auth-link">
+                    Don't have an account? <a href="#" onclick="switchTab('register')">Register here</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-form-container" class="auth-content hidden">
+            <!-- Role Selection -->
+            <div class="role-selection">
+                <div class="role-option selected" data-role="teacher">
+                    <input type="radio" id="role-teacher" name="role" value="teacher" checked>
+                    <label for="role-teacher">
+                        <span class="role-icon">👩‍🏫</span>
+                        <span>Teacher</span>
+                    </label>
+                </div>
+                <div class="role-option" data-role="nurse">
+                    <input type="radio" id="role-nurse" name="role" value="nurse">
+                    <label for="role-nurse">
+                        <span class="role-icon">👩‍⚕️</span>
+                        <span>Nurse</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Register Forms -->
+            <form id="teacher-register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="teacher-fullname">Full Name</label>
+                    <input type="text" id="teacher-fullname" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label for="teacher-email">Email Address</label>
+                    <input type="email" id="teacher-email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="no-advisory">
+                    <label for="no-advisory">I do not have a grade level advisory</label>
+                </div>
+
+                <!-- Grade & Section (hidden if no advisory) -->
+                <div id="grade-section-fields">
+                    <div class="form-group">
+                        <label for="teacher-grade">Grade Level</label>
+                        <select id="teacher-grade" required>
+                            <option value="">Select Grade Level</option>
+                            <option value="Kinder">Kinder</option>
+                            <option value="1">Grade 1</option>
+                            <option value="2">Grade 2</option>
+                            <option value="3">Grade 3</option>
+                            <option value="4">Grade 4</option>
+                            <option value="5">Grade 5</option>
+                            <option value="6">Grade 6</option>
+                            <option value="7">Grade 7</option>
+                            <option value="8">Grade 8</option>
+                            <option value="9">Grade 9</option>
+                            <option value="10">Grade 10</option>
+                            <option value="11">Grade 11</option>
+                            <option value="12">Grade 12</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teacher-section">Section</label>
+                        <select id="teacher-section" required>
+                            <option value="">Select Section</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
+                            <option value="E">Section E</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="teacher-password">Password</label>
+                    <input type="password" id="teacher-password" required placeholder="Create a password (min. 6 characters)">
+                </div>
+
+                <div class="form-group">
+                    <label for="teacher-confirm-password">Confirm Password</label>
+                    <input type="password" id="teacher-confirm-password" required placeholder="Confirm your password">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" id="teacher-register-button">
+                    Register as Teacher
+                </button>
+
+                <div class="auth-link">
+                    Already have an account? <a href="#" onclick="switchTab('login')">Login here</a>
+                </div>
+            </form>
+
+            <form id="nurse-register-form" class="auth-form hidden">
+                <div class="form-group">
+                    <label for="nurse-fullname">Full Name</label>
+                    <input type="text" id="nurse-fullname" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label for="nurse-email">Email Address</label>
+                    <input type="email" id="nurse-email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="nurse-phone">Phone Number</label>
+                    <input type="tel" id="nurse-phone" required placeholder="Enter your phone number">
+                </div>
+
+                <div class="form-group">
+                    <label for="nurse-password">Password</label>
+                    <input type="password" id="nurse-password" required placeholder="Create a password (min. 6 characters)">
+                </div>
+
+                <div class="form-group">
+                    <label for="nurse-confirm-password">Confirm Password</label>
+                    <input type="password" id="nurse-confirm-password" required placeholder="Confirm your password">
+                </div>
+
+                <div class="conditional-fields">
+                    <h4>Nurse Information</h4>
+                    <p style="font-size: 0.875rem; color: #666;">
+                        As a nurse, you'll be able to access student health records, log nurse visits, 
+                        and monitor vital signs.
+                    </p>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" id="nurse-register-button">
+                    Register as Nurse
+                </button>
+
+                <div class="auth-link">
+                    Already have an account? <a href="#" onclick="switchTab('login')">Login here</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div id="auth-message" class="hidden"></div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard hidden">
+        <div class="dashboard-header">
+            <h1>Health Dashboard</h1>
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <div class="user-details">
+                    <div class="user-name" id="user-name">User Name</div>
+                    <div class="user-role" id="user-role">Role</div>
+                </div>
+                <button id="logout-button" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <h2 style="margin-bottom: 1rem;">Welcome to the Health Dashboard</h2>
+            <p style="margin-bottom: 2rem;">Select an option from the menu to get started.</p>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-top: 2rem;">
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; width: 200px;">
+                    <h3 style="color: #667eea; margin-bottom: 0.5rem;">👩‍⚕️ Nurse View</h3>
+                    <p style="font-size: 0.9rem; color: #666;">Access student health records and log visits</p>
+                </div>
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; width: 200px;">
+                    <h3 style="color: #667eea; margin-bottom: 0.5rem;">👨‍🏫 Teacher View</h3>
+                    <p style="font-size: 0.9rem; color: #666;">Monitor students and send alerts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Messages -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Include Supabase from your separate file -->
+    <script type="module">
+        // Import supabase from your separate file
+        import { supabase } from './supabase.js';
+        
+        console.log('✅ Supabase client loaded:', supabase ? 'Yes' : 'No');
+
+        // State
+        let currentUser = null;
+        let userProfile = null;
+
+        // DOM Elements
+        const authContainer = document.getElementById('auth-container');
+        const dashboard = document.getElementById('dashboard');
+        const loginForm = document.getElementById('login-form');
+        const teacherRegisterForm = document.getElementById('teacher-register-form');
+        const nurseRegisterForm = document.getElementById('nurse-register-form');
+        const authTabs = document.querySelectorAll('.auth-tab');
+        const loginFormContainer = document.getElementById('login-form-container');
+        const registerFormContainer = document.getElementById('register-form-container');
+        const roleOptions = document.querySelectorAll('.role-option');
+        const noAdvisoryCheckbox = document.getElementById('no-advisory');
+        const gradeSectionFields = document.getElementById('grade-section-fields');
+        const logoutButton = document.getElementById('logout-button');
+        const authMessage = document.getElementById('auth-message');
+        const toast = document.getElementById('toast');
+
+        // User info elements
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const userRole = document.getElementById('user-role');
+
+        // Initialize the application
+        function init() {
+            console.log('🚀 Initializing School Health System...');
+            
+            // Check if user is already logged in
+            checkAuthState();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            console.log('✅ Application initialized');
+        }
+
+        // Check authentication state
+        async function checkAuthState() {
+            try {
+                const { data, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    console.error('Session check error:', error);
+                    showAuthMessage('Session error. Please login again.', 'error');
+                    return;
+                }
+                
+                if (data.session) {
+                    console.log('✅ User already logged in:', data.session.user.email);
+                    await loadUserProfile(data.session.user);
+                }
+            } catch (error) {
+                console.error('Error checking auth state:', error);
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tab switching
+            authTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    switchTab(tabName);
+                });
+            });
+
+            // Role selection
+            roleOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const role = option.dataset.role;
+                    selectRole(role);
+                });
+            });
+
+            // No advisory checkbox
+            noAdvisoryCheckbox.addEventListener('change', function() {
+                gradeSectionFields.style.display = this.checked ? 'none' : 'block';
+                
+                // Clear required fields when hidden
+                if (this.checked) {
+                    document.getElementById('teacher-grade').required = false;
+                    document.getElementById('teacher-section').required = false;
+                } else {
+                    document.getElementById('teacher-grade').required = true;
+                    document.getElementById('teacher-section').required = true;
+                }
+            });
+
+            // Login form
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleLogin();
+            });
+
+            // Teacher registration form
+            teacherRegisterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleTeacherRegistration();
+            });
+
+            // Nurse registration form
+            nurseRegisterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleNurseRegistration();
+            });
+
+            // Logout button
+            logoutButton.addEventListener('click', handleLogout);
+        }
+
+        // Switch between login and register tabs
+        function switchTab(tabName) {
+            // Update tabs
+            authTabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            // Update forms
+            if (tabName === 'login') {
+                loginFormContainer.classList.remove('hidden');
+                registerFormContainer.classList.add('hidden');
+            } else {
+                loginFormContainer.classList.add('hidden');
+                registerFormContainer.classList.remove('hidden');
+            }
+            
+            // Clear any messages
+            clearAuthMessage();
+        }
+
+        // Select role (teacher or nurse)
+        function selectRole(role) {
+            // Update UI
+            roleOptions.forEach(option => {
+                if (option.dataset.role === role) {
+                    option.classList.add('selected');
+                    // Check the hidden radio button
+                    option.querySelector('input').checked = true;
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+
+            // Show correct form
+            if (role === 'teacher') {
+                teacherRegisterForm.classList.remove('hidden');
+                nurseRegisterForm.classList.add('hidden');
+            } else {
+                teacherRegisterForm.classList.add('hidden');
+                nurseRegisterForm.classList.remove('hidden');
+            }
+        }
+
+        // Handle login
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            // Validation
+            if (!email || !password) {
+                showAuthMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            // Show loading state
+            const loginButton = document.getElementById('login-button');
+            const originalText = loginButton.textContent;
+            loginButton.innerHTML = '<div class="spinner"></div> Logging in...';
+            loginButton.disabled = true;
+
+            try {
+                console.log('🔐 Attempting login for:', email);
+                
+                // Sign in with Supabase Auth
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email.trim().toLowerCase(),
+                    password: password
+                });
+
+                if (error) {
+                    console.error('Login error:', error);
+                    throw error;
+                }
+
+                console.log('✅ Login successful:', data.user.email);
+                
+                // Load user profile
+                await loadUserProfile(data.user);
+                
+                // Show success message
+                showToast('Login successful! Redirecting...', 'success');
+                
+            } catch (error) {
+                console.error('Login failed:', error);
+                
+                let errorMessage = 'Login failed. ';
+                
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMessage += 'Please check your email and password.';
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMessage += 'Please verify your email address first.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showAuthMessage(errorMessage, 'error');
+            } finally {
+                // Reset button state
+                loginButton.textContent = originalText;
+                loginButton.disabled = false;
+            }
+        }
+
+        // Handle teacher registration
+        async function handleTeacherRegistration() {
+            const fullName = document.getElementById('teacher-fullname').value;
+            const email = document.getElementById('teacher-email').value;
+            const password = document.getElementById('teacher-password').value;
+            const confirmPassword = document.getElementById('teacher-confirm-password').value;
+            const noAdvisory = document.getElementById('no-advisory').checked;
+            const grade = noAdvisory ? null : document.getElementById('teacher-grade').value;
+            const section = noAdvisory ? null : document.getElementById('teacher-section').value;
+
+            // Validation
+            if (!fullName || !email || !password || !confirmPassword) {
+                showAuthMessage('Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showAuthMessage('Passwords do not match', 'error');
+                return;
+            }
+
+            if (!noAdvisory && (!grade || !section)) {
+                showAuthMessage('Please select both grade level and section', 'error');
+                return;
+            }
+
+            // Show loading state
+            const registerButton = document.getElementById('teacher-register-button');
+            const originalText = registerButton.textContent;
+            registerButton.innerHTML = '<div class="spinner"></div> Creating account...';
+            registerButton.disabled = true;
+
+            try {
+                console.log('👩‍🏫 Registering teacher:', email);
+                
+                // 1. Sign up with Supabase Auth
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email.trim().toLowerCase(),
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            role: 'teacher'
+                        }
+                    }
+                });
+
+                if (authError) {
+                    console.error('Auth error:', authError);
+                    throw authError;
+                }
+
+                const user = authData.user;
+                console.log('✅ Auth registration successful for:', user.email);
+
+                // 2. Create profile in profiles table
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert({
+                        id: user.id,
+                        full_name: fullName,
+                        email: email.trim().toLowerCase(),
+                        role: 'teacher'
+                        // Note: We don't have grade_section_id in profiles table
+                        // We would need to create a separate table for teacher assignments
+                    });
+
+                if (profileError) {
+                    console.error('Profile creation error:', profileError);
+                    
+                    // If profile creation fails, we should delete the auth user
+                    // But for now, just show error
+                    throw new Error('Failed to create teacher profile. Please try again.');
+                }
+
+                console.log('✅ Teacher profile created');
+
+                // 3. If teacher has advisory, we should store in a separate table
+                // Since we don't have teacher_grades table, we'll skip this for now
+                // In a real app, you would create a teacher_grades table
+
+                // Show success message
+                showAuthMessage(
+                    'Registration successful! Please check your email to verify your account, then login.',
+                    'success'
+                );
+
+                // Clear form
+                teacherRegisterForm.reset();
+                
+                // Switch to login tab
+                switchTab('login');
+                
+            } catch (error) {
+                console.error('Teacher registration failed:', error);
+                
+                let errorMessage = 'Registration failed. ';
+                
+                if (error.message.includes('User already registered')) {
+                    errorMessage += 'This email is already registered. Please login instead.';
+                } else if (error.message.includes('password')) {
+                    errorMessage += 'Password is too weak.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showAuthMessage(errorMessage, 'error');
+            } finally {
+                // Reset button state
+                registerButton.textContent = originalText;
+                registerButton.disabled = false;
+            }
+        }
+
+        // Handle nurse registration
+        async function handleNurseRegistration() {
+            const fullName = document.getElementById('nurse-fullname').value;
+            const email = document.getElementById('nurse-email').value;
+            const phone = document.getElementById('nurse-phone').value;
+            const password = document.getElementById('nurse-password').value;
+            const confirmPassword = document.getElementById('nurse-confirm-password').value;
+
+            // Validation
+            if (!fullName || !email || !phone || !password || !confirmPassword) {
+                showAuthMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showAuthMessage('Passwords do not match', 'error');
+                return;
+            }
+
+            // Show loading state
+            const registerButton = document.getElementById('nurse-register-button');
+            const originalText = registerButton.textContent;
+            registerButton.innerHTML = '<div class="spinner"></div> Creating account...';
+            registerButton.disabled = true;
+
+            try {
+                console.log('👩‍⚕️ Registering nurse:', email);
+                
+                // Generate a simple nurse passcode (4 digits)
+                const nursePasscode = Math.floor(1000 + Math.random() * 9000).toString();
+
+                // 1. Sign up with Supabase Auth
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email.trim().toLowerCase(),
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            role: 'nurse',
+                            phone_number: phone
+                        }
+                    }
+                });
+
+                if (authError) {
+                    console.error('Auth error:', authError);
+                    throw authError;
+                }
+
+                const user = authData.user;
+                console.log('✅ Auth registration successful for:', user.email);
+
+                // 2. Create profile in profiles table
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert({
+                        id: user.id,
+                        full_name: fullName,
+                        email: email.trim().toLowerCase(),
+                        role: 'nurse',
+                        nurse_passcode: nursePasscode
+                        // Note: We don't have phone_number in profiles table
+                        // We would need to add it or use metadata
+                    });
+
+                if (profileError) {
+                    console.error('Profile creation error:', profileError);
+                    throw new Error('Failed to create nurse profile. Please try again.');
+                }
+
+                console.log('✅ Nurse profile created with passcode:', nursePasscode);
+
+                // Show success message with passcode
+                showAuthMessage(
+                    `Registration successful! Your nurse passcode is: ${nursePasscode}<br>
+                    Please check your email to verify your account, then login.<br>
+                    <strong>Save this passcode - you'll need it for verification.</strong>`,
+                    'success'
+                );
+
+                // Clear form
+                nurseRegisterForm.reset();
+                
+                // Switch to login tab
+                switchTab('login');
+                
+            } catch (error) {
+                console.error('Nurse registration failed:', error);
+                
+                let errorMessage = 'Registration failed. ';
+                
+                if (error.message.includes('User already registered')) {
+                    errorMessage += 'This email is already registered. Please login instead.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showAuthMessage(errorMessage, 'error');
+            } finally {
+                // Reset button state
+                registerButton.textContent = originalText;
+                registerButton.disabled = false;
+            }
+        }
+
+        // Load user profile and show dashboard
+        async function loadUserProfile(user) {
+            try {
+                console.log('📋 Loading profile for user:', user.id);
+                
+                // Get user profile from profiles table
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (error) {
+                    console.error('Profile fetch error:', error);
+                    
+                    // If profile doesn't exist, create it from user metadata
+                    const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
+                    const role = user.user_metadata?.role || 'teacher';
+                    
+                    const { error: insertError } = await supabase
+                        .from('profiles')
+                        .insert({
+                            id: user.id,
+                            full_name: fullName,
+                            email: user.email,
+                            role: role
+                        });
+
+                    if (insertError) {
+                        console.error('Failed to create profile:', insertError);
+                        throw insertError;
+                    }
+                    
+                    userProfile = {
+                        id: user.id,
+                        full_name: fullName,
+                        email: user.email,
+                        role: role
+                    };
+                } else {
+                    userProfile = profile;
+                }
+
+                console.log('✅ Profile loaded:', userProfile);
+
+                // Update UI
+                updateUserInfo(userProfile);
+                
+                // Show dashboard
+                showDashboard();
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showToast('Error loading profile. Please try again.', 'error');
+            }
+        }
+
+        // Update user info in dashboard
+        function updateUserInfo(profile) {
+            // Set user name
+            userName.textContent = profile.full_name || profile.email;
+            userRole.textContent = profile.role === 'nurse' ? 'Nurse' : 'Teacher';
+            
+            // Set avatar (first letter of name)
+            const firstLetter = (profile.full_name || profile.email).charAt(0).toUpperCase();
+            userAvatar.textContent = firstLetter;
+            
+            // Store current user
+            currentUser = profile;
+        }
+
+        // Show dashboard
+        function showDashboard() {
+            authContainer.classList.add('hidden');
+            dashboard.classList.remove('hidden');
+            
+            showToast(`Welcome back, ${currentUser.full_name || currentUser.email}!`, 'success');
+        }
+
+        // Handle logout
+        async function handleLogout() {
+            try {
+                console.log('👋 Logging out...');
+                
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) {
+                    console.error('Logout error:', error);
+                    throw error;
+                }
+                
+                console.log('✅ Logged out successfully');
+                
+                // Reset state
+                currentUser = null;
+                userProfile = null;
+                
+                // Show auth container
+                dashboard.classList.add('hidden');
+                authContainer.classList.remove('hidden');
+                
+                // Clear forms
+                loginForm.reset();
+                teacherRegisterForm.reset();
+                nurseRegisterForm.reset();
+                
+                // Reset to login tab
+                switchTab('login');
+                
+                showToast('Logged out successfully', 'info');
+                
+            } catch (error) {
+                console.error('Logout failed:', error);
+                showToast('Logout failed. Please try again.', 'error');
+            }
+        }
+
+        // Show auth message
+        function showAuthMessage(message, type) {
+            authMessage.innerHTML = message;
+            authMessage.className = `${type}-message`;
+            authMessage.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                authMessage.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Clear auth message
+        function clearAuthMessage() {
+            authMessage.classList.add('hidden');
+            authMessage.innerHTML = '';
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.remove('hidden');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Listen for auth state changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            console.log('🔐 Auth state changed:', event, session?.user?.email);
+            
+            if (event === 'SIGNED_IN' && session) {
+                loadUserProfile(session.user);
+            } else if (event === 'SIGNED_OUT') {
+                // Already handled in handleLogout
+            }
+        });
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Make functions available globally for onclick handlers
+        window.switchTab = switchTab;
+        window.selectRole = selectRole;
+
+    </script>
+</body>
+</html>
