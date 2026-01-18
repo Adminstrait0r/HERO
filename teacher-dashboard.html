@@ -62,22 +62,30 @@
             font-size: 16px;
         }
 
-        .user-info {
+        .header-actions {
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--red-main), var(--red-accent));
+        .logout-btn {
+            background: rgba(198, 40, 40, 0.15);
+            color: var(--red-main);
+            border: 1px solid rgba(198, 40, 40, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1rem;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(198, 40, 40, 0.25);
+            transform: translateY(-2px);
         }
 
         /* Main Dashboard */
@@ -473,34 +481,6 @@
             transform: translateY(-2px);
         }
 
-        /* Logout Button */
-        .logout-container {
-            margin-top: 40px;
-            text-align: center;
-            padding: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .logout-button {
-            background: rgba(198, 40, 40, 0.15);
-            color: var(--red-main);
-            border: 1px solid rgba(198, 40, 40, 0.3);
-            padding: 12px 36px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .logout-button:hover {
-            background: rgba(198, 40, 40, 0.25);
-            transform: translateY(-2px);
-        }
-
         /* Loading State */
         .loading {
             text-align: center;
@@ -557,6 +537,10 @@
             .dashboard-main {
                 padding: 15px;
             }
+            
+            header {
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -568,12 +552,11 @@
             HERO
         </div>
         
-        <div class="user-info">
-            <div class="user-avatar">TJ</div>
-            <div>
-                <div style="font-weight: 600;">Teacher Jane</div>
-                <div style="font-size: 0.9rem; color: var(--text-muted);">St. Mary's Elementary School</div>
-            </div>
+        <div class="header-actions">
+            <button class="logout-btn" id="headerLogoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                Log Out
+            </button>
         </div>
     </header>
 
@@ -661,14 +644,6 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Logout Button -->
-        <div class="logout-container">
-            <button class="logout-button" id="logoutButton">
-                <i class="fas fa-sign-out-alt"></i>
-                Log Out Account
-            </button>
-        </div>
     </div>
 
     <!-- Alert Modal -->
@@ -706,11 +681,19 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <script>
-        // Initialize Supabase client (replace with your actual credentials)
-        const supabaseUrl = 'YOUR_SUPABASE_URL';
-        const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+        // Initialize Supabase client - REMOVED DUPLICATE DECLARATION
+        // These should be replaced with your actual Supabase credentials
+        const supabaseUrl = 'YOUR_SUPABASE_URL_HERE';
+        const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY_HERE';
         
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        // Check if supabase is already declared to avoid the error
+        let supabase;
+        if (!window.supabaseClient) {
+            supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+            window.supabaseClient = supabase; // Store globally to avoid re-declaration
+        } else {
+            supabase = window.supabaseClient;
+        }
         
         // Student data
         let allStudents = [];
@@ -731,15 +714,8 @@
                 openAlertModal();
             });
             
-            // Logout button
-            document.getElementById('logoutButton').addEventListener('click', function() {
-                if (confirm('Are you sure you want to log out?')) {
-                    // Sign out from Supabase
-                    supabase.auth.signOut().then(() => {
-                        window.location.href = 'login.html';
-                    });
-                }
-            });
+            // Header logout button
+            document.getElementById('headerLogoutBtn').addEventListener('click', handleLogout);
             
             // Alert form submission
             document.getElementById('alertForm').addEventListener('submit', submitAlert);
@@ -977,6 +953,25 @@
             } catch (error) {
                 console.error('Error deleting student:', error);
                 showError('Failed to delete student. Please try again.');
+            }
+        }
+
+        // Logout function
+        async function handleLogout() {
+            if (confirm('Are you sure you want to log out?')) {
+                try {
+                    // Sign out from Supabase
+                    const { error } = await supabase.auth.signOut();
+                    
+                    if (error) throw error;
+                    
+                    // Redirect to login page
+                    window.location.href = 'login.html';
+                    
+                } catch (error) {
+                    console.error('Error logging out:', error);
+                    showError('Failed to log out. Please try again.');
+                }
             }
         }
 
