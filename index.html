@@ -1,1199 +1,1211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HERO – Health Emergency Response Operations</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --bg-main: radial-gradient(circle at top, #141414, #000000 70%);
-      --red-main: #c62828;
-      --red-accent: #e53935;
-      --text-main: #f2f2f2;
-      --text-muted: #bdbdbd;
-      --btn-dark: #2b2b2b;
-      --card-bg: #1a1a1a;
-      --card-border: #2a2a2a;
-      --shadow-soft: 0 10px 30px rgba(0,0,0,0.6);
-    }
-
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      min-height: 100vh;
-      background: var(--bg-main);
-      color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Top bar */
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 18px 28px;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid #2a2a2a;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: var(--red-main);
-      font-size: 20px;
-    }
-
-    .brand-icon {
-      width: 26px;
-      height: 26px;
-      border: 2px solid var(--red-main);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-    }
-
-    .logout-btn {
-      background: #2b2b2b;
-      color: var(--text-main);
-      border: 1px solid #3a3a3a;
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-      display: inline-block;
-    }
-
-    .logout-btn:hover {
-      background: var(--red-main);
-      border-color: var(--red-accent);
-    }
-
-    /* Main Layout */
-    .main-layout {
-      display: flex;
-      flex: 1;
-      padding: 20px;
-      gap: 20px;
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    /* Alerts Panel */
-    .alerts-panel {
-      flex: 0 0 300px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
-      height: fit-content;
-    }
-
-    .alerts-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .alerts-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--red-main);
-    }
-
-    .refresh-btn {
-      background: none;
-      border: 1px solid #3a3a3a;
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
-
-    .refresh-btn:hover {
-      background: var(--red-main);
-      color: white;
-    }
-
-    .alert-item {
-      background: #2b2b2b;
-      border-left: 4px solid var(--red-main);
-      padding: 15px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      transition: all 0.2s;
-    }
-
-    .alert-item:hover {
-      transform: translateX(4px);
-      background: #333;
-    }
-
-    .alert-room {
-      font-size: 14px;
-      color: var(--red-main);
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
-    .alert-desc {
-      font-size: 14px;
-      color: var(--text-main);
-      margin-bottom: 8px;
-    }
-
-    .alert-time {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .no-alerts {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
-      font-style: italic;
-    }
-
-    /* Main Content */
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 40px 30px;
-      text-align: center;
-      box-shadow: var(--shadow-soft);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 52px;
-      letter-spacing: 4px;
-      color: var(--red-main);
-    }
-
-    .subtitle {
-      margin-top: 12px;
-      font-size: 20px;
-      color: var(--text-muted);
-    }
-
-    .actions {
-      margin-top: 48px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 16px 20px;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      box-shadow: var(--shadow-soft);
-      transition: all 0.2s;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--red-main), var(--red-accent));
-      color: white;
-    }
-
-    .btn-secondary {
-      background: var(--btn-dark);
-      color: var(--text-main);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      opacity: 0.95;
-    }
-
-    /* Navigation Screens */
-    .nav-screen {
-      display: none;
-      flex-direction: column;
-      gap: 30px;
-    }
-
-    .nav-screen.active {
-      display: flex;
-    }
-
-    .screen-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .back-btn {
-      background: #2b2b2b;
-      color: var(--text-main);
-      border: 1px solid #3a3a3a;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-
-    .back-btn:hover {
-      background: var(--red-main);
-      border-color: var(--red-accent);
-    }
-
-    .screen-title {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--red-main);
-    }
-
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .grid-btn {
-      background: #2b2b2b;
-      border: 1px solid #3a3a3a;
-      border-radius: 8px;
-      padding: 20px 15px;
-      color: var(--text-main);
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .grid-btn:hover {
-      background: var(--red-main);
-      border-color: var(--red-accent);
-      transform: translateY(-2px);
-    }
-
-    /* Students List */
-    .students-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .student-card {
-      background: #2b2b2b;
-      border: 1px solid #3a3a3a;
-      border-radius: 8px;
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .student-card:hover {
-      background: var(--red-main);
-      border-color: var(--red-accent);
-      transform: translateY(-2px);
-    }
-
-    .student-name {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--text-main);
-    }
-
-    .student-details {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    /* Nurse Visit Form */
-    .form-container {
-      background: #2b2b2b;
-      border: 1px solid #3a3a3a;
-      border-radius: 12px;
-      padding: 30px;
-    }
-
-    .form-section {
-      margin-bottom: 30px;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--red-main);
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #3a3a3a;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    input, textarea, select {
-      width: 100%;
-      padding: 12px 15px;
-      background: #1a1a1a;
-      border: 1px solid #3a3a3a;
-      border-radius: 6px;
-      color: var(--text-main);
-      font-size: 16px;
-    }
-
-    textarea {
-      height: 100px;
-      resize: vertical;
-    }
-
-    input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: var(--red-main);
-    }
-
-    .submit-btn {
-      background: linear-gradient(135deg, var(--red-main), var(--red-accent));
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 200px;
-      margin: 30px auto 0;
-      display: block;
-      transition: all 0.2s;
-    }
-
-    .submit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(198, 40, 40, 0.4);
-    }
-
-    /* Status Messages */
-    .status-message {
-      padding: 15px 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: none;
-    }
-
-    .status-message.success {
-      background: rgba(46, 125, 50, 0.2);
-      border: 1px solid #2e7d32;
-      color: #4caf50;
-      display: block;
-    }
-
-    .status-message.error {
-      background: rgba(211, 47, 47, 0.2);
-      border: 1px solid #d32f2f;
-      color: #ef5350;
-      display: block;
-    }
-
-    /* Loading State */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-muted);
-    }
-
-    /* Nurse Name Input */
-    .nurse-name-input {
-      width: 200px;
-      padding: 12px 15px;
-      background: #1a1a1a;
-      border: 1px solid #3a3a3a;
-      border-radius: 6px;
-      color: var(--text-main);
-      font-size: 16px;
-      margin-left: 20px;
-    }
-
-    /* Email Link Button */
-    .email-link-btn {
-      background: linear-gradient(135deg, #4CAF50, #45a049);
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 250px;
-      margin: 20px auto 0;
-      display: block;
-      transition: all 0.2s;
-      text-decoration: none;
-      text-align: center;
-    }
-
-    .email-link-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
-    }
-
-    /* Bottom Navigation */
-    .bottom-nav {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      z-index: 100;
-    }
-
-    .nav-dot {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: #0f0f0f;
-      border: 1px solid #2a2a2a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      color: var(--text-muted);
-      box-shadow: var(--shadow-soft);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .nav-dot:hover {
-      background: var(--red-main);
-      color: white;
-    }
-
-    /* Responsive */
-    @media (max-width: 1024px) {
-      .main-layout {
-        flex-direction: column;
-      }
-      
-      .alerts-panel {
-        flex: none;
-        width: 100%;
-      }
-    }
-
-    @media (max-width: 768px) {
-      h1 { font-size: 40px; }
-      .subtitle { font-size: 16px; }
-      .form-grid { grid-template-columns: 1fr; }
-      .grid-container { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-      .students-list { grid-template-columns: 1fr; }
-      header { padding: 15px 20px; }
-      .main-layout { padding: 15px; }
-      .nurse-name-input { 
-        width: 150px; 
-        margin-left: 10px;
-      }
-      .email-link-btn {
-        width: 200px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      h1 { font-size: 32px; }
-      .card { padding: 30px 20px; }
-      .form-container { padding: 20px; }
-      header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-      }
-      .nurse-name-input {
-        width: 100%;
-        margin: 10px 0 0 0;
-      }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HERO – Health Emergency Response Operations</title>
+    <style>
+        :root {
+            --bg-main: radial-gradient(circle at top, #141414, #000000 70%);
+            --red-main: #c62828;
+            --red-accent: #e53935;
+            --red-light: #ef5350;
+            --text-main: #f2f2f2;
+            --text-muted: #bdbdbd;
+            --text-dark: #333333;
+            --btn-dark: #2b2b2b;
+            --btn-darker: #1a1a1a;
+            --bg-card: rgba(40, 40, 40, 0.9);
+            --border-color: #444;
+            --shadow-soft: 0 10px 30px rgba(0,0,0,0.6);
+            --shadow-heavy: 0 15px 40px rgba(0,0,0,0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Top bar */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 28px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--red-main);
+            font-size: 20px;
+        }
+
+        .brand-icon {
+            width: 26px;
+            height: 26px;
+            border: 2px solid var(--red-main);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Main Auth Container */
+        .auth-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px 28px;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .auth-header {
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 52px;
+            letter-spacing: 4px;
+            color: var(--red-main);
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            margin-top: 12px;
+            font-size: 18px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .auth-actions {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 1px;
+            background: var(--btn-dark);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 30px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 14px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-tab.active {
+            background: var(--red-main);
+            color: white;
+            box-shadow: 0 4px 15px rgba(198, 40, 40, 0.3);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 14px 16px;
+            background: var(--btn-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--red-main);
+            box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.2);
+        }
+
+        .form-group.checkbox {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group.checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--red-main);
+        }
+
+        .form-group.checkbox label {
+            cursor: pointer;
+        }
+
+        /* Role Selection */
+        .role-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .role-option {
+            padding: 16px;
+            background: var(--btn-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .role-option:hover {
+            border-color: var(--red-main);
+            background: rgba(198, 40, 40, 0.1);
+        }
+
+        .role-option.selected {
+            border-color: var(--red-main);
+            background: rgba(198, 40, 40, 0.2);
+            box-shadow: 0 4px 15px rgba(198, 40, 40, 0.2);
+        }
+
+        .role-option input {
+            display: none;
+        }
+
+        .role-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        .role-icon {
+            font-size: 24px;
+        }
+
+        /* Conditional Fields */
+        .conditional-fields {
+            background: var(--btn-darker);
+            border-left: 4px solid var(--red-main);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .conditional-fields h4 {
+            margin: 0 0 8px 0;
+            color: var(--red-light);
+            font-size: 14px;
+        }
+
+        .conditional-fields p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--red-main), var(--red-accent));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(198, 40, 40, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--btn-dark);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--btn-darker);
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+
+        /* Links */
+        .auth-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .auth-link a {
+            color: var(--red-light);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Messages */
+        .error-message {
+            background: rgba(229, 57, 53, 0.1);
+            border: 1px solid var(--red-accent);
+            border-radius: 8px;
+            padding: 14px;
+            color: var(--red-light);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .success-message {
+            background: rgba(56, 142, 60, 0.1);
+            border: 1px solid #4caf50;
+            border-radius: 8px;
+            padding: 14px;
+            color: #4caf50;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .info-message {
+            background: rgba(41, 98, 255, 0.1);
+            border: 1px solid #2962ff;
+            border-radius: 8px;
+            padding: 14px;
+            color: #82b1ff;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* Confirmation Modal */
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .confirmation-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .confirmation-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--red-main);
+        }
+
+        .confirmation-content h2 {
+            color: var(--text-main);
+            margin: 0 0 16px 0;
+            font-size: 24px;
+        }
+
+        .confirmation-content p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .confirmation-tips {
+            background: var(--btn-darker);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: left;
+            border-left: 4px solid var(--red-main);
+        }
+
+        .confirmation-tips h4 {
+            color: var(--red-light);
+            margin: 0 0 8px 0;
+            font-size: 14px;
+        }
+
+        .confirmation-tips ul {
+            padding-left: 20px;
+            color: var(--text-muted);
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .confirmation-tips li {
+            margin-bottom: 6px;
+        }
+
+        .confirmation-note {
+            background: rgba(245, 124, 0, 0.1);
+            border: 1px solid #ff9800;
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 24px;
+            color: #ffb74d;
+            font-size: 13px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            box-shadow: var(--shadow-soft);
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #00c853, #64dd17);
+            border: 1px solid #00c853;
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #ff1744, #f50057);
+            border: 1px solid #ff1744;
+        }
+
+        .toast.info {
+            background: linear-gradient(135deg, #2962ff, #448aff);
+            border: 1px solid #2962ff;
+        }
+
+        .toast.warning {
+            background: linear-gradient(135deg, #ff9100, #ffab00);
+            border: 1px solid #ff9100;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid var(--red-main);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Corner dot */
+        .corner-dot {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--btn-darker);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--red-main);
+            box-shadow: var(--shadow-soft);
+            font-size: 18px;
+            z-index: 100;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            h1 { font-size: 40px; }
+            .subtitle { font-size: 16px; }
+            .auth-card { padding: 30px 20px; }
+            .role-selection { grid-template-columns: 1fr; }
+            .confirmation-content { padding: 24px 20px; }
+        }
+    </style>
 </head>
 <body>
-
-  <header>
-    <div class="brand">
-      <div class="brand-icon">🚨</div>
-      HERO
-    </div>
-    
-    <div style="display: flex; align-items: center; gap: 15px;">
-      <select id="nurseSelect" class="nurse-name-input">
-        <option value="">Select Nurse</option>
-        <!-- Nurses loaded dynamically -->
-      </select>
-      <a href="index.html" class="logout-btn">Home</a>
-    </div>
-  </header>
-
-  <div class="main-layout">
-    <!-- Alerts Panel -->
-    <div class="alerts-panel">
-      <div class="alerts-header">
-        <div class="alerts-title">ACTIVE ALERTS</div>
-        <button id="refreshAlerts" class="refresh-btn">⟳ Refresh</button>
-      </div>
-      <div id="alertsList">
-        <div class="no-alerts">No active alerts at the moment.</div>
-      </div>
-    </div>
-
-    <!-- Main Content Area -->
-    <div class="main-content">
-      <!-- Home Screen -->
-      <div id="homeScreen" class="nav-screen active">
-        <div class="card">
-          <h1>HERO</h1>
-          <div class="subtitle">Health Emergency Response Operations</div>
-
-          <div class="actions">
-            <button id="goHelpBtn" class="btn btn-primary">
-              🚑 Go Help!
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="confirmation-modal hidden">
+        <div class="confirmation-content">
+            <div class="confirmation-icon">📧</div>
+            <h2>EMAIL CONFIRMATION REQUIRED</h2>
+            <p>A verification email has been sent to <strong id="confirmation-email" style="color: var(--red-light);"></strong></p>
+            
+            <div class="confirmation-tips">
+                <h4>ACTION REQUIRED:</h4>
+                <ul>
+                    <li>Check your email inbox</li>
+                    <li>Look for "HERO System Verification"</li>
+                    <li>Click the verification link</li>
+                    <li>Return here to login</li>
+                </ul>
+            </div>
+            
+            <div class="confirmation-note">
+                <strong>Note:</strong> If email isn't visible, check spam/junk folder
+            </div>
+            
+            <button id="confirmation-ok-btn" class="btn btn-primary">
+                ACKNOWLEDGED
             </button>
-          </div>
+            
+            <p style="margin-top: 20px; font-size: 13px; color: var(--text-muted);">
+                Didn't receive? <a href="#" id="resend-email-link" style="color: var(--red-light); font-weight: 500;">Resend verification</a>
+            </p>
         </div>
-      </div>
-
-      <!-- Grade Level Screen -->
-      <div id="gradeLevelScreen" class="nav-screen">
-        <div class="screen-header">
-          <button id="backFromGrades" class="back-btn">← Back</button>
-          <div class="screen-title">Select Grade Level</div>
-        </div>
-        <div class="grid-container" id="gradeLevelsContainer">
-          <!-- Grade levels loaded dynamically -->
-        </div>
-      </div>
-
-      <!-- Sections Screen -->
-      <div id="sectionsScreen" class="nav-screen">
-        <div class="screen-header">
-          <button id="backFromSections" class="back-btn">← Back</button>
-          <div class="screen-title">Select Section</div>
-        </div>
-        <div class="grid-container" id="sectionsContainer">
-          <!-- Sections loaded dynamically -->
-        </div>
-      </div>
-
-      <!-- Students Screen -->
-      <div id="studentsScreen" class="nav-screen">
-        <div class="screen-header">
-          <button id="backFromStudents" class="back-btn">← Back</button>
-          <div class="screen-title">Select Student</div>
-        </div>
-        <div class="students-list" id="studentsContainer">
-          <!-- Students loaded dynamically -->
-        </div>
-      </div>
-
-      <!-- Nurse Visit Form -->
-      <div id="nurseVisitForm" class="nav-screen">
-        <div class="screen-header">
-          <button id="backFromForm" class="back-btn">← Back</button>
-          <div class="screen-title">Nurse Visit Form</div>
-        </div>
-        
-        <div class="status-message" id="statusMessage"></div>
-        
-        <div class="form-container">
-          <div class="form-section">
-            <div class="section-title">Student Information</div>
-            <div class="form-grid">
-              <div class="form-group full-width">
-                <label>Name and Section</label>
-                <input type="text" id="studentInfo" readonly>
-              </div>
-              
-              <div class="form-group">
-                <label>Time In</label>
-                <input type="datetime-local" id="timeIn">
-              </div>
-              
-              <div class="form-group">
-                <label>Age</label>
-                <input type="number" id="age" readonly>
-              </div>
-              
-              <div class="form-group full-width">
-                <label>Symptoms</label>
-                <textarea id="symptoms" placeholder="Describe symptoms..."></textarea>
-              </div>
-              
-              <div class="form-group full-width">
-                <label>Intervention Given</label>
-                <textarea id="intervention" placeholder="Describe intervention..."></textarea>
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-section">
-            <div class="section-title">Vital Signs</div>
-            <div class="form-grid">
-              <div class="form-group">
-                <label>PR (Pulse Rate)</label>
-                <input type="text" id="pr" placeholder="e.g., 72 bpm">
-              </div>
-              
-              <div class="form-group">
-                <label>SPO2 (Oxygen Saturation)</label>
-                <input type="text" id="spo2" placeholder="e.g., 98%">
-              </div>
-              
-              <div class="form-group">
-                <label>BP (Blood Pressure)</label>
-                <input type="text" id="bp" placeholder="e.g., 120/80">
-              </div>
-              
-              <div class="form-group">
-                <label>TEMP (Temperature)</label>
-                <input type="text" id="temp" placeholder="e.g., 36.5°C">
-              </div>
-            </div>
-          </div>
-          
-          <button id="submitVisitBtn" class="submit-btn">
-            📤 Submit Visit Record
-          </button>
-
-          <!-- This will appear after successful submission -->
-          <a id="emailLinkBtn" class="email-link-btn" style="display: none;" target="_blank">
-            📧 Email Parent Report
-          </a>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <div class="bottom-nav">
-    <div id="homeNav" class="nav-dot">N</div>
-  </div>
-
-  <script>
-    // Initialize Supabase client - REPLACE WITH YOUR ACTUAL CREDENTIALS
-    const SUPABASE_URL = 'https://gehcvalwixalqqdssekw.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_0xH493bo2eEKS4Gq6SKdfw_r5F0tNJu';
-    let supabaseClient = null;
-    
-    // Global variables
-    let currentStudent = null;
-    let currentGradeSection = null;
-    let currentNurseId = null;
-    let savedVisitId = null;
-    let parentEmail = null;
-    
-    // DOM Elements
-    let refreshAlertsBtn, goHelpBtn, backFromGrades, backFromSections, 
-        backFromStudents, backFromForm, homeNav, submitVisitBtn, 
-        nurseSelect, emailLinkBtn;
-    
-    // Initialize when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize Supabase client
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      
-      // Get DOM elements
-      refreshAlertsBtn = document.getElementById('refreshAlerts');
-      goHelpBtn = document.getElementById('goHelpBtn');
-      backFromGrades = document.getElementById('backFromGrades');
-      backFromSections = document.getElementById('backFromSections');
-      backFromStudents = document.getElementById('backFromStudents');
-      backFromForm = document.getElementById('backFromForm');
-      homeNav = document.getElementById('homeNav');
-      submitVisitBtn = document.getElementById('submitVisitBtn');
-      nurseSelect = document.getElementById('nurseSelect');
-      emailLinkBtn = document.getElementById('emailLinkBtn');
-      
-      // Set current time
-      const now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      document.getElementById('timeIn').value = now.toISOString().slice(0, 16);
-      
-      // Set up event listeners
-      setupEventListeners();
-      
-      // Load initial data
-      loadAlerts();
-      loadNurses();
-    });
-
-    // Setup all event listeners
-    function setupEventListeners() {
-      if (refreshAlertsBtn) refreshAlertsBtn.addEventListener('click', loadAlerts);
-      if (goHelpBtn) goHelpBtn.addEventListener('click', () => showScreen('gradeLevelScreen'));
-      if (backFromGrades) backFromGrades.addEventListener('click', () => showScreen('homeScreen'));
-      if (backFromSections) backFromSections.addEventListener('click', () => showScreen('gradeLevelScreen'));
-      if (backFromStudents) backFromStudents.addEventListener('click', () => showScreen('sectionsScreen'));
-      if (backFromForm) backFromForm.addEventListener('click', () => showScreen('studentsScreen'));
-      if (homeNav) homeNav.addEventListener('click', () => showScreen('homeScreen'));
-      if (submitVisitBtn) submitVisitBtn.addEventListener('click', submitVisit);
-      if (nurseSelect) nurseSelect.addEventListener('change', function() {
-        currentNurseId = this.value;
-      });
-    }
-
-    // Screen navigation
-    function showScreen(screenId) {
-      // Hide all screens
-      const screens = document.querySelectorAll('.nav-screen');
-      screens.forEach(screen => screen.classList.remove('active'));
-      
-      // Show target screen
-      const targetScreen = document.getElementById(screenId);
-      if (targetScreen) {
-        targetScreen.classList.add('active');
-      }
-      
-      // Load data for specific screens
-      if (screenId === 'gradeLevelScreen') {
-        loadGradeLevels();
-      } else if (screenId === 'homeScreen') {
-        loadAlerts(); // Refresh alerts when returning home
-      }
-    }
-
-    // Load alerts
-    async function loadAlerts() {
-      const alertsList = document.getElementById('alertsList');
-      if (!alertsList) return;
-      
-      alertsList.innerHTML = '<div class="no-alerts">Loading alerts...</div>';
-      
-      try {
-        const { data, error } = await supabaseClient
-          .from('alerts')
-          .select('*, profiles(full_name)')
-          .eq('status', 'active')
-          .order('created_at', { ascending: false })
-          .limit(10);
-        
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
-          alertsList.innerHTML = '<div class="no-alerts">No active alerts at the moment.</div>';
-          return;
-        }
-        
-        alertsList.innerHTML = '';
-        data.forEach(alert => {
-          const alertDiv = document.createElement('div');
-          alertDiv.className = 'alert-item';
-          alertDiv.innerHTML = `
-            <div class="alert-room">Room ${alert.room_number}</div>
-            <div class="alert-desc">${alert.description || 'No description'}</div>
-            <div class="alert-time">
-              From: ${alert.profiles?.full_name || 'Unknown'} • 
-              ${new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+    <!-- Auth Container -->
+    <div id="auth-container" class="auth-main">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>HERO</h1>
+                <div class="subtitle">Health Emergency Response Operations System</div>
             </div>
-          `;
-          alertsList.appendChild(alertDiv);
-        });
-      } catch (error) {
-        alertsList.innerHTML = '<div class="no-alerts">Error loading alerts.</div>';
-        console.error('Error loading alerts:', error);
-      }
-    }
 
-    // Load nurses
-    async function loadNurses() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('profiles')
-          .select('id, full_name, email')
-          .eq('role', 'nurse')
-          .order('full_name');
-        
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
-          nurseSelect.innerHTML = '<option value="">Select Nurse</option>';
-          data.forEach(nurse => {
-            const option = document.createElement('option');
-            option.value = nurse.id;
-            option.textContent = nurse.full_name || nurse.email;
-            nurseSelect.appendChild(option);
-          });
-        }
-      } catch (error) {
-        console.error('Error loading nurses:', error);
-      }
-    }
-
-    // Load grade levels
-    async function loadGradeLevels() {
-      const container = document.getElementById('gradeLevelsContainer');
-      if (!container) return;
-      
-      container.innerHTML = '<div class="loading">Loading grade levels...</div>';
-      
-      try {
-        const { data, error } = await supabaseClient
-          .from('grade_sections')
-          .select('grade_level')
-          .order('grade_level');
-        
-        if (error) throw error;
-        
-        // Get unique grade levels
-        const gradeLevels = [...new Set(data.map(item => item.grade_level))];
-        
-        if (gradeLevels.length === 0) {
-          container.innerHTML = '<div class="loading">No grade levels found.</div>';
-          return;
-        }
-        
-        container.innerHTML = '';
-        gradeLevels.forEach(grade => {
-          const btn = document.createElement('button');
-          btn.className = 'grid-btn';
-          btn.textContent = `Grade ${grade}`;
-          btn.addEventListener('click', () => loadSections(grade));
-          container.appendChild(btn);
-        });
-      } catch (error) {
-        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading grade levels</div>';
-        console.error('Error loading grade levels:', error);
-      }
-    }
-
-    // Load sections for a grade level
-    async function loadSections(gradeLevel) {
-      currentGradeSection = null;
-      const container = document.getElementById('sectionsContainer');
-      if (!container) return;
-      
-      container.innerHTML = '<div class="loading">Loading sections...</div>';
-      
-      try {
-        const { data, error } = await supabaseClient
-          .from('grade_sections')
-          .select('*')
-          .eq('grade_level', gradeLevel)
-          .order('section');
-        
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
-          container.innerHTML = '<div class="loading">No sections found for this grade.</div>';
-          return;
-        }
-        
-        container.innerHTML = '';
-        data.forEach(section => {
-          const btn = document.createElement('button');
-          btn.className = 'grid-btn';
-          btn.textContent = `${section.grade_level} - ${section.section}`;
-          btn.addEventListener('click', () => loadStudents(section));
-          container.appendChild(btn);
-        });
-        
-        showScreen('sectionsScreen');
-      } catch (error) {
-        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading sections</div>';
-        console.error('Error loading sections:', error);
-      }
-    }
-
-    // Load students for a section
-    async function loadStudents(section) {
-      currentGradeSection = section;
-      const container = document.getElementById('studentsContainer');
-      if (!container) return;
-      
-      container.innerHTML = '<div class="loading">Loading students...</div>';
-      
-      try {
-        const { data, error } = await supabaseClient
-          .from('students')
-          .select('*')
-          .eq('grade_section_id', section.id)
-          .order('full_name');
-        
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
-          container.innerHTML = '<div class="loading">No students found in this section.</div>';
-          return;
-        }
-        
-        container.innerHTML = '';
-        data.forEach(student => {
-          const card = document.createElement('div');
-          card.className = 'student-card';
-          card.addEventListener('click', () => showStudentForm(student));
-          card.innerHTML = `
-            <div class="student-name">${student.full_name}</div>
-            <div class="student-details">
-              Age: ${student.age || 'N/A'}<br>
-              ${student.allergies ? `Allergies: ${student.allergies}` : 'No known allergies'}
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">LOGIN</button>
+                <button class="auth-tab" data-tab="register">REGISTER</button>
             </div>
-          `;
-          container.appendChild(card);
+
+            <div id="login-form-container">
+                <div class="info-message" id="login-info-message" style="display: none;">
+                    <strong>⚠️ VERIFICATION REQUIRED</strong><br>
+                    Please verify your email before login. Check your inbox.
+                </div>
+
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label>EMAIL ADDRESS</label>
+                        <input type="email" id="login-email" required placeholder="user@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>PASSWORD</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="login-button">
+                        → ACCESS SYSTEM
+                    </button>
+
+                    <div class="auth-link">
+                        No credentials? <a href="#" onclick="switchTab('register')">Request access</a>
+                    </div>
+                </form>
+            </div>
+
+            <div id="register-form-container" class="hidden">
+                <div class="role-selection">
+                    <div class="role-option selected" data-role="teacher">
+                        <input type="radio" id="role-teacher" name="role" value="teacher" checked>
+                        <label for="role-teacher">
+                            👨‍🏫
+                            <span>TEACHER</span>
+                        </label>
+                    </div>
+                    <div class="role-option" data-role="nurse">
+                        <input type="radio" id="role-nurse" name="role" value="nurse">
+                        <label for="role-nurse">
+                            👩‍⚕️
+                            <span>NURSE</span>
+                        </label>
+                    </div>
+                </div>
+
+                <form id="teacher-register-form" class="auth-form">
+                    <div class="form-group">
+                        <label>FULL NAME</label>
+                        <input type="text" id="teacher-fullname" required placeholder="John Doe">
+                    </div>
+
+                    <div class="form-group">
+                        <label>EMAIL ADDRESS</label>
+                        <input type="email" id="teacher-email" required placeholder="teacher@school.edu">
+                    </div>
+
+                    <div class="form-group checkbox">
+                        <input type="checkbox" id="no-advisory">
+                        <label for="no-advisory">No grade level advisory assignment</label>
+                    </div>
+
+                    <div id="grade-section-fields">
+                        <div class="form-group">
+                            <label>GRADE LEVEL & SECTION</label>
+                            <select id="grade-section-select" required>
+                                <option value="">Select grade and section</option>
+                                <!-- Will be populated from database -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>PASSWORD</label>
+                        <input type="password" id="teacher-password" required placeholder="Minimum 6 characters">
+                    </div>
+
+                    <div class="form-group">
+                        <label>CONFIRM PASSWORD</label>
+                        <input type="password" id="teacher-confirm-password" required placeholder="Re-enter password">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="teacher-register-button">
+                        REGISTER AS TEACHER
+                    </button>
+
+                    <div class="auth-link">
+                        Already registered? <a href="#" onclick="switchTab('login')">Login here</a>
+                    </div>
+                </form>
+
+                <form id="nurse-register-form" class="auth-form hidden">
+                    <div class="form-group">
+                        <label>EMAIL ADDRESS</label>
+                        <input type="email" id="nurse-email" required placeholder="nurse@school.edu">
+                    </div>
+
+                    <div class="form-group">
+                        <label>PASSWORD</label>
+                        <input type="password" id="nurse-password" required placeholder="Minimum 6 characters">
+                    </div>
+
+                    <div class="form-group">
+                        <label>CONFIRM PASSWORD</label>
+                        <input type="password" id="nurse-confirm-password" required placeholder="Re-enter password">
+                    </div>
+
+                    <div class="conditional-fields">
+                        <h4>NURSE PROTOCOL ACCESS</h4>
+                        <p>Medical records access • Vital signs monitoring • Emergency response protocols • Student health tracking</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="nurse-register-button">
+                        REGISTER AS NURSE
+                    </button>
+
+                    <div class="auth-link">
+                        Already registered? <a href="#" onclick="switchTab('login')">Login here</a>
+                    </div>
+                </form>
+            </div>
+
+            <div id="auth-message" class="hidden"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Corner Dot -->
+    <div class="corner-dot">N</div>
+
+    <script type="module">
+        import { supabase } from './supabase.js';
+
+        let lastRegisteredEmail = '';
+        let gradeSections = [];
+
+        const authContainer = document.getElementById('auth-container');
+        const loginForm = document.getElementById('login-form');
+        const teacherRegisterForm = document.getElementById('teacher-register-form');
+        const nurseRegisterForm = document.getElementById('nurse-register-form');
+        const authTabs = document.querySelectorAll('.auth-tab');
+        const loginFormContainer = document.getElementById('login-form-container');
+        const registerFormContainer = document.getElementById('register-form-container');
+        const roleOptions = document.querySelectorAll('.role-option');
+        const noAdvisoryCheckbox = document.getElementById('no-advisory');
+        const gradeSectionFields = document.getElementById('grade-section-fields');
+        const gradeSectionSelect = document.getElementById('grade-section-select');
+        const authMessage = document.getElementById('auth-message');
+        const toast = document.getElementById('toast');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmationEmail = document.getElementById('confirmation-email');
+        const confirmationOkBtn = document.getElementById('confirmation-ok-btn');
+        const resendEmailLink = document.getElementById('resend-email-link');
+        const loginInfoMessage = document.getElementById('login-info-message');
+
+        async function loadGradeSections() {
+            try {
+                const { data, error } = await supabase
+                    .from('grade_sections')
+                    .select('*')
+                    .order('grade_level', { ascending: true })
+                    .order('section', { ascending: true });
+
+                if (error) throw error;
+                
+                gradeSections = data;
+                populateGradeSectionDropdown();
+            } catch (error) {
+                console.error('Error loading grade sections:', error);
+                showToast('❌ Failed to load grade sections', 'error');
+            }
+        }
+
+        function populateGradeSectionDropdown() {
+            gradeSectionSelect.innerHTML = '<option value="">Select grade and section</option>';
+            
+            gradeSections.forEach(gradeSection => {
+                const option = document.createElement('option');
+                option.value = gradeSection.id;
+                option.textContent = `${gradeSection.grade_level} - ${gradeSection.section}`;
+                gradeSectionSelect.appendChild(option);
+            });
+        }
+
+        function init() {
+            checkAuthState();
+            setupEventListeners();
+            loadGradeSections();
+        }
+
+        async function checkAuthState() {
+            try {
+                const { data, error } = await supabase.auth.getSession();
+                if (data.session) {
+                    const profile = await loadTeacherProfile(data.session.user);
+                    if (profile && profile.role === 'teacher') {
+                        redirectToTeacherDashboard();
+                    }
+                }
+            } catch (error) {
+                console.error('Auth state check error:', error);
+            }
+        }
+
+        function setupEventListeners() {
+            authTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    switchTab(tabName);
+                });
+            });
+
+            roleOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const role = option.dataset.role;
+                    selectRole(role);
+                });
+            });
+
+            noAdvisoryCheckbox.addEventListener('change', function() {
+                gradeSectionFields.style.display = this.checked ? 'none' : 'block';
+                if (this.checked) {
+                    gradeSectionSelect.required = false;
+                } else {
+                    gradeSectionSelect.required = true;
+                }
+            });
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleLogin();
+            });
+
+            teacherRegisterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleTeacherRegistration();
+            });
+
+            nurseRegisterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleNurseRegistration();
+            });
+
+            confirmationOkBtn.addEventListener('click', () => {
+                confirmationModal.classList.add('hidden');
+                switchTab('login');
+            });
+
+            resendEmailLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await resendConfirmationEmail();
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('confirm')) {
+                loginInfoMessage.style.display = 'block';
+            }
+        }
+
+        function switchTab(tabName) {
+            authTabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            if (tabName === 'login') {
+                loginFormContainer.classList.remove('hidden');
+                registerFormContainer.classList.add('hidden');
+            } else {
+                loginFormContainer.classList.add('hidden');
+                registerFormContainer.classList.remove('hidden');
+            }
+            clearAuthMessage();
+        }
+
+        function selectRole(role) {
+            roleOptions.forEach(option => {
+                if (option.dataset.role === role) {
+                    option.classList.add('selected');
+                    option.querySelector('input').checked = true;
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+
+            if (role === 'teacher') {
+                teacherRegisterForm.classList.remove('hidden');
+                nurseRegisterForm.classList.add('hidden');
+            } else {
+                teacherRegisterForm.classList.add('hidden');
+                nurseRegisterForm.classList.remove('hidden');
+            }
+        }
+
+        function showEmailConfirmation(email) {
+            lastRegisteredEmail = email;
+            confirmationEmail.textContent = email;
+            confirmationModal.classList.remove('hidden');
+            showToast('📧 Verification email sent. Check inbox.', 'info');
+        }
+
+        async function resendConfirmationEmail() {
+            if (!lastRegisteredEmail) return;
+            try {
+                const { error } = await supabase.auth.resend({
+                    type: 'signup',
+                    email: lastRegisteredEmail,
+                    options: { emailRedirectTo: window.location.origin }
+                });
+                if (error) throw error;
+                showToast('✅ Verification email resent.', 'success');
+            } catch (error) {
+                showToast('❌ Failed to resend email.', 'error');
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                showAuthMessage('All fields required.', 'error');
+                return;
+            }
+
+            const loginButton = document.getElementById('login-button');
+            const originalText = loginButton.textContent;
+            loginButton.innerHTML = '<div class="spinner"></div> VERIFYING...';
+            loginButton.disabled = true;
+
+            try {
+                // First try to login as teacher (Supabase Auth)
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+
+                    if (error) {
+                        if (error.message.includes('Email not confirmed')) {
+                            loginInfoMessage.style.display = 'block';
+                            showEmailConfirmation(email);
+                            showToast('📧 Email verification required.', 'warning');
+                            return;
+                        }
+                        throw new Error('Teacher login failed');
+                    }
+                    
+                    const profile = await loadTeacherProfile(data.user);
+                    if (profile && profile.role === 'teacher') {
+                        showToast('✅ Teacher access granted', 'success');
+                        redirectToTeacherDashboard();
+                    }
+                    return;
+                } catch (teacherError) {
+                    console.log('Trying nurse login...');
+                }
+
+                // Try nurse login - check in nurse table
+                const { data: nurseData, error: nurseError } = await supabase
+                    .from('nurse')
+                    .select('*')
+                    .eq('email', email)
+                    .single();
+
+                if (nurseError || !nurseData) {
+                    throw new Error('Invalid email or password');
+                }
+
+                if (nurseData.password !== password) {
+                    throw new Error('Invalid email or password');
+                }
+
+                // Nurse login successful
+                sessionStorage.setItem('nurseProfile', JSON.stringify({
+                    id: nurseData.id,
+                    email: nurseData.email,
+                    role: 'nurse'
+                }));
+                showToast('✅ Nurse access granted', 'success');
+                redirectToNurseDashboard();
+
+            } catch (error) {
+                let errorMessage = 'Login failed. ';
+                if (error.message.includes('Invalid email or password')) {
+                    errorMessage = 'Invalid email or password.';
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMessage = 'Email verification required.';
+                } else {
+                    errorMessage += error.message;
+                }
+                showAuthMessage(errorMessage, 'error');
+            } finally {
+                loginButton.textContent = originalText;
+                loginButton.disabled = false;
+            }
+        }
+
+        async function loadTeacherProfile(user) {
+            try {
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (error) {
+                    const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
+                    const { error: insertError } = await supabase
+                        .from('profiles')
+                        .insert({
+                            id: user.id,
+                            full_name: fullName,
+                            email: user.email,
+                            role: 'teacher'
+                        });
+                    if (insertError) throw insertError;
+                    return { id: user.id, full_name: fullName, email: user.email, role: 'teacher' };
+                }
+                return profile;
+            } catch (error) {
+                console.error('Profile load failed:', error);
+                return null;
+            }
+        }
+
+        async function handleTeacherRegistration() {
+            const fullName = document.getElementById('teacher-fullname').value;
+            const email = document.getElementById('teacher-email').value.trim().toLowerCase();
+            const password = document.getElementById('teacher-password').value;
+            const confirmPassword = document.getElementById('teacher-confirm-password').value;
+            const noAdvisory = document.getElementById('no-advisory').checked;
+            const gradeSectionId = noAdvisory ? null : gradeSectionSelect.value;
+
+            if (!fullName || !email || !password || !confirmPassword) {
+                showAuthMessage('All fields required.', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showAuthMessage('Password: 6+ characters.', 'error');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showAuthMessage('Passwords do not match.', 'error');
+                return;
+            }
+            if (!noAdvisory && !gradeSectionId) {
+                showAuthMessage('Please select a grade and section.', 'error');
+                return;
+            }
+
+            const registerButton = document.getElementById('teacher-register-button');
+            const originalText = registerButton.textContent;
+            registerButton.innerHTML = '<div class="spinner"></div> PROCESSING...';
+            registerButton.disabled = true;
+
+            try {
+                // Get the selected grade section data
+                let gradeSectionData = null;
+                if (gradeSectionId) {
+                    gradeSectionData = gradeSections.find(gs => gs.id === gradeSectionId);
+                }
+
+                // Create auth user
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            role: 'teacher',
+                            grade_level: gradeSectionData ? gradeSectionData.grade_level : null,
+                            section: gradeSectionData ? gradeSectionData.section : null,
+                            has_advisory: !noAdvisory,
+                            grade_section_id: gradeSectionId
+                        },
+                        emailRedirectTo: window.location.origin + '?confirm=true'
+                    }
+                });
+                if (authError) throw authError;
+
+                // Create profile
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert({
+                        id: authData.user.id,
+                        full_name: fullName,
+                        email: email,
+                        role: 'teacher'
+                    });
+                if (profileError) throw new Error('Profile creation failed.');
+
+                showEmailConfirmation(email);
+                teacherRegisterForm.reset();
+                noAdvisoryCheckbox.checked = false;
+                gradeSectionFields.style.display = 'block';
+                showToast('✅ Teacher registered successfully! Check email for verification.', 'success');
+            } catch (error) {
+                let errorMessage = 'Registration failed. ';
+                if (error.message.includes('User already registered')) {
+                    errorMessage += 'Email already exists. Login instead.';
+                } else if (error.message.includes('password')) {
+                    errorMessage += 'Weak password.';
+                } else {
+                    errorMessage += error.message;
+                }
+                showAuthMessage(errorMessage, 'error');
+            } finally {
+                registerButton.textContent = originalText;
+                registerButton.disabled = false;
+            }
+        }
+
+        async function handleNurseRegistration() {
+            const email = document.getElementById('nurse-email').value.trim().toLowerCase();
+            const password = document.getElementById('nurse-password').value;
+            const confirmPassword = document.getElementById('nurse-confirm-password').value;
+
+            if (!email || !password || !confirmPassword) {
+                showAuthMessage('All fields required.', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showAuthMessage('Password: 6+ characters.', 'error');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showAuthMessage('Passwords do not match.', 'error');
+                return;
+            }
+
+            const registerButton = document.getElementById('nurse-register-button');
+            const originalText = registerButton.textContent;
+            registerButton.innerHTML = '<div class="spinner"></div> PROCESSING...';
+            registerButton.disabled = true;
+
+            try {
+                // Check if nurse already exists
+                const { data: existingNurse, error: checkError } = await supabase
+                    .from('nurse')
+                    .select('id')
+                    .eq('email', email)
+                    .single();
+
+                if (!checkError && existingNurse) {
+                    throw new Error('Nurse with this email already exists');
+                }
+
+                // Create nurse in nurse table
+                const { data: nurse, error: nurseError } = await supabase
+                    .from('nurse')
+                    .insert({
+                        email: email,
+                        password: password
+                    })
+                    .select()
+                    .single();
+
+                if (nurseError) throw nurseError;
+
+                showAuthMessage('✅ Nurse registered successfully! You can now login.', 'success');
+                nurseRegisterForm.reset();
+                
+                setTimeout(() => {
+                    switchTab('login');
+                }, 3000);
+                
+            } catch (error) {
+                let errorMessage = 'Registration failed. ';
+                if (error.message.includes('already exists')) {
+                    errorMessage = 'Nurse with this email already exists.';
+                } else {
+                    errorMessage += error.message;
+                }
+                showAuthMessage(errorMessage, 'error');
+            } finally {
+                registerButton.textContent = originalText;
+                registerButton.disabled = false;
+            }
+        }
+
+        function redirectToTeacherDashboard() {
+            window.location.href = 'teacher-dashboard.html';
+        }
+
+        function redirectToNurseDashboard() {
+            window.location.href = 'nurse-dashboard.html';
+        }
+
+        function showAuthMessage(message, type) {
+            authMessage.innerHTML = message;
+            authMessage.className = `${type}-message`;
+            authMessage.classList.remove('hidden');
+            setTimeout(() => authMessage.classList.add('hidden'), 5000);
+        }
+
+        function clearAuthMessage() {
+            authMessage.classList.add('hidden');
+            authMessage.innerHTML = '';
+        }
+
+        function showToast(message, type = 'info') {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 4000);
+        }
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                redirectToTeacherDashboard();
+            }
         });
-        
-        showScreen('studentsScreen');
-      } catch (error) {
-        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading students</div>';
-        console.error('Error loading students:', error);
-      }
-    }
 
-    // Show form for selected student
-    async function showStudentForm(student) {
-      currentStudent = student;
-      
-      // Set form values
-      document.getElementById('studentInfo').value = 
-        `${student.full_name} - ${currentGradeSection.grade_level} ${currentGradeSection.section}`;
-      
-      document.getElementById('age').value = student.age || '';
-      
-      // Set current time
-      const now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      document.getElementById('timeIn').value = now.toISOString().slice(0, 16);
-      
-      // Clear previous values
-      document.getElementById('symptoms').value = '';
-      document.getElementById('intervention').value = '';
-      document.getElementById('pr').value = '';
-      document.getElementById('spo2').value = '';
-      document.getElementById('bp').value = '';
-      document.getElementById('temp').value = '';
-      
-      // Hide status message and email button
-      document.getElementById('statusMessage').className = 'status-message';
-      emailLinkBtn.style.display = 'none';
-      
-      // Get parent info for this student
-      try {
-        const { data: parentData, error } = await supabaseClient
-          .from('parents')
-          .select('parent_email')
-          .eq('student_id', student.id)
-          .single();
-        
-        if (parentData && !error) {
-          parentEmail = parentData.parent_email;
-        } else {
-          parentEmail = null;
-        }
-      } catch (error) {
-        parentEmail = null;
-        console.error('Error loading parent info:', error);
-      }
-      
-      showScreen('nurseVisitForm');
-    }
-
-    // Submit visit form
-    async function submitVisit() {
-      const statusMessage = document.getElementById('statusMessage');
-      statusMessage.className = 'status-message';
-      
-      // Validate nurse selection
-      if (!currentNurseId) {
-        statusMessage.className = 'status-message error';
-        statusMessage.innerHTML = '❌ Please select a nurse from the dropdown.';
-        nurseSelect.focus();
-        return;
-      }
-      
-      // Validate required fields
-      if (!document.getElementById('symptoms').value.trim()) {
-        statusMessage.className = 'status-message error';
-        statusMessage.innerHTML = '❌ Please describe the symptoms.';
-        return;
-      }
-      
-      try {
-        // Create nurse visit
-        const visitData = {
-          student_id: currentStudent.id,
-          nurse_id: currentNurseId,
-          time_in: document.getElementById('timeIn').value,
-          symptoms: document.getElementById('symptoms').value.trim(),
-          intervention_given: document.getElementById('intervention').value.trim()
-        };
-        
-        const { data: visit, error: visitError } = await supabaseClient
-          .from('nurse_visits')
-          .insert([visitData])
-          .select()
-          .single();
-        
-        if (visitError) throw visitError;
-        
-        savedVisitId = visit.id;
-        
-        // Create vital signs if any are provided
-        const pr = document.getElementById('pr').value.trim();
-        const spo2 = document.getElementById('spo2').value.trim();
-        const bp = document.getElementById('bp').value.trim();
-        const temp = document.getElementById('temp').value.trim();
-        
-        if (pr || spo2 || bp || temp) {
-          const vitalData = {
-            nurse_visit_id: visit.id,
-            pr: pr,
-            spo2: spo2,
-            bp: bp,
-            temperature: temp
-          };
-          
-          const { error: vitalError } = await supabaseClient
-            .from('vital_signs')
-            .insert([vitalData]);
-          
-          if (vitalError) throw vitalError;
-        }
-        
-        // Log SMS/Email notification
-        if (parentEmail) {
-          await logNotification(currentStudent.id, visit.id, parentEmail);
-        }
-        
-        // Show success and email button
-        statusMessage.className = 'status-message success';
-        statusMessage.innerHTML = '✅ Visit recorded successfully!';
-        
-        // Show email button if parent email exists
-        if (parentEmail) {
-          setupEmailButton(parentEmail);
-          emailLinkBtn.style.display = 'block';
-        }
-        
-      } catch (error) {
-        statusMessage.className = 'status-message error';
-        statusMessage.innerHTML = `❌ Error: ${error.message}`;
-        console.error('Submit error:', error);
-      }
-    }
-
-    // Log notification in sms_logs table
-    async function logNotification(studentId, visitId, email) {
-      try {
-        const logData = {
-          student_id: studentId,
-          nurse_visit_id: visitId,
-          phone_number: null, // We don't have phone number
-          message: `Email notification sent to parent at ${email}`
-        };
-        
-        await supabaseClient
-          .from('sms_logs')
-          .insert([logData]);
-        
-      } catch (error) {
-        console.error('Error logging notification:', error);
-      }
-    }
-
-    // Setup email button with mailto link
-    function setupEmailButton(email) {
-      if (!email) return;
-      
-      const studentName = currentStudent.full_name;
-      const symptoms = document.getElementById('symptoms').value.trim();
-      const intervention = document.getElementById('intervention').value.trim();
-      const timeIn = document.getElementById('timeIn').value;
-      const pr = document.getElementById('pr').value.trim();
-      const spo2 = document.getElementById('spo2').value.trim();
-      const bp = document.getElementById('bp').value.trim();
-      const temp = document.getElementById('temp').value.trim();
-      
-      // Get selected nurse name
-      const selectedNurseOption = nurseSelect.options[nurseSelect.selectedIndex];
-      const nurseName = selectedNurseOption ? selectedNurseOption.textContent : 'School Nurse';
-      
-      // Create email body
-      let body = `Dear Parent/Guardian,\n\n`;
-      body += `This is to inform you that your child ${studentName} visited the school clinic today.\n\n`;
-      body += `Visit Details:\n`;
-      body += `- Date & Time: ${new Date(timeIn).toLocaleString()}\n`;
-      body += `- Symptoms: ${symptoms || 'Not specified'}\n`;
-      body += `- Intervention Given: ${intervention || 'None'}\n`;
-      
-      if (pr || spo2 || bp || temp) {
-        body += `\nVital Signs:\n`;
-        if (pr) body += `- Pulse Rate: ${pr}\n`;
-        if (spo2) body += `- Oxygen Saturation: ${spo2}\n`;
-        if (bp) body += `- Blood Pressure: ${bp}\n`;
-        if (temp) body += `- Temperature: ${temp}\n`;
-      }
-      
-      body += `\nAttending Nurse: ${nurseName}\n`;
-      body += `\nIf you have any questions or concerns, please contact the school clinic.\n\n`;
-      body += `Best regards,\nSchool Clinic Team\nHERO - Health Emergency Response Operations`;
-      
-      const subject = `Nurse Visit Report - ${studentName}`;
-      
-      // Create mailto link
-      const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      
-      // Set button properties
-      emailLinkBtn.href = mailtoLink;
-      emailLinkBtn.textContent = '📧 Email Parent Report';
-    }
-
-    // Initialize alerts refresh every 30 seconds
-    setInterval(loadAlerts, 30000);
-  </script>
+        document.addEventListener('DOMContentLoaded', init);
+        window.switchTab = switchTab;
+        window.selectRole = selectRole;
+    </script>
 </body>
 </html>
