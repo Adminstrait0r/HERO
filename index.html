@@ -340,7 +340,7 @@
         .error-message {
             background: rgba(229, 57, 53, 0.1);
             border: 1px solid var(--red-accent);
-            border-radius: 8px;
+            border-radius = 8px;
             padding: 14px;
             color: var(--red-light);
             font-size: 14px;
@@ -641,45 +641,6 @@
                         <input type="email" id="teacher-email" required placeholder="teacher@school.edu">
                     </div>
 
-                    <div class="form-group checkbox">
-                        <input type="checkbox" id="no-advisory">
-                        <label for="no-advisory">No grade level advisory assignment</label>
-                    </div>
-
-                    <div id="grade-section-fields">
-                        <div class="form-group">
-                            <label>GRADE LEVEL</label>
-                            <select id="teacher-grade" required>
-                                <option value="">Select grade</option>
-                                <option value="K">Kinder</option>
-                                <option value="1">Grade 1</option>
-                                <option value="2">Grade 2</option>
-                                <option value="3">Grade 3</option>
-                                <option value="4">Grade 4</option>
-                                <option value="5">Grade 5</option>
-                                <option value="6">Grade 6</option>
-                                <option value="7">Grade 7</option>
-                                <option value="8">Grade 8</option>
-                                <option value="9">Grade 9</option>
-                                <option value="10">Grade 10</option>
-                                <option value="11">Grade 11</option>
-                                <option value="12">Grade 12</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>SECTION</label>
-                            <select id="teacher-section" required>
-                                <option value="">Select section</option>
-                                <option value="A">Section A</option>
-                                <option value="B">Section B</option>
-                                <option value="C">Section C</option>
-                                <option value="D">Section D</option>
-                                <option value="E">Section E</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div class="form-group">
                         <label>PASSWORD</label>
                         <input type="password" id="teacher-password" required placeholder="Minimum 6 characters">
@@ -701,18 +662,8 @@
 
                 <form id="nurse-register-form" class="auth-form hidden">
                     <div class="form-group">
-                        <label>FULL NAME</label>
-                        <input type="text" id="nurse-fullname" required placeholder="Dr. Jane Smith">
-                    </div>
-
-                    <div class="form-group">
                         <label>EMAIL ADDRESS</label>
                         <input type="email" id="nurse-email" required placeholder="nurse@school.edu">
-                    </div>
-
-                    <div class="form-group">
-                        <label>PHONE NUMBER</label>
-                        <input type="tel" id="nurse-phone" required placeholder="+1 (555) 123-4567">
                     </div>
 
                     <div class="form-group">
@@ -763,8 +714,6 @@
         const loginFormContainer = document.getElementById('login-form-container');
         const registerFormContainer = document.getElementById('register-form-container');
         const roleOptions = document.querySelectorAll('.role-option');
-        const noAdvisoryCheckbox = document.getElementById('no-advisory');
-        const gradeSectionFields = document.getElementById('grade-section-fields');
         const authMessage = document.getElementById('auth-message');
         const toast = document.getElementById('toast');
         const confirmationModal = document.getElementById('confirmation-modal');
@@ -782,7 +731,6 @@
             try {
                 const { data, error } = await supabase.auth.getSession();
                 if (data.session) {
-                    // Teacher is logged in via Supabase Auth
                     const profile = await loadTeacherProfile(data.session.user);
                     if (profile && profile.role === 'teacher') {
                         redirectToTeacherDashboard();
@@ -806,17 +754,6 @@
                     const role = option.dataset.role;
                     selectRole(role);
                 });
-            });
-
-            noAdvisoryCheckbox.addEventListener('change', function() {
-                gradeSectionFields.style.display = this.checked ? 'none' : 'block';
-                if (this.checked) {
-                    document.getElementById('teacher-grade').required = false;
-                    document.getElementById('teacher-section').required = false;
-                } else {
-                    document.getElementById('teacher-grade').required = true;
-                    document.getElementById('teacher-section').required = true;
-                }
             });
 
             loginForm.addEventListener('submit', async (e) => {
@@ -939,11 +876,9 @@
                             showToast('📧 Email verification required.', 'warning');
                             return;
                         }
-                        // If teacher login fails, try nurse login
                         throw new Error('Teacher login failed');
                     }
                     
-                    // Teacher login successful
                     const profile = await loadTeacherProfile(data.user);
                     if (profile && profile.role === 'teacher') {
                         showToast('✅ Teacher access granted', 'success');
@@ -965,12 +900,11 @@
                     throw new Error('Invalid email or password');
                 }
 
-                // Check password (plain text comparison - in production, use hashing)
                 if (nurseData.password !== password) {
                     throw new Error('Invalid email or password');
                 }
 
-                // Nurse login successful - store in session storage and redirect
+                // Nurse login successful
                 sessionStorage.setItem('nurseProfile', JSON.stringify({
                     id: nurseData.id,
                     email: nurseData.email,
@@ -1004,7 +938,6 @@
                     .single();
 
                 if (error) {
-                    // Create profile if doesn't exist
                     const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
                     const { error: insertError } = await supabase
                         .from('profiles')
@@ -1029,9 +962,6 @@
             const email = document.getElementById('teacher-email').value.trim().toLowerCase();
             const password = document.getElementById('teacher-password').value;
             const confirmPassword = document.getElementById('teacher-confirm-password').value;
-            const noAdvisory = document.getElementById('no-advisory').checked;
-            const grade = noAdvisory ? null : document.getElementById('teacher-grade').value;
-            const section = noAdvisory ? null : document.getElementById('teacher-section').value;
 
             if (!fullName || !email || !password || !confirmPassword) {
                 showAuthMessage('All fields required.', 'error');
@@ -1045,10 +975,6 @@
                 showAuthMessage('Passwords do not match.', 'error');
                 return;
             }
-            if (!noAdvisory && (!grade || !section)) {
-                showAuthMessage('Select grade and section.', 'error');
-                return;
-            }
 
             const registerButton = document.getElementById('teacher-register-button');
             const originalText = registerButton.textContent;
@@ -1056,31 +982,6 @@
             registerButton.disabled = true;
 
             try {
-                // First, check if grade_section exists
-                let gradeSectionId = null;
-                if (grade && section) {
-                    const { data: existingGradeSection, error: gradeError } = await supabase
-                        .from('grade_sections')
-                        .select('id')
-                        .eq('grade_level', grade)
-                        .eq('section', section)
-                        .single();
-
-                    if (gradeError && gradeError.code === 'PGRST116') {
-                        // Grade section doesn't exist, create it
-                        const { data: newGradeSection, error: createError } = await supabase
-                            .from('grade_sections')
-                            .insert([{ grade_level: grade, section: section }])
-                            .select()
-                            .single();
-                        
-                        if (createError) throw createError;
-                        gradeSectionId = newGradeSection.id;
-                    } else if (!gradeError) {
-                        gradeSectionId = existingGradeSection.id;
-                    }
-                }
-
                 // Create auth user
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: email,
@@ -1088,11 +989,7 @@
                     options: {
                         data: {
                             full_name: fullName,
-                            role: 'teacher',
-                            grade_level: grade,
-                            section: section,
-                            has_advisory: !noAdvisory,
-                            grade_section_id: gradeSectionId
+                            role: 'teacher'
                         },
                         emailRedirectTo: window.location.origin + '?confirm=true'
                     }
@@ -1112,8 +1009,6 @@
 
                 showEmailConfirmation(email);
                 teacherRegisterForm.reset();
-                noAdvisoryCheckbox.checked = false;
-                gradeSectionFields.style.display = 'block';
                 showToast('✅ Teacher registered successfully! Check email for verification.', 'success');
             } catch (error) {
                 let errorMessage = 'Registration failed. ';
@@ -1132,13 +1027,11 @@
         }
 
         async function handleNurseRegistration() {
-            const fullName = document.getElementById('nurse-fullname').value;
             const email = document.getElementById('nurse-email').value.trim().toLowerCase();
-            const phone = document.getElementById('nurse-phone').value;
             const password = document.getElementById('nurse-password').value;
             const confirmPassword = document.getElementById('nurse-confirm-password').value;
 
-            if (!fullName || !email || !phone || !password || !confirmPassword) {
+            if (!email || !password || !confirmPassword) {
                 showAuthMessage('All fields required.', 'error');
                 return;
             }
@@ -1168,26 +1061,21 @@
                     throw new Error('Nurse with this email already exists');
                 }
 
-                // Create nurse in nurse table (id will be auto-generated)
+                // Create nurse in nurse table
                 const { data: nurse, error: nurseError } = await supabase
                     .from('nurse')
                     .insert({
                         email: email,
-                        password: password // In production, hash this!
+                        password: password
                     })
                     .select()
                     .single();
 
                 if (nurseError) throw nurseError;
 
-                // Also create a basic profile entry for consistency if needed
-                // But nurses don't need profiles table - they use nurse table only
-
-                // Show success message
                 showAuthMessage('✅ Nurse registered successfully! You can now login.', 'success');
                 nurseRegisterForm.reset();
                 
-                // Switch to login tab after 3 seconds
                 setTimeout(() => {
                     switchTab('login');
                 }, 3000);
@@ -1233,7 +1121,6 @@
             setTimeout(() => toast.classList.add('hidden'), 4000);
         }
 
-        // Listen for auth state changes (for teachers only)
         supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN' && session) {
                 redirectToTeacherDashboard();
