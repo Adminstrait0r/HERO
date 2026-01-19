@@ -987,4 +987,582 @@
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Time Reported
+          <div class="detail-label">Time Reported</div>
+          <div class="detail-value" id="modalTime"></div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="modal-btn btn-modal-respond" id="respondToAlert">
+            ✓ Responding
+          </button>
+          <button class="modal-btn btn-modal-dismiss" id="dismissAlert">
+            Dismiss
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div id="homeNav" class="nav-dot">N</div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://gehcvalwixalqqdssekw.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_0xH493bo2eEKS4Gq6SKdfw_r5F0tNJu';
+    let supabaseClient = null;
+    
+    let currentStudent = null;
+    let currentGradeSection = null;
+    let currentNurseId = null;
+    let savedVisitId = null;
+    let parentEmail = null;
+    let currentAlertId = null;
+    let viewedAlerts = new Set();
+    
+    let refreshAlertsBtn, goHelpBtn, backFromGrades, backFromSections, 
+        backFromStudents, backFromForm, homeNav, submitVisitBtn, 
+        nurseSelect, emailLinkBtn, alertDetailModal, closeAlertModal,
+        respondToAlert, dismissAlert;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      
+      refreshAlertsBtn = document.getElementById('refreshAlerts');
+      goHelpBtn = document.getElementById('goHelpBtn');
+      backFromGrades = document.getElementById('backFromGrades');
+      backFromSections = document.getElementById('backFromSections');
+      backFromStudents = document.getElementById('backFromStudents');
+      backFromForm = document.getElementById('backFromForm');
+      homeNav = document.getElementById('homeNav');
+      submitVisitBtn = document.getElementById('submitVisitBtn');
+      nurseSelect = document.getElementById('nurseSelect');
+      emailLinkBtn = document.getElementById('emailLinkBtn');
+      alertDetailModal = document.getElementById('alertDetailModal');
+      closeAlertModal = document.getElementById('closeAlertModal');
+      respondToAlert = document.getElementById('respondToAlert');
+      dismissAlert = document.getElementById('dismissAlert');
+      
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('timeIn').value = now.toISOString().slice(0, 16);
+      
+      setupEventListeners();
+      loadAlerts();
+      loadNurses();
+    });
+
+    function setupEventListeners() {
+      if (refreshAlertsBtn) refreshAlertsBtn.addEventListener('click', loadAlerts);
+      if (goHelpBtn) goHelpBtn.addEventListener('click', () => showScreen('gradeLevelScreen'));
+      if (backFromGrades) backFromGrades.addEventListener('click', () => showScreen('homeScreen'));
+      if (backFromSections) backFromSections.addEventListener('click', () => showScreen('gradeLevelScreen'));
+      if (backFromStudents) backFromStudents.addEventListener('click', () => showScreen('sectionsScreen'));
+      if (backFromForm) backFromForm.addEventListener('click', () => showScreen('studentsScreen'));
+      if (homeNav) homeNav.addEventListener('click', () => showScreen('homeScreen'));
+      if (submitVisitBtn) submitVisitBtn.addEventListener('click', submitVisit);
+      if (nurseSelect) nurseSelect.addEventListener('change', function() {
+        currentNurseId = this.value;
+      });
+      if (closeAlertModal) closeAlertModal.addEventListener('click', closeModal);
+      if (respondToAlert) respondToAlert.addEventListener('click', handleRespondToAlert);
+      if (dismissAlert) dismissAlert.addEventListener('click', handleDismissAlert);
+      
+      window.addEventListener('click', function(event) {
+        if (event.target === alertDetailModal) {
+          closeModal();
+        }
+      });
+    }
+
+    function showScreen(screenId) {
+      const screens = document.querySelectorAll('.nav-screen');
+      screens.forEach(screen => screen.classList.remove('active'));
+      
+      const targetScreen = document.getElementById(screenId);
+      if (targetScreen) {
+        targetScreen.classList.add('active');
+      }
+      
+      if (screenId === 'gradeLevelScreen') {
+        loadGradeLevels();
+      } else if (screenId === 'homeScreen') {
+        loadAlerts();
+      }
+    }
+
+    async function loadAlerts() {
+      const alertsList = document.getElementById('alertsList');
+      const alertCount = document.getElementById('alertCount');
+      if (!alertsList) return;
+      
+      alertsList.innerHTML = '<div class="no-alerts"><i>⏳</i>Loading alerts...</div>';
+      
+      try {
+        const { data, error } = await supabaseClient
+          .from('alerts')
+          .select('*, profiles(full_name, email)')
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(20);
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+          alertsList.innerHTML = '<div class="no-alerts"><i>📭</i>No active alerts at the moment.</div>';
+          alertCount.textContent = '0';
+          return;
+        }
+        
+        alertCount.textContent = data.length;
+        alertsList.innerHTML = '';
+        
+        data.forEach(alert => {
+          const alertDiv = document.createElement('div');
+          const isUnread = !viewedAlerts.has(alert.id);
+          alertDiv.className = `alert-item ${isUnread ? 'unread' : ''}`;
+          alertDiv.onclick = () => showAlertDetail(alert);
+          
+          const timeAgo = getTimeAgo(new Date(alert.created_at));
+          
+          alertDiv.innerHTML = `
+            <div class="alert-room">
+              📍 ${escapeHtml(alert.room_number)}
+            </div>
+            <div class="alert-desc">${escapeHtml(alert.description || 'No description')}</div>
+            <div class="alert-footer">
+              <div class="alert-time">${timeAgo}</div>
+            </div>
+            <div class="alert-teacher">From: ${escapeHtml(alert.profiles?.full_name || 'Unknown Teacher')}</div>
+          `;
+          alertsList.appendChild(alertDiv);
+        });
+      } catch (error) {
+        alertsList.innerHTML = '<div class="no-alerts"><i>⚠️</i>Error loading alerts.</div>';
+        console.error('Error loading alerts:', error);
+      }
+    }
+
+    function showAlertDetail(alert) {
+      currentAlertId = alert.id;
+      viewedAlerts.add(alert.id);
+      
+      document.getElementById('modalRoom').textContent = alert.room_number;
+      document.getElementById('modalDescription').textContent = alert.description || 'No description provided';
+      document.getElementById('modalTeacher').textContent = alert.profiles?.full_name || 'Unknown Teacher';
+      document.getElementById('modalTime').textContent = new Date(alert.created_at).toLocaleString();
+      
+      alertDetailModal.classList.add('active');
+      loadAlerts();
+    }
+
+    function closeModal() {
+      alertDetailModal.classList.remove('active');
+      currentAlertId = null;
+    }
+
+    async function handleRespondToAlert() {
+      if (!currentAlertId) return;
+      
+      try {
+        const { error } = await supabaseClient
+          .from('alerts')
+          .update({ 
+            status: 'responded',
+            responded_at: new Date().toISOString()
+          })
+          .eq('id', currentAlertId);
+        
+        if (error) throw error;
+        
+        showNotification('✓ Marked as responding to alert', 'success');
+        closeModal();
+        loadAlerts();
+      } catch (error) {
+        console.error('Error responding to alert:', error);
+        showNotification('Error updating alert status', 'error');
+      }
+    }
+
+    async function handleDismissAlert() {
+      if (!currentAlertId) return;
+      
+      if (!confirm('Are you sure you want to dismiss this alert?')) {
+        return;
+      }
+      
+      try {
+        const { error } = await supabaseClient
+          .from('alerts')
+          .update({ status: 'dismissed' })
+          .eq('id', currentAlertId);
+        
+        if (error) throw error;
+        
+        showNotification('Alert dismissed', 'success');
+        closeModal();
+        loadAlerts();
+      } catch (error) {
+        console.error('Error dismissing alert:', error);
+        showNotification('Error dismissing alert', 'error');
+      }
+    }
+
+    function getTimeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      
+      if (seconds < 60) return 'Just now';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+      return `${Math.floor(seconds / 86400)}d ago`;
+    }
+
+    async function loadNurses() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('profiles')
+          .select('id, full_name, email')
+          .eq('role', 'nurse')
+          .order('full_name');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          nurseSelect.innerHTML = '<option value="">Select Nurse</option>';
+          data.forEach(nurse => {
+            const option = document.createElement('option');
+            option.value = nurse.id;
+            option.textContent = nurse.full_name || nurse.email;
+            nurseSelect.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading nurses:', error);
+      }
+    }
+
+    async function loadGradeLevels() {
+      const container = document.getElementById('gradeLevelsContainer');
+      if (!container) return;
+      
+      container.innerHTML = '<div class="loading">Loading grade levels...</div>';
+      
+      try {
+        const { data, error } = await supabaseClient
+          .from('grade_sections')
+          .select('grade_level')
+          .order('grade_level');
+        
+        if (error) throw error;
+        
+        const gradeLevels = [...new Set(data.map(item => item.grade_level))];
+        
+        if (gradeLevels.length === 0) {
+          container.innerHTML = '<div class="loading">No grade levels found.</div>';
+          return;
+        }
+        
+        container.innerHTML = '';
+        gradeLevels.forEach(grade => {
+          const btn = document.createElement('button');
+          btn.className = 'grid-btn';
+          btn.textContent = `Grade ${grade}`;
+          btn.addEventListener('click', () => loadSections(grade));
+          container.appendChild(btn);
+        });
+      } catch (error) {
+        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading grade levels</div>';
+        console.error('Error loading grade levels:', error);
+      }
+    }
+
+    async function loadSections(gradeLevel) {
+      currentGradeSection = null;
+      const container = document.getElementById('sectionsContainer');
+      if (!container) return;
+      
+      container.innerHTML = '<div class="loading">Loading sections...</div>';
+      
+      try {
+        const { data, error } = await supabaseClient
+          .from('grade_sections')
+          .select('*')
+          .eq('grade_level', gradeLevel)
+          .order('section');
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div class="loading">No sections found for this grade.</div>';
+          return;
+        }
+        
+        container.innerHTML = '';
+        data.forEach(section => {
+          const btn = document.createElement('button');
+          btn.className = 'grid-btn';
+          btn.textContent = `${section.grade_level} - ${section.section}`;
+          btn.addEventListener('click', () => loadStudents(section));
+          container.appendChild(btn);
+        });
+        
+        showScreen('sectionsScreen');
+      } catch (error) {
+        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading sections</div>';
+        console.error('Error loading sections:', error);
+      }
+    }
+
+    async function loadStudents(section) {
+      currentGradeSection = section;
+      const container = document.getElementById('studentsContainer');
+      if (!container) return;
+      
+      container.innerHTML = '<div class="loading">Loading students...</div>';
+      
+      try {
+        const { data, error } = await supabaseClient
+          .from('students')
+          .select('*')
+          .eq('grade_section_id', section.id)
+          .order('full_name');
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div class="loading">No students found in this section.</div>';
+          return;
+        }
+        
+        container.innerHTML = '';
+        data.forEach(student => {
+          const card = document.createElement('div');
+          card.className = 'student-card';
+          card.addEventListener('click', () => showStudentForm(student));
+          card.innerHTML = `
+            <div class="student-name">${escapeHtml(student.full_name)}</div>
+            <div class="student-details">
+              Age: ${student.age || 'N/A'}<br>
+              ${student.allergies ? `Allergies: ${escapeHtml(student.allergies)}` : 'No known allergies'}
+            </div>
+          `;
+          container.appendChild(card);
+        });
+        
+        showScreen('studentsScreen');
+      } catch (error) {
+        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading students</div>';
+        console.error('Error loading students:', error);
+      }
+    }
+
+    async function showStudentForm(student) {
+      currentStudent = student;
+      
+      document.getElementById('studentInfo').value = 
+        `${student.full_name} - ${currentGradeSection.grade_level} ${currentGradeSection.section}`;
+      
+      document.getElementById('age').value = student.age || '';
+      
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('timeIn').value = now.toISOString().slice(0, 16);
+      
+      document.getElementById('symptoms').value = '';
+      document.getElementById('intervention').value = '';
+      document.getElementById('pr').value = '';
+      document.getElementById('spo2').value = '';
+      document.getElementById('bp').value = '';
+      document.getElementById('temp').value = '';
+      
+      document.getElementById('statusMessage').className = 'status-message';
+      emailLinkBtn.style.display = 'none';
+      
+      parentEmail = student.parent_email || null;
+      
+      showScreen('nurseVisitForm');
+    }
+
+    async function submitVisit() {
+      const statusMessage = document.getElementById('statusMessage');
+      statusMessage.className = 'status-message';
+      
+      if (!currentNurseId) {
+        statusMessage.className = 'status-message error';
+        statusMessage.innerHTML = '❌ Please select a nurse from the dropdown.';
+        nurseSelect.focus();
+        return;
+      }
+      
+      if (!document.getElementById('symptoms').value.trim()) {
+        statusMessage.className = 'status-message error';
+        statusMessage.innerHTML = '❌ Please describe the symptoms.';
+        return;
+      }
+      
+      try {
+        const visitData = {
+          student_id: currentStudent.id,
+          nurse_id: currentNurseId,
+          time_in: document.getElementById('timeIn').value,
+          symptoms: document.getElementById('symptoms').value.trim(),
+          intervention_given: document.getElementById('intervention').value.trim()
+        };
+        
+        const { data: visit, error: visitError } = await supabaseClient
+          .from('nurse_visits')
+          .insert([visitData])
+          .select()
+          .single();
+        
+        if (visitError) throw visitError;
+        
+        savedVisitId = visit.id;
+        
+        const pr = document.getElementById('pr').value.trim();
+        const spo2 = document.getElementById('spo2').value.trim();
+        const bp = document.getElementById('bp').value.trim();
+        const temp = document.getElementById('temp').value.trim();
+        
+        if (pr || spo2 || bp || temp) {
+          const vitalData = {
+            nurse_visit_id: visit.id,
+            pr: pr,
+            spo2: spo2,
+            bp: bp,
+            temperature: temp
+          };
+          
+          const { error: vitalError } = await supabaseClient
+            .from('vital_signs')
+            .insert([vitalData]);
+          
+          if (vitalError) throw vitalError;
+        }
+        
+        if (parentEmail) {
+          await logNotification(currentStudent.id, visit.id, parentEmail);
+        }
+        
+        statusMessage.className = 'status-message success';
+        statusMessage.innerHTML = '✅ Visit recorded successfully!';
+        
+        if (parentEmail) {
+          setupEmailButton(parentEmail);
+          emailLinkBtn.style.display = 'block';
+        }
+        
+        showNotification('✓ Visit recorded successfully', 'success');
+        
+      } catch (error) {
+        statusMessage.className = 'status-message error';
+        statusMessage.innerHTML = `❌ Error: ${error.message}`;
+        console.error('Submit error:', error);
+      }
+    }
+
+    async function logNotification(studentId, visitId, email) {
+      try {
+        const logData = {
+          student_id: studentId,
+          nurse_visit_id: visitId,
+          phone_number: null,
+          message: `Email notification sent to parent at ${email}`
+        };
+        
+        await supabaseClient
+          .from('sms_logs')
+          .insert([logData]);
+        
+      } catch (error) {
+        console.error('Error logging notification:', error);
+      }
+    }
+
+    function setupEmailButton(email) {
+      if (!email) return;
+      
+      const studentName = currentStudent.full_name;
+      const symptoms = document.getElementById('symptoms').value.trim();
+      const intervention = document.getElementById('intervention').value.trim();
+      const timeIn = document.getElementById('timeIn').value;
+      const pr = document.getElementById('pr').value.trim();
+      const spo2 = document.getElementById('spo2').value.trim();
+      const bp = document.getElementById('bp').value.trim();
+      const temp = document.getElementById('temp').value.trim();
+      
+      const selectedNurseOption = nurseSelect.options[nurseSelect.selectedIndex];
+      const nurseName = selectedNurseOption ? selectedNurseOption.textContent : 'School Nurse';
+      
+      let body = `Dear Parent/Guardian,\n\n`;
+      body += `This is to inform you that your child ${studentName} visited the school clinic today.\n\n`;
+      body += `Visit Details:\n`;
+      body += `- Date & Time: ${new Date(timeIn).toLocaleString()}\n`;
+      body += `- Symptoms: ${symptoms || 'Not specified'}\n`;
+      body += `- Intervention Given: ${intervention || 'None'}\n`;
+      
+      if (pr || spo2 || bp || temp) {
+        body += `\nVital Signs:\n`;
+        if (pr) body += `- Pulse Rate: ${pr}\n`;
+        if (spo2) body += `- Oxygen Saturation: ${spo2}\n`;
+        if (bp) body += `- Blood Pressure: ${bp}\n`;
+        if (temp) body += `- Temperature: ${temp}\n`;
+      }
+      
+      body += `\nAttending Nurse: ${nurseName}\n`;
+      body += `\nIf you have any questions or concerns, please contact the school clinic.\n\n`;
+      body += `Best regards,\nSchool Clinic Team\nHERO - Health Emergency Response Operations`;
+      
+      const subject = `Nurse Visit Report - ${studentName}`;
+      const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      
+      emailLinkBtn.href = mailtoLink;
+      emailLinkBtn.textContent = '📧 Email Parent Report';
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? 'rgba(76, 175, 80, 0.9)' : 'rgba(198, 40, 40, 0.9)'};
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        z-index: 1001;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        animation: slideInNotif 0.3s ease;
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOutNotif 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInNotif {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOutNotif {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    setInterval(loadAlerts, 30000);
+  </script>
+</body>
+</html
