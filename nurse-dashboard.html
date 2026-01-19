@@ -10,6 +10,9 @@
       --bg-main: radial-gradient(circle at top, #141414, #000000 70%);
       --red-main: #c62828;
       --red-accent: #e53935;
+      --green-main: #4CAF50;
+      --green-accent: #45a049;
+      --orange-main: #FF9800;
       --text-main: #f2f2f2;
       --text-muted: #bdbdbd;
       --btn-dark: #2b2b2b;
@@ -33,7 +36,7 @@
       flex-direction: column;
     }
 
-    /* Top bar */
+    /* ============= HEADER ============= */
     header {
       display: flex;
       justify-content: space-between;
@@ -68,6 +71,36 @@
       font-size: 14px;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .nurse-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .nurse-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nurse-name {
+      font-size: 14px;
+      color: var(--red-main);
+      font-weight: 600;
+      padding: 6px 12px;
+      background: rgba(198, 40, 40, 0.1);
+      border-radius: 4px;
+      border: 1px solid rgba(198, 40, 40, 0.3);
+    }
+
     .logout-btn {
       background: #2b2b2b;
       color: var(--text-main);
@@ -85,7 +118,7 @@
       border-color: var(--red-accent);
     }
 
-    /* Main Layout */
+    /* ============= MAIN LAYOUT ============= */
     .main-layout {
       display: flex;
       flex: 1;
@@ -96,7 +129,7 @@
       width: 100%;
     }
 
-    /* Alerts Panel - Enhanced */
+    /* ============= ALERTS PANEL ============= */
     .alerts-panel {
       flex: 0 0 350px;
       background: var(--card-bg);
@@ -106,6 +139,19 @@
       height: fit-content;
       max-height: calc(100vh - 120px);
       overflow-y: auto;
+    }
+
+    .alerts-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .alerts-panel::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+
+    .alerts-panel::-webkit-scrollbar-thumb {
+      background: #3a3a3a;
+      border-radius: 3px;
     }
 
     .alerts-header {
@@ -133,6 +179,8 @@
       padding: 2px 8px;
       border-radius: 12px;
       font-weight: 700;
+      min-width: 24px;
+      text-align: center;
     }
 
     .refresh-btn {
@@ -150,6 +198,11 @@
       background: var(--red-main);
       color: white;
       border-color: var(--red-accent);
+    }
+
+    .refresh-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .alert-item {
@@ -224,43 +277,6 @@
       font-style: italic;
     }
 
-    .alert-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 10px;
-    }
-
-    .alert-action-btn {
-      flex: 1;
-      padding: 6px 10px;
-      border-radius: 4px;
-      border: none;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-respond {
-      background: rgba(76, 175, 80, 0.2);
-      color: #4CAF50;
-      border: 1px solid rgba(76, 175, 80, 0.3);
-    }
-
-    .btn-respond:hover {
-      background: rgba(76, 175, 80, 0.3);
-    }
-
-    .btn-dismiss {
-      background: rgba(255, 152, 0, 0.2);
-      color: #FF9800;
-      border: 1px solid rgba(255, 152, 0, 0.3);
-    }
-
-    .btn-dismiss:hover {
-      background: rgba(255, 152, 0, 0.3);
-    }
-
     .no-alerts {
       text-align: center;
       padding: 40px 20px;
@@ -268,14 +284,14 @@
       font-style: italic;
     }
 
-    .no-alerts i {
+    .no-alerts-icon {
       font-size: 3rem;
       margin-bottom: 15px;
       opacity: 0.3;
       display: block;
     }
 
-    /* Alert Detail Modal */
+    /* ============= MODAL ============= */
     .modal {
       display: none;
       position: fixed;
@@ -335,6 +351,7 @@
       font-size: 1.8rem;
       cursor: pointer;
       transition: color 0.2s;
+      line-height: 1;
     }
 
     .close-modal:hover {
@@ -389,7 +406,7 @@
     }
 
     .btn-modal-respond {
-      background: linear-gradient(135deg, #4CAF50, #45a049);
+      background: linear-gradient(135deg, var(--green-main), var(--green-accent));
       color: white;
     }
 
@@ -408,7 +425,7 @@
       background: #333;
     }
 
-    /* Main Content */
+    /* ============= MAIN CONTENT ============= */
     .main-content {
       flex: 1;
       display: flex;
@@ -466,17 +483,17 @@
       color: white;
     }
 
-    .btn-secondary {
-      background: var(--btn-dark);
-      color: var(--text-main);
-    }
-
-    .btn:hover {
+    .btn:hover:not(:disabled) {
       transform: translateY(-2px);
       opacity: 0.95;
     }
 
-    /* Navigation Screens */
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ============= NAVIGATION SCREENS ============= */
     .nav-screen {
       display: none;
       flex-direction: column;
@@ -544,7 +561,7 @@
       transform: translateY(-2px);
     }
 
-    /* Students List */
+    /* ============= STUDENTS LIST ============= */
     .students-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -579,7 +596,7 @@
       color: var(--text-muted);
     }
 
-    /* Nurse Visit Form */
+    /* ============= NURSE VISIT FORM ============= */
     .form-container {
       background: #2b2b2b;
       border: 1px solid #3a3a3a;
@@ -619,6 +636,12 @@
       margin-bottom: 8px;
       font-weight: 600;
       color: var(--text-main);
+      font-size: 14px;
+    }
+
+    label .required {
+      color: var(--red-main);
+      margin-left: 4px;
     }
 
     input, textarea, select {
@@ -629,16 +652,23 @@
       border-radius: 6px;
       color: var(--text-main);
       font-size: 16px;
+      transition: border-color 0.2s;
     }
 
     textarea {
       height: 100px;
       resize: vertical;
+      font-family: inherit;
     }
 
     input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: var(--red-main);
+    }
+
+    input:read-only {
+      background: #0f0f0f;
+      cursor: not-allowed;
     }
 
     .submit-btn {
@@ -656,55 +686,43 @@
       transition: all 0.2s;
     }
 
-    .submit-btn:hover {
+    .submit-btn:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 5px 20px rgba(198, 40, 40, 0.4);
     }
 
-    /* Status Messages */
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ============= STATUS MESSAGES ============= */
     .status-message {
       padding: 15px 20px;
       border-radius: 8px;
       margin-bottom: 20px;
       display: none;
+      align-items: center;
+      gap: 10px;
     }
 
     .status-message.success {
-      background: rgba(46, 125, 50, 0.2);
-      border: 1px solid #2e7d32;
-      color: #4caf50;
-      display: block;
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid var(--green-main);
+      color: var(--green-main);
+      display: flex;
     }
 
     .status-message.error {
       background: rgba(211, 47, 47, 0.2);
       border: 1px solid #d32f2f;
       color: #ef5350;
-      display: block;
+      display: flex;
     }
 
-    /* Loading State */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-muted);
-    }
-
-    /* Nurse Name Input */
-    .nurse-name-input {
-      width: 200px;
-      padding: 12px 15px;
-      background: #1a1a1a;
-      border: 1px solid #3a3a3a;
-      border-radius: 6px;
-      color: var(--text-main);
-      font-size: 16px;
-      margin-left: 20px;
-    }
-
-    /* Email Link Button */
+    /* ============= EMAIL BUTTON ============= */
     .email-link-btn {
-      background: linear-gradient(135deg, #4CAF50, #45a049);
+      background: linear-gradient(135deg, var(--green-main), var(--green-accent));
       color: white;
       border: none;
       padding: 15px 30px;
@@ -714,7 +732,7 @@
       cursor: pointer;
       width: 250px;
       margin: 20px auto 0;
-      display: block;
+      display: none;
       transition: all 0.2s;
       text-decoration: none;
       text-align: center;
@@ -725,36 +743,36 @@
       box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
     }
 
-    /* Bottom Navigation */
-    .bottom-nav {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      z-index: 100;
-    }
-
-    .nav-dot {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: #0f0f0f;
-      border: 1px solid #2a2a2a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
+    /* ============= LOADING STATE ============= */
+    .loading {
+      text-align: center;
+      padding: 40px;
       color: var(--text-muted);
-      box-shadow: var(--shadow-soft);
-      cursor: pointer;
-      transition: all 0.2s;
     }
 
-    .nav-dot:hover {
-      background: var(--red-main);
-      color: white;
+    .loading::after {
+      content: '...';
+      animation: loading 1.5s infinite;
     }
 
-    /* Responsive */
+    @keyframes loading {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    /* ============= NOTIFICATIONS ============= */
+    @keyframes slideInNotif {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOutNotif {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* ============= RESPONSIVE ============= */
     @media (max-width: 1024px) {
       .main-layout {
         flex-direction: column;
@@ -775,20 +793,20 @@
       .students-list { grid-template-columns: 1fr; }
       header { padding: 15px 20px; }
       .main-layout { padding: 15px; }
-      .nurse-name-input { 
-        width: 150px; 
-        margin-left: 10px;
+      .nurse-info { 
+        align-items: flex-start;
+      }
+      .nurse-name {
+        font-size: 13px;
+        padding: 5px 10px;
       }
       .email-link-btn {
         width: 200px;
       }
-      .alerts-panel {
-        flex: 0 0 auto;
-      }
     }
 
     @media (max-width: 480px) {
-      h1 { font-size: 32px; }
+      h1 { font-size: 32px; letter-spacing: 2px; }
       .card { padding: 30px 20px; }
       .form-container { padding: 20px; }
       header {
@@ -796,9 +814,21 @@
         gap: 15px;
         text-align: center;
       }
-      .nurse-name-input {
+      .header-actions {
+        flex-direction: column;
         width: 100%;
-        margin: 10px 0 0 0;
+        gap: 10px;
+      }
+      .nurse-info {
+        width: 100%;
+        align-items: center;
+      }
+      .nurse-name {
+        width: 100%;
+        text-align: center;
+      }
+      .logout-btn {
+        width: 100%;
       }
     }
   </style>
@@ -811,27 +841,28 @@
       HERO
     </div>
     
-    <div style="display: flex; align-items: center; gap: 15px;">
-      <select id="nurseSelect" class="nurse-name-input">
-        <option value="">Select Nurse</option>
-      </select>
-      <a href="index.html" class="logout-btn">Home</a>
+    <div class="header-actions">
+      <div class="nurse-info" id="nurseInfo">
+        <span class="nurse-label">Logged in as:</span>
+        <span class="nurse-name" id="nurseName">Loading...</span>
+      </div>
+      <a href="index.html" class="logout-btn" id="logoutBtn">Logout</a>
     </div>
   </header>
 
   <div class="main-layout">
-    <!-- Enhanced Alerts Panel -->
+    <!-- Alerts Panel -->
     <div class="alerts-panel">
       <div class="alerts-header">
         <div class="alerts-title">
           🚨 ACTIVE ALERTS
           <span class="alert-badge" id="alertCount">0</span>
         </div>
-        <button id="refreshAlerts" class="refresh-btn">⟳ Refresh</button>
+        <button id="refreshAlerts" class="refresh-btn" aria-label="Refresh alerts">⟳ Refresh</button>
       </div>
       <div id="alertsList">
         <div class="no-alerts">
-          <i>📭</i>
+          <span class="no-alerts-icon">📭</span>
           No active alerts at the moment.
         </div>
       </div>
@@ -900,28 +931,28 @@
             <div class="section-title">Student Information</div>
             <div class="form-grid">
               <div class="form-group full-width">
-                <label>Name and Section</label>
+                <label for="studentInfo">Name and Section</label>
                 <input type="text" id="studentInfo" readonly>
               </div>
               
               <div class="form-group">
-                <label>Time In</label>
-                <input type="datetime-local" id="timeIn">
+                <label for="timeIn">Time In<span class="required">*</span></label>
+                <input type="datetime-local" id="timeIn" required>
               </div>
               
               <div class="form-group">
-                <label>Age</label>
+                <label for="age">Age</label>
                 <input type="number" id="age" readonly>
               </div>
               
               <div class="form-group full-width">
-                <label>Symptoms</label>
-                <textarea id="symptoms" placeholder="Describe symptoms..."></textarea>
+                <label for="symptoms">Symptoms<span class="required">*</span></label>
+                <textarea id="symptoms" placeholder="Describe symptoms in detail..." required></textarea>
               </div>
               
               <div class="form-group full-width">
-                <label>Intervention Given</label>
-                <textarea id="intervention" placeholder="Describe intervention..."></textarea>
+                <label for="intervention">Intervention Given</label>
+                <textarea id="intervention" placeholder="Describe intervention and care provided..."></textarea>
               </div>
             </div>
           </div>
@@ -930,22 +961,22 @@
             <div class="section-title">Vital Signs</div>
             <div class="form-grid">
               <div class="form-group">
-                <label>PR (Pulse Rate)</label>
+                <label for="pr">PR (Pulse Rate)</label>
                 <input type="text" id="pr" placeholder="e.g., 72 bpm">
               </div>
               
               <div class="form-group">
-                <label>SPO2 (Oxygen Saturation)</label>
+                <label for="spo2">SPO2 (Oxygen Saturation)</label>
                 <input type="text" id="spo2" placeholder="e.g., 98%">
               </div>
               
               <div class="form-group">
-                <label>BP (Blood Pressure)</label>
+                <label for="bp">BP (Blood Pressure)</label>
                 <input type="text" id="bp" placeholder="e.g., 120/80">
               </div>
               
               <div class="form-group">
-                <label>TEMP (Temperature)</label>
+                <label for="temp">Temperature</label>
                 <input type="text" id="temp" placeholder="e.g., 36.5°C">
               </div>
             </div>
@@ -955,7 +986,7 @@
             📤 Submit Visit Record
           </button>
 
-          <a id="emailLinkBtn" class="email-link-btn" style="display: none;" target="_blank">
+          <a id="emailLinkBtn" class="email-link-btn" target="_blank">
             📧 Email Parent Report
           </a>
         </div>
@@ -964,11 +995,11 @@
   </div>
 
   <!-- Alert Detail Modal -->
-  <div class="modal" id="alertDetailModal">
+  <div class="modal" id="alertDetailModal" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">⚠️ Alert Details</h2>
-        <button class="close-modal" id="closeAlertModal">&times;</button>
+        <h2 class="modal-title" id="modalTitle">⚠️ Alert Details</h2>
+        <button class="close-modal" id="closeAlertModal" aria-label="Close modal">&times;</button>
       </div>
       <div class="modal-body">
         <div class="detail-row">
@@ -1003,78 +1034,148 @@
     </div>
   </div>
 
-  <div class="bottom-nav">
-    <div id="homeNav" class="nav-dot">N</div>
-  </div>
-
   <script>
-    const SUPABASE_URL = 'https://gehcvalwixalqqdssekw.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_0xH493bo2eEKS4Gq6SKdfw_r5F0tNJu';
-    let supabaseClient = null;
-    
-    let currentStudent = null;
-    let currentGradeSection = null;
-    let currentNurseId = null;
-    let savedVisitId = null;
-    let parentEmail = null;
-    let currentAlertId = null;
-    let viewedAlerts = new Set();
-    
-    let refreshAlertsBtn, goHelpBtn, backFromGrades, backFromSections, 
-        backFromStudents, backFromForm, homeNav, submitVisitBtn, 
-        nurseSelect, emailLinkBtn, alertDetailModal, closeAlertModal,
-        respondToAlert, dismissAlert;
-    
+    // ============= CONFIGURATION =============
+    const CONFIG = {
+      SUPABASE_URL: 'https://gehcvalwixalqqdssekw.supabase.co',
+      SUPABASE_ANON_KEY: 'sb_publishable_0xH493bo2eEKS4Gq6SKdfw_r5F0tNJu',
+      ALERTS_REFRESH_INTERVAL: 30000, // 30 seconds
+      NOTIFICATION_TIMEOUT: 3000 // 3 seconds
+    };
+
+    // ============= STATE MANAGEMENT =============
+    const state = {
+      supabaseClient: null,
+      currentStudent: null,
+      currentGradeSection: null,
+      currentNurseId: null,
+      currentNurseEmail: null,
+      currentNurseName: null,
+      savedVisitId: null,
+      parentEmail: null,
+      currentAlertId: null,
+      viewedAlerts: new Set(),
+      isRefreshing: false
+    };
+
+    // ============= DOM ELEMENTS =============
+    const elements = {
+      refreshAlertsBtn: null,
+      goHelpBtn: null,
+      backFromGrades: null,
+      backFromSections: null,
+      backFromStudents: null,
+      backFromForm: null,
+      submitVisitBtn: null,
+      nurseName: null,
+      logoutBtn: null,
+      emailLinkBtn: null,
+      alertDetailModal: null,
+      closeAlertModal: null,
+      respondToAlert: null,
+      dismissAlert: null,
+      alertsList: null,
+      alertCount: null,
+      statusMessage: null
+    };
+
+    // ============= INITIALIZATION =============
     document.addEventListener('DOMContentLoaded', function() {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      
-      refreshAlertsBtn = document.getElementById('refreshAlerts');
-      goHelpBtn = document.getElementById('goHelpBtn');
-      backFromGrades = document.getElementById('backFromGrades');
-      backFromSections = document.getElementById('backFromSections');
-      backFromStudents = document.getElementById('backFromStudents');
-      backFromForm = document.getElementById('backFromForm');
-      homeNav = document.getElementById('homeNav');
-      submitVisitBtn = document.getElementById('submitVisitBtn');
-      nurseSelect = document.getElementById('nurseSelect');
-      emailLinkBtn = document.getElementById('emailLinkBtn');
-      alertDetailModal = document.getElementById('alertDetailModal');
-      closeAlertModal = document.getElementById('closeAlertModal');
-      respondToAlert = document.getElementById('respondToAlert');
-      dismissAlert = document.getElementById('dismissAlert');
-      
-      const now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      document.getElementById('timeIn').value = now.toISOString().slice(0, 16);
-      
+      initializeSupabase();
+      cacheElements();
       setupEventListeners();
-      loadAlerts();
-      loadNurses();
+      setDefaultDateTime();
+      loadInitialData();
+      startAlertPolling();
     });
 
+    function initializeSupabase() {
+      state.supabaseClient = window.supabase.createClient(
+        CONFIG.SUPABASE_URL,
+        CONFIG.SUPABASE_ANON_KEY
+      );
+    }
+
+    function cacheElements() {
+      elements.refreshAlertsBtn = document.getElementById('refreshAlerts');
+      elements.goHelpBtn = document.getElementById('goHelpBtn');
+      elements.backFromGrades = document.getElementById('backFromGrades');
+      elements.backFromSections = document.getElementById('backFromSections');
+      elements.backFromStudents = document.getElementById('backFromStudents');
+      elements.backFromForm = document.getElementById('backFromForm');
+      elements.submitVisitBtn = document.getElementById('submitVisitBtn');
+      elements.nurseName = document.getElementById('nurseName');
+      elements.logoutBtn = document.getElementById('logoutBtn');
+      elements.emailLinkBtn = document.getElementById('emailLinkBtn');
+      elements.alertDetailModal = document.getElementById('alertDetailModal');
+      elements.closeAlertModal = document.getElementById('closeAlertModal');
+      elements.respondToAlert = document.getElementById('respondToAlert');
+      elements.dismissAlert = document.getElementById('dismissAlert');
+      elements.alertsList = document.getElementById('alertsList');
+      elements.alertCount = document.getElementById('alertCount');
+      elements.statusMessage = document.getElementById('statusMessage');
+    }
+
     function setupEventListeners() {
-      if (refreshAlertsBtn) refreshAlertsBtn.addEventListener('click', loadAlerts);
-      if (goHelpBtn) goHelpBtn.addEventListener('click', () => showScreen('gradeLevelScreen'));
-      if (backFromGrades) backFromGrades.addEventListener('click', () => showScreen('homeScreen'));
-      if (backFromSections) backFromSections.addEventListener('click', () => showScreen('gradeLevelScreen'));
-      if (backFromStudents) backFromStudents.addEventListener('click', () => showScreen('sectionsScreen'));
-      if (backFromForm) backFromForm.addEventListener('click', () => showScreen('studentsScreen'));
-      if (homeNav) homeNav.addEventListener('click', () => showScreen('homeScreen'));
-      if (submitVisitBtn) submitVisitBtn.addEventListener('click', submitVisit);
-      if (nurseSelect) nurseSelect.addEventListener('change', function() {
-        currentNurseId = this.value;
-      });
-      if (closeAlertModal) closeAlertModal.addEventListener('click', closeModal);
-      if (respondToAlert) respondToAlert.addEventListener('click', handleRespondToAlert);
-      if (dismissAlert) dismissAlert.addEventListener('click', handleDismissAlert);
+      // Navigation
+      elements.goHelpBtn?.addEventListener('click', () => showScreen('gradeLevelScreen'));
+      elements.backFromGrades?.addEventListener('click', () => showScreen('homeScreen'));
+      elements.backFromSections?.addEventListener('click', () => showScreen('gradeLevelScreen'));
+      elements.backFromStudents?.addEventListener('click', () => showScreen('sectionsScreen'));
+      elements.backFromForm?.addEventListener('click', () => showScreen('studentsScreen'));
       
+      // Alerts
+      elements.refreshAlertsBtn?.addEventListener('click', () => loadAlerts());
+      
+      // Form
+      elements.submitVisitBtn?.addEventListener('click', submitVisit);
+      
+      // Logout
+      elements.logoutBtn?.addEventListener('click', handleLogout);
+      
+      // Modal
+      elements.closeAlertModal?.addEventListener('click', closeModal);
+      elements.respondToAlert?.addEventListener('click', handleRespondToAlert);
+      elements.dismissAlert?.addEventListener('click', handleDismissAlert);
+      
+      // Close modal on outside click
       window.addEventListener('click', function(event) {
-        if (event.target === alertDetailModal) {
+        if (event.target === elements.alertDetailModal) {
+          closeModal();
+        }
+      });
+
+      // Close modal on Escape key
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && elements.alertDetailModal?.classList.contains('active')) {
           closeModal();
         }
       });
     }
 
+    function setDefaultDateTime() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      const timeInElement = document.getElementById('timeIn');
+      if (timeInElement) {
+        timeInElement.value = now.toISOString().slice(0, 16);
+      }
+    }
+
+    function loadInitialData() {
+      loadNurseProfile();
+      loadAlerts();
+    }
+
+    function startAlertPolling() {
+      setInterval(() => {
+        if (!state.isRefreshing) {
+          loadAlerts();
+        }
+      }, CONFIG.ALERTS_REFRESH_INTERVAL);
+    }
+
+    // ============= SCREEN NAVIGATION =============
     function showScreen(screenId) {
       const screens = document.querySelectorAll('.nav-screen');
       screens.forEach(screen => screen.classList.remove('active'));
@@ -1084,22 +1185,30 @@
         targetScreen.classList.add('active');
       }
       
-      if (screenId === 'gradeLevelScreen') {
-        loadGradeLevels();
-      } else if (screenId === 'homeScreen') {
-        loadAlerts();
+      // Load data when entering specific screens
+      switch(screenId) {
+        case 'gradeLevelScreen':
+          loadGradeLevels();
+          break;
+        case 'homeScreen':
+          loadAlerts();
+          break;
       }
     }
 
+    // ============= ALERTS MANAGEMENT =============
     async function loadAlerts() {
-      const alertsList = document.getElementById('alertsList');
-      const alertCount = document.getElementById('alertCount');
-      if (!alertsList) return;
+      if (!elements.alertsList) return;
       
-      alertsList.innerHTML = '<div class="no-alerts"><i>⏳</i>Loading alerts...</div>';
+      state.isRefreshing = true;
+      if (elements.refreshAlertsBtn) {
+        elements.refreshAlertsBtn.disabled = true;
+      }
+      
+      elements.alertsList.innerHTML = '<div class="no-alerts"><span class="no-alerts-icon">⏳</span>Loading alerts...</div>';
       
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await state.supabaseClient
           .from('alerts')
           .select('*, profiles(full_name, email)')
           .eq('status', 'active')
@@ -1109,69 +1218,83 @@
         if (error) throw error;
         
         if (!data || data.length === 0) {
-          alertsList.innerHTML = '<div class="no-alerts"><i>📭</i>No active alerts at the moment.</div>';
-          alertCount.textContent = '0';
+          elements.alertsList.innerHTML = '<div class="no-alerts"><span class="no-alerts-icon">📭</span>No active alerts at the moment.</div>';
+          if (elements.alertCount) elements.alertCount.textContent = '0';
           return;
         }
         
-        alertCount.textContent = data.length;
-        alertsList.innerHTML = '';
+        if (elements.alertCount) elements.alertCount.textContent = data.length;
+        elements.alertsList.innerHTML = '';
         
-        data.forEach(alert => {
-          const alertDiv = document.createElement('div');
-          const isUnread = !viewedAlerts.has(alert.id);
-          alertDiv.className = `alert-item ${isUnread ? 'unread' : ''}`;
-          alertDiv.onclick = () => showAlertDetail(alert);
-          
-          const timeAgo = getTimeAgo(new Date(alert.created_at));
-          
-          alertDiv.innerHTML = `
-            <div class="alert-room">
-              📍 ${escapeHtml(alert.room_number)}
-            </div>
-            <div class="alert-desc">${escapeHtml(alert.description || 'No description')}</div>
-            <div class="alert-footer">
-              <div class="alert-time">${timeAgo}</div>
-            </div>
-            <div class="alert-teacher">From: ${escapeHtml(alert.profiles?.full_name || 'Unknown Teacher')}</div>
-          `;
-          alertsList.appendChild(alertDiv);
-        });
+        data.forEach(alert => renderAlertItem(alert));
+        
       } catch (error) {
-        alertsList.innerHTML = '<div class="no-alerts"><i>⚠️</i>Error loading alerts.</div>';
         console.error('Error loading alerts:', error);
+        elements.alertsList.innerHTML = '<div class="no-alerts"><span class="no-alerts-icon">⚠️</span>Error loading alerts. Please try again.</div>';
+      } finally {
+        state.isRefreshing = false;
+        if (elements.refreshAlertsBtn) {
+          elements.refreshAlertsBtn.disabled = false;
+        }
       }
     }
 
+    function renderAlertItem(alert) {
+      const alertDiv = document.createElement('div');
+      const isUnread = !state.viewedAlerts.has(alert.id);
+      alertDiv.className = `alert-item ${isUnread ? 'unread' : ''}`;
+      alertDiv.onclick = () => showAlertDetail(alert);
+      
+      const timeAgo = getTimeAgo(new Date(alert.created_at));
+      const teacherName = alert.profiles?.full_name || 'Unknown Teacher';
+      
+      alertDiv.innerHTML = `
+        <div class="alert-room">
+          📍 ${escapeHtml(alert.room_number)}
+        </div>
+        <div class="alert-desc">${escapeHtml(alert.description || 'No description')}</div>
+        <div class="alert-footer">
+          <div class="alert-time">${timeAgo}</div>
+        </div>
+        <div class="alert-teacher">From: ${escapeHtml(teacherName)}</div>
+      `;
+      
+      elements.alertsList.appendChild(alertDiv);
+    }
+
     function showAlertDetail(alert) {
-      currentAlertId = alert.id;
-      viewedAlerts.add(alert.id);
+      state.currentAlertId = alert.id;
+      state.viewedAlerts.add(alert.id);
       
       document.getElementById('modalRoom').textContent = alert.room_number;
       document.getElementById('modalDescription').textContent = alert.description || 'No description provided';
       document.getElementById('modalTeacher').textContent = alert.profiles?.full_name || 'Unknown Teacher';
       document.getElementById('modalTime').textContent = new Date(alert.created_at).toLocaleString();
       
-      alertDetailModal.classList.add('active');
+      elements.alertDetailModal?.classList.add('active');
+      elements.alertDetailModal?.setAttribute('aria-hidden', 'false');
+      
+      // Refresh alerts list to update unread status
       loadAlerts();
     }
 
     function closeModal() {
-      alertDetailModal.classList.remove('active');
-      currentAlertId = null;
+      elements.alertDetailModal?.classList.remove('active');
+      elements.alertDetailModal?.setAttribute('aria-hidden', 'true');
+      state.currentAlertId = null;
     }
 
     async function handleRespondToAlert() {
-      if (!currentAlertId) return;
+      if (!state.currentAlertId) return;
       
       try {
-        const { error } = await supabaseClient
+        const { error } = await state.supabaseClient
           .from('alerts')
           .update({ 
             status: 'responded',
             responded_at: new Date().toISOString()
           })
-          .eq('id', currentAlertId);
+          .eq('id', state.currentAlertId);
         
         if (error) throw error;
         
@@ -1180,31 +1303,31 @@
         loadAlerts();
       } catch (error) {
         console.error('Error responding to alert:', error);
-        showNotification('Error updating alert status', 'error');
+        showNotification('❌ Error updating alert status', 'error');
       }
     }
 
     async function handleDismissAlert() {
-      if (!currentAlertId) return;
+      if (!state.currentAlertId) return;
       
       if (!confirm('Are you sure you want to dismiss this alert?')) {
         return;
       }
       
       try {
-        const { error } = await supabaseClient
+        const { error } = await state.supabaseClient
           .from('alerts')
           .update({ status: 'dismissed' })
-          .eq('id', currentAlertId);
+          .eq('id', state.currentAlertId);
         
         if (error) throw error;
         
-        showNotification('Alert dismissed', 'success');
+        showNotification('✓ Alert dismissed', 'success');
         closeModal();
         loadAlerts();
       } catch (error) {
         console.error('Error dismissing alert:', error);
-        showNotification('Error dismissing alert', 'error');
+        showNotification('❌ Error dismissing alert', 'error');
       }
     }
 
@@ -1217,38 +1340,80 @@
       return `${Math.floor(seconds / 86400)}d ago`;
     }
 
-    async function loadNurses() {
+    // ============= NURSE AUTHENTICATION =============
+    async function loadNurseProfile() {
       try {
-        const { data, error } = await supabaseClient
-          .from('profiles')
-          .select('id, full_name, email')
-          .eq('role', 'nurse')
-          .order('full_name');
+        // Get nurse profile from sessionStorage (set during login)
+        const nurseProfile = sessionStorage.getItem('nurseProfile');
         
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
-          nurseSelect.innerHTML = '<option value="">Select Nurse</option>';
-          data.forEach(nurse => {
-            const option = document.createElement('option');
-            option.value = nurse.id;
-            option.textContent = nurse.full_name || nurse.email;
-            nurseSelect.appendChild(option);
-          });
+        if (!nurseProfile) {
+          showNotification('⚠️ Please login first', 'warning');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+          return;
         }
+        
+        const profile = JSON.parse(nurseProfile);
+        
+        if (profile.role !== 'nurse') {
+          showNotification('⚠️ Unauthorized access', 'error');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+          return;
+        }
+        
+        // Set nurse info in state
+        state.currentNurseId = profile.id;
+        state.currentNurseEmail = profile.email;
+        
+        // Fetch full nurse details from database
+        const { data, error } = await state.supabaseClient
+          .from('nurse')
+          .select('*')
+          .eq('id', profile.id)
+          .single();
+        
+        if (error) {
+          console.error('Error loading nurse details:', error);
+          // Fallback to email if name not found
+          state.currentNurseName = profile.email.split('@')[0];
+        } else {
+          state.currentNurseName = data.full_name || data.email.split('@')[0];
+        }
+        
+        // Display nurse name
+        if (elements.nurseName) {
+          elements.nurseName.textContent = state.currentNurseName;
+        }
+        
       } catch (error) {
-        console.error('Error loading nurses:', error);
+        console.error('Error loading nurse profile:', error);
+        showNotification('❌ Error loading profile', 'error');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
       }
     }
 
+    function handleLogout() {
+      sessionStorage.removeItem('nurseProfile');
+      showNotification('✓ Logged out successfully', 'success');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1000);
+    }
+
+    // ============= GRADE LEVELS =============
     async function loadGradeLevels() {
       const container = document.getElementById('gradeLevelsContainer');
       if (!container) return;
       
-      container.innerHTML = '<div class="loading">Loading grade levels...</div>';
+      container.innerHTML = '<div class="loading">Loading grade levels</div>';
       
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await state.supabaseClient
           .from('grade_sections')
           .select('grade_level')
           .order('grade_level');
@@ -1271,20 +1436,22 @@
           container.appendChild(btn);
         });
       } catch (error) {
-        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading grade levels</div>';
         console.error('Error loading grade levels:', error);
+        container.innerHTML = '<div class="loading" style="color: #ef5350;">Error loading grade levels</div>';
+        showNotification('❌ Error loading grade levels', 'error');
       }
     }
 
+    // ============= SECTIONS =============
     async function loadSections(gradeLevel) {
-      currentGradeSection = null;
+      state.currentGradeSection = null;
       const container = document.getElementById('sectionsContainer');
       if (!container) return;
       
-      container.innerHTML = '<div class="loading">Loading sections...</div>';
+      container.innerHTML = '<div class="loading">Loading sections</div>';
       
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await state.supabaseClient
           .from('grade_sections')
           .select('*')
           .eq('grade_level', gradeLevel)
@@ -1308,20 +1475,22 @@
         
         showScreen('sectionsScreen');
       } catch (error) {
-        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading sections</div>';
         console.error('Error loading sections:', error);
+        container.innerHTML = '<div class="loading" style="color: #ef5350;">Error loading sections</div>';
+        showNotification('❌ Error loading sections', 'error');
       }
     }
 
+    // ============= STUDENTS =============
     async function loadStudents(section) {
-      currentGradeSection = section;
+      state.currentGradeSection = section;
       const container = document.getElementById('studentsContainer');
       if (!container) return;
       
-      container.innerHTML = '<div class="loading">Loading students...</div>';
+      container.innerHTML = '<div class="loading">Loading students</div>';
       
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await state.supabaseClient
           .from('students')
           .select('*')
           .eq('grade_section_id', section.id)
@@ -1339,11 +1508,16 @@
           const card = document.createElement('div');
           card.className = 'student-card';
           card.addEventListener('click', () => showStudentForm(student));
+          
+          const allergiesInfo = student.allergies 
+            ? `Allergies: ${escapeHtml(student.allergies)}` 
+            : 'No known allergies';
+          
           card.innerHTML = `
             <div class="student-name">${escapeHtml(student.full_name)}</div>
             <div class="student-details">
               Age: ${student.age || 'N/A'}<br>
-              ${student.allergies ? `Allergies: ${escapeHtml(student.allergies)}` : 'No known allergies'}
+              ${allergiesInfo}
             </div>
           `;
           container.appendChild(card);
@@ -1351,23 +1525,28 @@
         
         showScreen('studentsScreen');
       } catch (error) {
-        container.innerHTML = '<div class="loading" style="color: #e53935;">Error loading students</div>';
         console.error('Error loading students:', error);
+        container.innerHTML = '<div class="loading" style="color: #ef5350;">Error loading students</div>';
+        showNotification('❌ Error loading students', 'error');
       }
     }
 
-    async function showStudentForm(student) {
-      currentStudent = student;
+    // ============= NURSE VISIT FORM =============
+    function showStudentForm(student) {
+      state.currentStudent = student;
       
+      // Populate student information
       document.getElementById('studentInfo').value = 
-        `${student.full_name} - ${currentGradeSection.grade_level} ${currentGradeSection.section}`;
+        `${student.full_name} - ${state.currentGradeSection.grade_level} ${state.currentGradeSection.section}`;
       
       document.getElementById('age').value = student.age || '';
       
+      // Set current date/time
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById('timeIn').value = now.toISOString().slice(0, 16);
       
+      // Clear form fields
       document.getElementById('symptoms').value = '';
       document.getElementById('intervention').value = '';
       document.getElementById('pr').value = '';
@@ -1375,41 +1554,50 @@
       document.getElementById('bp').value = '';
       document.getElementById('temp').value = '';
       
-      document.getElementById('statusMessage').className = 'status-message';
-      emailLinkBtn.style.display = 'none';
+      // Reset status message and email button
+      hideStatusMessage();
+      elements.emailLinkBtn.style.display = 'none';
       
-      parentEmail = student.parent_email || null;
+      state.parentEmail = student.parent_email || null;
       
       showScreen('nurseVisitForm');
     }
 
     async function submitVisit() {
-      const statusMessage = document.getElementById('statusMessage');
-      statusMessage.className = 'status-message';
+      hideStatusMessage();
       
-      if (!currentNurseId) {
-        statusMessage.className = 'status-message error';
-        statusMessage.innerHTML = '❌ Please select a nurse from the dropdown.';
-        nurseSelect.focus();
+      // Validation
+      if (!state.currentNurseId) {
+        showStatusMessage('❌ Nurse authentication error. Please re-login.', 'error');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
         return;
       }
       
-      if (!document.getElementById('symptoms').value.trim()) {
-        statusMessage.className = 'status-message error';
-        statusMessage.innerHTML = '❌ Please describe the symptoms.';
+      const symptoms = document.getElementById('symptoms').value.trim();
+      if (!symptoms) {
+        showStatusMessage('❌ Please describe the symptoms.', 'error');
+        document.getElementById('symptoms').focus();
         return;
       }
+      
+      // Disable submit button during submission
+      elements.submitVisitBtn.disabled = true;
+      elements.submitVisitBtn.textContent = '⏳ Submitting...';
       
       try {
+        // Prepare visit data
         const visitData = {
-          student_id: currentStudent.id,
-          nurse_id: currentNurseId,
+          student_id: state.currentStudent.id,
+          nurse_id: state.currentNurseId,
           time_in: document.getElementById('timeIn').value,
-          symptoms: document.getElementById('symptoms').value.trim(),
+          symptoms: symptoms,
           intervention_given: document.getElementById('intervention').value.trim()
         };
         
-        const { data: visit, error: visitError } = await supabaseClient
+        // Insert visit record
+        const { data: visit, error: visitError } = await state.supabaseClient
           .from('nurse_visits')
           .insert([visitData])
           .select()
@@ -1417,47 +1605,50 @@
         
         if (visitError) throw visitError;
         
-        savedVisitId = visit.id;
+        state.savedVisitId = visit.id;
         
-        const pr = document.getElementById('pr').value.trim();
-        const spo2 = document.getElementById('spo2').value.trim();
-        const bp = document.getElementById('bp').value.trim();
-        const temp = document.getElementById('temp').value.trim();
+        // Save vital signs if any are provided
+        const vitalSigns = {
+          pr: document.getElementById('pr').value.trim(),
+          spo2: document.getElementById('spo2').value.trim(),
+          bp: document.getElementById('bp').value.trim(),
+          temp: document.getElementById('temp').value.trim()
+        };
         
-        if (pr || spo2 || bp || temp) {
+        if (vitalSigns.pr || vitalSigns.spo2 || vitalSigns.bp || vitalSigns.temp) {
           const vitalData = {
             nurse_visit_id: visit.id,
-            pr: pr,
-            spo2: spo2,
-            bp: bp,
-            temperature: temp
+            pr: vitalSigns.pr,
+            spo2: vitalSigns.spo2,
+            bp: vitalSigns.bp,
+            temperature: vitalSigns.temp
           };
           
-          const { error: vitalError } = await supabaseClient
+          const { error: vitalError } = await state.supabaseClient
             .from('vital_signs')
             .insert([vitalData]);
           
           if (vitalError) throw vitalError;
         }
         
-        if (parentEmail) {
-          await logNotification(currentStudent.id, visit.id, parentEmail);
+        // Log notification if parent email exists
+        if (state.parentEmail) {
+          await logNotification(state.currentStudent.id, visit.id, state.parentEmail);
+          setupEmailButton(state.parentEmail);
+          elements.emailLinkBtn.style.display = 'block';
         }
         
-        statusMessage.className = 'status-message success';
-        statusMessage.innerHTML = '✅ Visit recorded successfully!';
-        
-        if (parentEmail) {
-          setupEmailButton(parentEmail);
-          emailLinkBtn.style.display = 'block';
-        }
-        
+        showStatusMessage('✅ Visit recorded successfully!', 'success');
         showNotification('✓ Visit recorded successfully', 'success');
         
       } catch (error) {
-        statusMessage.className = 'status-message error';
-        statusMessage.innerHTML = `❌ Error: ${error.message}`;
         console.error('Submit error:', error);
+        showStatusMessage(`❌ Error: ${error.message}`, 'error');
+        showNotification('❌ Error submitting visit record', 'error');
+      } finally {
+        // Re-enable submit button
+        elements.submitVisitBtn.disabled = false;
+        elements.submitVisitBtn.textContent = '📤 Submit Visit Record';
       }
     }
 
@@ -1470,7 +1661,7 @@
           message: `Email notification sent to parent at ${email}`
         };
         
-        await supabaseClient
+        await state.supabaseClient
           .from('sms_logs')
           .insert([logData]);
         
@@ -1482,7 +1673,7 @@
     function setupEmailButton(email) {
       if (!email) return;
       
-      const studentName = currentStudent.full_name;
+      const studentName = state.currentStudent.full_name;
       const symptoms = document.getElementById('symptoms').value.trim();
       const intervention = document.getElementById('intervention').value.trim();
       const timeIn = document.getElementById('timeIn').value;
@@ -1491,9 +1682,9 @@
       const bp = document.getElementById('bp').value.trim();
       const temp = document.getElementById('temp').value.trim();
       
-      const selectedNurseOption = nurseSelect.options[nurseSelect.selectedIndex];
-      const nurseName = selectedNurseOption ? selectedNurseOption.textContent : 'School Nurse';
+      const nurseName = state.currentNurseName || 'School Nurse';
       
+      // Compose email body
       let body = `Dear Parent/Guardian,\n\n`;
       body += `This is to inform you that your child ${studentName} visited the school clinic today.\n\n`;
       body += `Visit Details:\n`;
@@ -1516,8 +1707,22 @@
       const subject = `Nurse Visit Report - ${studentName}`;
       const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       
-      emailLinkBtn.href = mailtoLink;
-      emailLinkBtn.textContent = '📧 Email Parent Report';
+      elements.emailLinkBtn.href = mailtoLink;
+    }
+
+    // ============= UTILITY FUNCTIONS =============
+    function showStatusMessage(message, type) {
+      if (!elements.statusMessage) return;
+      
+      elements.statusMessage.className = `status-message ${type}`;
+      elements.statusMessage.textContent = message;
+    }
+
+    function hideStatusMessage() {
+      if (!elements.statusMessage) return;
+      
+      elements.statusMessage.className = 'status-message';
+      elements.statusMessage.textContent = '';
     }
 
     function showNotification(message, type) {
@@ -1526,13 +1731,14 @@
         position: fixed;
         top: 20px;
         right: 20px;
-        background: ${type === 'success' ? 'rgba(76, 175, 80, 0.9)' : 'rgba(198, 40, 40, 0.9)'};
+        background: ${type === 'success' ? 'rgba(76, 175, 80, 0.9)' : 'rgba(211, 47, 47, 0.9)'};
         color: white;
         padding: 15px 25px;
         border-radius: 8px;
         z-index: 1001;
         box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         animation: slideInNotif 0.3s ease;
+        font-weight: 600;
       `;
       notification.textContent = message;
       document.body.appendChild(notification);
@@ -1540,29 +1746,15 @@
       setTimeout(() => {
         notification.style.animation = 'slideOutNotif 0.3s ease';
         setTimeout(() => notification.remove(), 300);
-      }, 3000);
+      }, CONFIG.NOTIFICATION_TIMEOUT);
     }
 
     function escapeHtml(text) {
+      if (!text) return '';
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
-
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideInNotif {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-      }
-      @keyframes slideOutNotif {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-      }
-    `;
-    document.head.appendChild(style);
-
-    setInterval(loadAlerts, 30000);
   </script>
 </body>
-</html
+</html>
