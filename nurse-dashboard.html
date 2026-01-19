@@ -13,6 +13,7 @@
       --green-main: #4CAF50;
       --green-accent: #45a049;
       --orange-main: #FF9800;
+      --blue-main: #2196F3;
       --text-main: #f2f2f2;
       --text-muted: #bdbdbd;
       --btn-dark: #2b2b2b;
@@ -319,7 +320,6 @@
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
-      animation: modalFadeIn 0.3s ease;
     }
 
     @keyframes modalFadeIn {
@@ -720,27 +720,73 @@
       display: flex;
     }
 
-    /* ============= EMAIL BUTTON ============= */
-    .email-link-btn {
-      background: linear-gradient(135deg, var(--green-main), var(--green-accent));
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 250px;
-      margin: 20px auto 0;
-      display: none;
-      transition: all 0.2s;
-      text-decoration: none;
-      text-align: center;
+    .status-message.info {
+      background: rgba(33, 150, 243, 0.2);
+      border: 1px solid var(--blue-main);
+      color: var(--blue-main);
+      display: flex;
     }
 
-    .email-link-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+    /* ============= EMAIL STATUS BOX ============= */
+    .email-status-box {
+      background: rgba(33, 150, 243, 0.1);
+      border: 2px solid var(--blue-main);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 25px;
+      display: none;
+    }
+
+    .email-status-box.show {
+      display: block;
+    }
+
+    .email-status-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .email-status-icon {
+      font-size: 24px;
+    }
+
+    .email-status-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue-main);
+    }
+
+    .email-status-message {
+      font-size: 14px;
+      color: var(--text-main);
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .email-recipients {
+      background: #1a1a1a;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+
+    .email-recipients-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .email-recipient-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      color: var(--text-main);
+      font-size: 14px;
     }
 
     /* ============= LOADING STATE ============= */
@@ -799,9 +845,6 @@
       .nurse-name {
         font-size: 13px;
         padding: 5px 10px;
-      }
-      .email-link-btn {
-        width: 200px;
       }
     }
 
@@ -986,9 +1029,20 @@
             📤 Submit Visit Record
           </button>
 
-          <a id="emailLinkBtn" class="email-link-btn" target="_blank">
-            📧 Email Parent Report
-          </a>
+          <!-- Email Status Box -->
+          <div id="emailStatusBox" class="email-status-box">
+            <div class="email-status-header">
+              <span class="email-status-icon">📧</span>
+              <span class="email-status-title">Automated Email Notification</span>
+            </div>
+            <div class="email-status-message" id="emailStatusMessage">
+              Parent notification emails will be sent automatically within a few minutes.
+            </div>
+            <div class="email-recipients" id="emailRecipientsBox">
+              <div class="email-recipients-title">Email Recipients:</div>
+              <div id="emailRecipientsList"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1052,7 +1106,7 @@
       currentNurseEmail: null,
       currentNurseName: null,
       savedVisitId: null,
-      parentEmail: null,
+      parentEmails: [],
       currentAlertId: null,
       viewedAlerts: new Set(),
       isRefreshing: false
@@ -1069,7 +1123,9 @@
       submitVisitBtn: null,
       nurseName: null,
       logoutBtn: null,
-      emailLinkBtn: null,
+      emailStatusBox: null,
+      emailStatusMessage: null,
+      emailRecipientsList: null,
       alertDetailModal: null,
       closeAlertModal: null,
       respondToAlert: null,
@@ -1106,7 +1162,9 @@
       elements.submitVisitBtn = document.getElementById('submitVisitBtn');
       elements.nurseName = document.getElementById('nurseName');
       elements.logoutBtn = document.getElementById('logoutBtn');
-      elements.emailLinkBtn = document.getElementById('emailLinkBtn');
+      elements.emailStatusBox = document.getElementById('emailStatusBox');
+      elements.emailStatusMessage = document.getElementById('emailStatusMessage');
+      elements.emailRecipientsList = document.getElementById('emailRecipientsList');
       elements.alertDetailModal = document.getElementById('alertDetailModal');
       elements.closeAlertModal = document.getElementById('closeAlertModal');
       elements.respondToAlert = document.getElementById('respondToAlert');
@@ -1532,7 +1590,7 @@
     }
 
     // ============= NURSE VISIT FORM =============
-    function showStudentForm(student) {
+    async function showStudentForm(student) {
       state.currentStudent = student;
       
       // Populate student information
@@ -1554,13 +1612,33 @@
       document.getElementById('bp').value = '';
       document.getElementById('temp').value = '';
       
-      // Reset status message and email button
+      // Reset status message and email box
       hideStatusMessage();
-      elements.emailLinkBtn.style.display = 'none';
+      elements.emailStatusBox.classList.remove('show');
       
-      state.parentEmail = student.parent_email || null;
+      // Load parent emails
+      await loadParentEmails(student.id);
       
       showScreen('nurseVisitForm');
+    }
+
+    async function loadParentEmails(studentId) {
+      state.parentEmails = [];
+      
+      try {
+        const { data, error } = await state.supabaseClient
+          .from('parents')
+          .select('parent_name, parent_email')
+          .eq('student_id', studentId);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          state.parentEmails = data.filter(p => p.parent_email);
+        }
+      } catch (error) {
+        console.error('Error loading parent emails:', error);
+      }
     }
 
     async function submitVisit() {
@@ -1607,7 +1685,7 @@
         
         state.savedVisitId = visit.id;
         
-        // Save vital signs if any are provided
+        // Save vital signs
         const vitalSigns = {
           pr: document.getElementById('pr').value.trim(),
           spo2: document.getElementById('spo2').value.trim(),
@@ -1615,31 +1693,28 @@
           temp: document.getElementById('temp').value.trim()
         };
         
-        if (vitalSigns.pr || vitalSigns.spo2 || vitalSigns.bp || vitalSigns.temp) {
-          const vitalData = {
-            nurse_visit_id: visit.id,
-            pr: vitalSigns.pr,
-            spo2: vitalSigns.spo2,
-            bp: vitalSigns.bp,
-            temperature: vitalSigns.temp
-          };
-          
-          const { error: vitalError } = await state.supabaseClient
-            .from('vital_signs')
-            .insert([vitalData]);
-          
-          if (vitalError) throw vitalError;
-        }
+        // Always insert vital signs record with email_sent = false
+        const vitalData = {
+          nurse_visit_id: visit.id,
+          pr: vitalSigns.pr || null,
+          spo2: vitalSigns.spo2 || null,
+          bp: vitalSigns.bp || null,
+          temperature: vitalSigns.temp || null,
+          email_sent: false  // This triggers the Google Apps Script
+        };
         
-        // Log notification if parent email exists
-        if (state.parentEmail) {
-          await logNotification(state.currentStudent.id, visit.id, state.parentEmail);
-          setupEmailButton(state.parentEmail);
-          elements.emailLinkBtn.style.display = 'block';
-        }
+        const { error: vitalError } = await state.supabaseClient
+          .from('vital_signs')
+          .insert([vitalData]);
         
+        if (vitalError) throw vitalError;
+        
+        // Show success message
         showStatusMessage('✅ Visit recorded successfully!', 'success');
         showNotification('✓ Visit recorded successfully', 'success');
+        
+        // Show email notification status
+        displayEmailStatus();
         
       } catch (error) {
         console.error('Submit error:', error);
@@ -1652,62 +1727,28 @@
       }
     }
 
-    async function logNotification(studentId, visitId, email) {
-      try {
-        const logData = {
-          student_id: studentId,
-          nurse_visit_id: visitId,
-          phone_number: null,
-          message: `Email notification sent to parent at ${email}`
-        };
+    function displayEmailStatus() {
+      if (state.parentEmails.length === 0) {
+        elements.emailStatusMessage.textContent = 
+          'No parent email addresses found for this student. Emails will not be sent.';
+        elements.emailRecipientsList.innerHTML = 
+          '<div style="color: var(--text-muted); font-style: italic;">No recipients</div>';
+      } else {
+        elements.emailStatusMessage.textContent = 
+          'Parent notification emails will be sent automatically by Google Apps Script within a few minutes.';
         
-        await state.supabaseClient
-          .from('sms_logs')
-          .insert([logData]);
-        
-      } catch (error) {
-        console.error('Error logging notification:', error);
-      }
-    }
-
-    function setupEmailButton(email) {
-      if (!email) return;
-      
-      const studentName = state.currentStudent.full_name;
-      const symptoms = document.getElementById('symptoms').value.trim();
-      const intervention = document.getElementById('intervention').value.trim();
-      const timeIn = document.getElementById('timeIn').value;
-      const pr = document.getElementById('pr').value.trim();
-      const spo2 = document.getElementById('spo2').value.trim();
-      const bp = document.getElementById('bp').value.trim();
-      const temp = document.getElementById('temp').value.trim();
-      
-      const nurseName = state.currentNurseName || 'School Nurse';
-      
-      // Compose email body
-      let body = `Dear Parent/Guardian,\n\n`;
-      body += `This is to inform you that your child ${studentName} visited the school clinic today.\n\n`;
-      body += `Visit Details:\n`;
-      body += `- Date & Time: ${new Date(timeIn).toLocaleString()}\n`;
-      body += `- Symptoms: ${symptoms || 'Not specified'}\n`;
-      body += `- Intervention Given: ${intervention || 'None'}\n`;
-      
-      if (pr || spo2 || bp || temp) {
-        body += `\nVital Signs:\n`;
-        if (pr) body += `- Pulse Rate: ${pr}\n`;
-        if (spo2) body += `- Oxygen Saturation: ${spo2}\n`;
-        if (bp) body += `- Blood Pressure: ${bp}\n`;
-        if (temp) body += `- Temperature: ${temp}\n`;
+        elements.emailRecipientsList.innerHTML = '';
+        state.parentEmails.forEach(parent => {
+          const recipientDiv = document.createElement('div');
+          recipientDiv.className = 'email-recipient-item';
+          recipientDiv.innerHTML = `
+            ✉️ ${escapeHtml(parent.parent_name)} - ${escapeHtml(parent.parent_email)}
+          `;
+          elements.emailRecipientsList.appendChild(recipientDiv);
+        });
       }
       
-      body += `\nAttending Nurse: ${nurseName}\n`;
-      body += `\nIf you have any questions or concerns, please contact the school clinic.\n\n`;
-      body += `Best regards,\nSchool Clinic Team\nHERO - Health Emergency Response Operations`;
-      
-      const subject = `Nurse Visit Report - ${studentName}`;
-      const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      
-      elements.emailLinkBtn.href = mailtoLink;
+      elements.emailStatusBox.classList.add('show');
     }
 
     // ============= UTILITY FUNCTIONS =============
