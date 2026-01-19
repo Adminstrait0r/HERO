@@ -1626,16 +1626,38 @@
       state.parentEmails = [];
       
       try {
+        // Get parent email from students table
+        if (state.currentStudent.parent_email) {
+          state.parentEmails.push({
+            parent_name: 'Parent/Guardian',
+            parent_email: state.currentStudent.parent_email
+          });
+        }
+        
+        // Get additional parent emails from parents table
         const { data, error } = await state.supabaseClient
           .from('parents')
           .select('parent_name, parent_email')
           .eq('student_id', studentId);
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error loading parents table:', error);
+        }
         
         if (data && data.length > 0) {
-          state.parentEmails = data.filter(p => p.parent_email);
+          const additionalParents = data.filter(p => p.parent_email);
+          state.parentEmails.push(...additionalParents);
         }
+        
+        // Remove duplicates based on email
+        const uniqueEmails = new Map();
+        state.parentEmails.forEach(parent => {
+          if (!uniqueEmails.has(parent.parent_email)) {
+            uniqueEmails.set(parent.parent_email, parent);
+          }
+        });
+        state.parentEmails = Array.from(uniqueEmails.values());
+        
       } catch (error) {
         console.error('Error loading parent emails:', error);
       }
