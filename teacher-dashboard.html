@@ -1203,14 +1203,14 @@
                     return;
                 }
                 
+                // REMOVED STATUS FIELD - Just insert room_number, description, and teacher_id
                 const { data, error } = await supabase
                     .from('alerts')
                     .insert([
                         {
                             teacher_id: user.id,
                             room_number: roomNumber,
-                            description: description,
-                            created_at: new Date().toISOString()
+                            description: description
                         }
                     ]);
                 
