@@ -37,7 +37,6 @@
       flex-direction: column;
     }
 
-    /* ============= HEADER ============= */
     header {
       display: flex;
       justify-content: space-between;
@@ -109,10 +108,8 @@
       padding: 10px 20px;
       border-radius: 6px;
       font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-      display: inline-block;
       cursor: pointer;
+      transition: all 0.2s;
     }
 
     .logout-btn:hover {
@@ -120,7 +117,6 @@
       border-color: var(--red-accent);
     }
 
-    /* ============= MAIN LAYOUT ============= */
     .main-layout {
       display: flex;
       flex: 1;
@@ -131,7 +127,6 @@
       width: 100%;
     }
 
-    /* ============= ALERTS PANEL ============= */
     .alerts-panel {
       flex: 0 0 350px;
       background: var(--card-bg);
@@ -141,19 +136,6 @@
       height: fit-content;
       max-height: calc(100vh - 120px);
       overflow-y: auto;
-    }
-
-    .alerts-panel::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .alerts-panel::-webkit-scrollbar-track {
-      background: #1a1a1a;
-    }
-
-    .alerts-panel::-webkit-scrollbar-thumb {
-      background: #3a3a3a;
-      border-radius: 3px;
     }
 
     .alerts-header {
@@ -196,7 +178,7 @@
       transition: all 0.2s;
     }
 
-    .refresh-btn:hover {
+    .refresh-btn:hover:not(:disabled) {
       background: var(--red-main);
       color: white;
       border-color: var(--red-accent);
@@ -215,7 +197,6 @@
       border-radius: 8px;
       transition: all 0.2s;
       cursor: pointer;
-      position: relative;
     }
 
     .alert-item:hover {
@@ -247,9 +228,6 @@
       color: var(--red-main);
       font-weight: 600;
       margin-bottom: 5px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
 
     .alert-desc {
@@ -273,13 +251,6 @@
       color: var(--text-muted);
     }
 
-    .alert-teacher {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-style: italic;
-      margin-top: 5px;
-    }
-
     .no-alerts {
       text-align: center;
       padding: 40px 20px;
@@ -293,7 +264,6 @@
       display: block;
     }
 
-    /* ============= MODAL ============= */
     .modal {
       display: none;
       position: fixed;
@@ -321,12 +291,6 @@
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
-      animation: modalFadeIn 0.3s ease;
-    }
-
-    @keyframes modalFadeIn {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .modal-header {
@@ -341,9 +305,6 @@
       font-size: 1.3rem;
       color: var(--red-main);
       margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
 
     .close-modal {
@@ -353,7 +314,6 @@
       font-size: 1.8rem;
       cursor: pointer;
       transition: color 0.2s;
-      line-height: 1;
     }
 
     .close-modal:hover {
@@ -427,7 +387,6 @@
       background: #333;
     }
 
-    /* ============= MAIN CONTENT ============= */
     .main-content {
       flex: 1;
       display: flex;
@@ -490,12 +449,6 @@
       opacity: 0.95;
     }
 
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* ============= NAVIGATION SCREENS ============= */
     .nav-screen {
       display: none;
       flex-direction: column;
@@ -563,7 +516,6 @@
       transform: translateY(-2px);
     }
 
-    /* ============= STUDENTS LIST ============= */
     .students-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -598,7 +550,6 @@
       color: var(--text-muted);
     }
 
-    /* ============= NURSE VISIT FORM ============= */
     .form-container {
       background: #2b2b2b;
       border: 1px solid #3a3a3a;
@@ -698,38 +649,6 @@
       cursor: not-allowed;
     }
 
-    /* ============= STATUS MESSAGES ============= */
-    .status-message {
-      padding: 15px 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: none;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .status-message.success {
-      background: rgba(76, 175, 80, 0.2);
-      border: 1px solid var(--green-main);
-      color: var(--green-main);
-      display: flex;
-    }
-
-    .status-message.error {
-      background: rgba(211, 47, 47, 0.2);
-      border: 1px solid #d32f2f;
-      color: #ef5350;
-      display: flex;
-    }
-
-    .status-message.info {
-      background: rgba(33, 150, 243, 0.2);
-      border: 1px solid var(--blue-main);
-      color: var(--blue-main);
-      display: flex;
-    }
-
-    /* ============= EMAIL STATUS BOX ============= */
     .email-status-box {
       background: rgba(33, 150, 243, 0.1);
       border: 2px solid var(--blue-main);
@@ -791,25 +710,12 @@
       font-size: 14px;
     }
 
-    /* ============= LOADING STATE ============= */
     .loading {
       text-align: center;
       padding: 40px;
       color: var(--text-muted);
     }
 
-    .loading::after {
-      content: '...';
-      animation: loading 1.5s infinite;
-    }
-
-    @keyframes loading {
-      0%, 20% { content: '.'; }
-      40% { content: '..'; }
-      60%, 100% { content: '...'; }
-    }
-
-    /* ============= NOTIFICATIONS ============= */
     @keyframes slideInNotif {
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
@@ -820,7 +726,6 @@
       to { transform: translateX(100%); opacity: 0; }
     }
 
-    /* ============= RESPONSIVE ============= */
     @media (max-width: 1024px) {
       .main-layout {
         flex-direction: column;
@@ -841,40 +746,6 @@
       .students-list { grid-template-columns: 1fr; }
       header { padding: 15px 20px; }
       .main-layout { padding: 15px; }
-      .nurse-info { 
-        align-items: flex-start;
-      }
-      .nurse-name {
-        font-size: 13px;
-        padding: 5px 10px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      h1 { font-size: 32px; letter-spacing: 2px; }
-      .card { padding: 30px 20px; }
-      .form-container { padding: 20px; }
-      header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-      }
-      .header-actions {
-        flex-direction: column;
-        width: 100%;
-        gap: 10px;
-      }
-      .nurse-info {
-        width: 100%;
-        align-items: center;
-      }
-      .nurse-name {
-        width: 100%;
-        text-align: center;
-      }
-      .logout-btn {
-        width: 100%;
-      }
     }
   </style>
 </head>
@@ -887,7 +758,7 @@
     </div>
     
     <div class="header-actions">
-      <div class="nurse-info" id="nurseInfo">
+      <div class="nurse-info">
         <span class="nurse-label">Logged in as:</span>
         <span class="nurse-name" id="nurseName">Loading...</span>
       </div>
@@ -896,80 +767,62 @@
   </header>
 
   <div class="main-layout">
-    <!-- Alerts Panel -->
     <div class="alerts-panel">
       <div class="alerts-header">
         <div class="alerts-title">
           🚨 ACTIVE ALERTS
           <span class="alert-badge" id="alertCount">0</span>
         </div>
-        <button id="refreshAlerts" class="refresh-btn" aria-label="Refresh alerts">⟳ Refresh</button>
+        <button id="refreshAlerts" class="refresh-btn">⟳ Refresh</button>
       </div>
       <div id="alertsList">
         <div class="no-alerts">
           <span class="no-alerts-icon">📭</span>
-          No active alerts at the moment.
+          Loading alerts...
         </div>
       </div>
     </div>
 
-    <!-- Main Content Area -->
     <div class="main-content">
-      <!-- Home Screen -->
       <div id="homeScreen" class="nav-screen active">
         <div class="card">
           <h1>HERO</h1>
           <div class="subtitle">Health Emergency Response Operations</div>
-
           <div class="actions">
-            <button id="goHelpBtn" class="btn btn-primary">
-              🚑 Go Help!
-            </button>
+            <button id="goHelpBtn" class="btn btn-primary">🚑 Go Help!</button>
           </div>
         </div>
       </div>
 
-      <!-- Grade Level Screen -->
       <div id="gradeLevelScreen" class="nav-screen">
         <div class="screen-header">
           <button id="backFromGrades" class="back-btn">← Back</button>
           <div class="screen-title">Select Grade Level</div>
         </div>
-        <div class="grid-container" id="gradeLevelsContainer">
-          <!-- Grade levels loaded dynamically -->
-        </div>
+        <div class="grid-container" id="gradeLevelsContainer"></div>
       </div>
 
-      <!-- Sections Screen -->
       <div id="sectionsScreen" class="nav-screen">
         <div class="screen-header">
           <button id="backFromSections" class="back-btn">← Back</button>
           <div class="screen-title">Select Section</div>
         </div>
-        <div class="grid-container" id="sectionsContainer">
-          <!-- Sections loaded dynamically -->
-        </div>
+        <div class="grid-container" id="sectionsContainer"></div>
       </div>
 
-      <!-- Students Screen -->
       <div id="studentsScreen" class="nav-screen">
         <div class="screen-header">
           <button id="backFromStudents" class="back-btn">← Back</button>
           <div class="screen-title">Select Student</div>
         </div>
-        <div class="students-list" id="studentsContainer">
-          <!-- Students loaded dynamically -->
-        </div>
+        <div class="students-list" id="studentsContainer"></div>
       </div>
 
-      <!-- Nurse Visit Form -->
       <div id="nurseVisitForm" class="nav-screen">
         <div class="screen-header">
           <button id="backFromForm" class="back-btn">← Back</button>
           <div class="screen-title">Nurse Visit Form</div>
         </div>
-        
-        <div class="status-message" id="statusMessage"></div>
         
         <div class="form-container">
           <div class="form-section">
@@ -1027,20 +880,15 @@
             </div>
           </div>
           
-          <button id="submitVisitBtn" class="submit-btn">
-            📤 Submit Visit Record
-          </button>
+          <button id="submitVisitBtn" class="submit-btn">📤 Submit Visit Record</button>
 
-          <!-- Email Status Box -->
           <div id="emailStatusBox" class="email-status-box">
             <div class="email-status-header">
               <span class="email-status-icon">📧</span>
               <span class="email-status-title">Automated Email Notification</span>
             </div>
-            <div class="email-status-message" id="emailStatusMessage">
-              Parent notification emails will be sent automatically within a few minutes.
-            </div>
-            <div class="email-recipients" id="emailRecipientsBox">
+            <div class="email-status-message" id="emailStatusMessage"></div>
+            <div class="email-recipients">
               <div class="email-recipients-title">Email Recipients:</div>
               <div id="emailRecipientsList"></div>
             </div>
@@ -1050,12 +898,11 @@
     </div>
   </div>
 
-  <!-- Alert Detail Modal -->
-  <div class="modal" id="alertDetailModal" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+  <div class="modal" id="alertDetailModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title" id="modalTitle">⚠️ Alert Details</h2>
-        <button class="close-modal" id="closeAlertModal" aria-label="Close modal">&times;</button>
+        <h2 class="modal-title">⚠️ Alert Details</h2>
+        <button class="close-modal" id="closeAlertModal">&times;</button>
       </div>
       <div class="modal-body">
         <div class="detail-row">
@@ -1069,22 +916,13 @@
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Reported By</div>
-          <div class="detail-value" id="modalTeacher"></div>
-        </div>
-        
-        <div class="detail-row">
           <div class="detail-label">Time Reported</div>
           <div class="detail-value" id="modalTime"></div>
         </div>
         
         <div class="modal-actions">
-          <button class="modal-btn btn-modal-respond" id="respondToAlert">
-            ✓ Responding
-          </button>
-          <button class="modal-btn btn-modal-dismiss" id="dismissAlert">
-            Dismiss
-          </button>
+          <button class="modal-btn btn-modal-respond" id="respondToAlert">✓ Responding</button>
+          <button class="modal-btn btn-modal-dismiss" id="dismissAlert">Dismiss</button>
         </div>
       </div>
     </div>
@@ -1093,350 +931,161 @@
   <script type="module">
     import { supabase } from './supabase.js';
     
-    // ============= CONFIGURATION =============
-    const CONFIG = {
-      ALERTS_REFRESH_INTERVAL: 30000, // 30 seconds
-      NOTIFICATION_TIMEOUT: 3000, // 3 seconds
-      DEBUG: true // Set to false in production
-    };
-
-    // ============= STATE MANAGEMENT =============
     const state = {
-      supabaseClient: supabase,
+      currentNurseId: null,
+      currentNurseName: null,
       currentStudent: null,
       currentGradeSection: null,
-      currentNurseId: null,
-      currentNurseEmail: null,
-      currentNurseName: null,
-      savedVisitId: null,
       parentEmails: [],
       currentAlertId: null,
-      viewedAlerts: new Set(),
-      isRefreshing: false
+      viewedAlerts: new Set()
     };
 
-    // ============= DEBUG LOGGING =============
-    function debugLog(...args) {
-      if (CONFIG.DEBUG) {
-        console.log('[HERO Debug]', ...args);
-      }
-    }
-
-    // ============= DOM ELEMENTS =============
-    const elements = {
-      refreshAlertsBtn: document.getElementById('refreshAlerts'),
-      goHelpBtn: document.getElementById('goHelpBtn'),
-      backFromGrades: document.getElementById('backFromGrades'),
-      backFromSections: document.getElementById('backFromSections'),
-      backFromStudents: document.getElementById('backFromStudents'),
-      backFromForm: document.getElementById('backFromForm'),
-      submitVisitBtn: document.getElementById('submitVisitBtn'),
-      nurseName: document.getElementById('nurseName'),
-      logoutBtn: document.getElementById('logoutBtn'),
-      emailStatusBox: document.getElementById('emailStatusBox'),
-      emailStatusMessage: document.getElementById('emailStatusMessage'),
-      emailRecipientsList: document.getElementById('emailRecipientsList'),
-      alertDetailModal: document.getElementById('alertDetailModal'),
-      closeAlertModal: document.getElementById('closeAlertModal'),
-      respondToAlert: document.getElementById('respondToAlert'),
-      dismissAlert: document.getElementById('dismissAlert'),
-      alertsList: document.getElementById('alertsList'),
-      alertCount: document.getElementById('alertCount'),
-      statusMessage: document.getElementById('statusMessage')
-    };
-
-    // ============= INITIALIZATION =============
-    document.addEventListener('DOMContentLoaded', function() {
-      debugLog('DOM Content Loaded');
-      checkNurseAuth(); // CHECK AUTH FIRST - THIS WAS THE BUG!
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 Nurse Dashboard Loading...');
+      checkAuth();
       setupEventListeners();
       setDefaultDateTime();
     });
 
-    // ============= AUTHENTICATION CHECK =============
-    function checkNurseAuth() {
-      debugLog('Checking nurse authentication...');
+    function checkAuth() {
+      const nurseProfile = sessionStorage.getItem('nurseProfile');
+      console.log('📋 Checking auth...', nurseProfile ? 'Found' : 'Not found');
       
-      // Get nurse profile from sessionStorage (set by index.html)
-      const nurseProfileStr = sessionStorage.getItem('nurseProfile');
-      
-      if (!nurseProfileStr) {
-        debugLog('No nurse profile found in sessionStorage - redirecting to login');
-        showNotification('⚠️ Please login first', 'error');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 1500);
+      if (!nurseProfile) {
+        console.log('❌ No nurse profile - redirecting');
+        alert('Please login first');
+        window.location.href = 'index.html';
         return;
       }
       
       try {
-        const nurseProfile = JSON.parse(nurseProfileStr);
-        debugLog('Nurse profile found:', nurseProfile);
+        const profile = JSON.parse(nurseProfile);
+        console.log('✅ Profile:', profile);
         
-        // Verify it's actually a nurse
-        if (nurseProfile.role !== 'nurse') {
-          debugLog('Invalid role:', nurseProfile.role);
-          showNotification('⚠️ Unauthorized access', 'error');
-          sessionStorage.removeItem('nurseProfile');
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 1500);
+        if (profile.role !== 'nurse') {
+          console.log('❌ Invalid role');
+          alert('Unauthorized access');
+          sessionStorage.clear();
+          window.location.href = 'index.html';
           return;
         }
         
-        // Set nurse info in state
-        state.currentNurseId = nurseProfile.id;
-        state.currentNurseEmail = nurseProfile.email;
-        state.currentNurseName = nurseProfile.full_name || nurseProfile.email.split('@')[0];
+        state.currentNurseId = profile.id;
+        state.currentNurseName = profile.full_name || profile.email.split('@')[0];
         
-        // Display nurse name
-        if (elements.nurseName) {
-          elements.nurseName.textContent = state.currentNurseName;
-        }
+        document.getElementById('nurseName').textContent = state.currentNurseName;
+        console.log('✅ Authenticated:', state.currentNurseName);
         
-        debugLog('Nurse authenticated:', state.currentNurseName);
+        loadAlerts();
+        setInterval(loadAlerts, 30000);
         
-        // Now load data
-        loadInitialData();
-        startAlertPolling();
-        
-      } catch (error) {
-        debugLog('Error parsing nurse profile:', error);
-        showNotification('❌ Authentication error', 'error');
-        sessionStorage.removeItem('nurseProfile');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 1500);
+      } catch (e) {
+        console.error('❌ Error:', e);
+        alert('Authentication error');
+        window.location.href = 'index.html';
       }
     }
 
     function setupEventListeners() {
-      // Navigation
-      elements.goHelpBtn?.addEventListener('click', () => showScreen('gradeLevelScreen'));
-      elements.backFromGrades?.addEventListener('click', () => showScreen('homeScreen'));
-      elements.backFromSections?.addEventListener('click', () => showScreen('gradeLevelScreen'));
-      elements.backFromStudents?.addEventListener('click', () => showScreen('sectionsScreen'));
-      elements.backFromForm?.addEventListener('click', () => showScreen('studentsScreen'));
+      document.getElementById('goHelpBtn')?.addEventListener('click', () => showScreen('gradeLevelScreen'));
+      document.getElementById('backFromGrades')?.addEventListener('click', () => showScreen('homeScreen'));
+      document.getElementById('backFromSections')?.addEventListener('click', () => showScreen('gradeLevelScreen'));
+      document.getElementById('backFromStudents')?.addEventListener('click', () => showScreen('sectionsScreen'));
+      document.getElementById('backFromForm')?.addEventListener('click', () => showScreen('studentsScreen'));
       
-      // Alerts
-      elements.refreshAlertsBtn?.addEventListener('click', () => loadAlerts());
+      document.getElementById('refreshAlerts')?.addEventListener('click', loadAlerts);
+      document.getElementById('submitVisitBtn')?.addEventListener('click', submitVisit);
+      document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
       
-      // Form
-      elements.submitVisitBtn?.addEventListener('click', submitVisit);
+      document.getElementById('closeAlertModal')?.addEventListener('click', closeModal);
+      document.getElementById('respondToAlert')?.addEventListener('click', handleRespondToAlert);
+      document.getElementById('dismissAlert')?.addEventListener('click', handleDismissAlert);
       
-      // Logout
-      elements.logoutBtn?.addEventListener('click', handleLogout);
-      
-      // Modal
-      elements.closeAlertModal?.addEventListener('click', closeModal);
-      elements.respondToAlert?.addEventListener('click', handleRespondToAlert);
-      elements.dismissAlert?.addEventListener('click', handleDismissAlert);
-      
-      // Close modal on outside click
-      window.addEventListener('click', function(event) {
-        if (event.target === elements.alertDetailModal) {
-          closeModal();
-        }
-      });
-
-      // Close modal on Escape key
-      document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && elements.alertDetailModal?.classList.contains('active')) {
-          closeModal();
-        }
+      window.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('alertDetailModal')) closeModal();
       });
     }
 
     function setDefaultDateTime() {
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      const timeInElement = document.getElementById('timeIn');
-      if (timeInElement) {
-        timeInElement.value = now.toISOString().slice(0, 16);
-      }
+      const el = document.getElementById('timeIn');
+      if (el) el.value = now.toISOString().slice(0, 16);
     }
 
-    function loadInitialData() {
-      loadAlerts();
-    }
-
-    function startAlertPolling() {
-      setInterval(() => {
-        if (!state.isRefreshing) {
-          loadAlerts();
-        }
-      }, CONFIG.ALERTS_REFRESH_INTERVAL);
-    }
-
-    // ============= SCREEN NAVIGATION =============
-    function showScreen(screenId) {
-      debugLog('Showing screen:', screenId);
-      
-      const screens = document.querySelectorAll('.nav-screen');
-      screens.forEach(screen => screen.classList.remove('active'));
-      
-      const targetScreen = document.getElementById(screenId);
-      if (targetScreen) {
-        targetScreen.classList.add('active');
-      }
-      
-      // Load data when entering specific screens
-      switch(screenId) {
-        case 'gradeLevelScreen':
-          loadGradeLevels();
-          break;
-        case 'homeScreen':
-          loadAlerts();
-          break;
-      }
-    }
-
-    // ============= ALERTS MANAGEMENT =============
     async function loadAlerts() {
-      if (!elements.alertsList) {
-        debugLog('alertsList element not found');
-        return;
-      }
+      const btn = document.getElementById('refreshAlerts');
+      const list = document.getElementById('alertsList');
+      const badge = document.getElementById('alertCount');
       
-      state.isRefreshing = true;
-      if (elements.refreshAlertsBtn) {
-        elements.refreshAlertsBtn.disabled = true;
-      }
+      console.log('🔄 Loading alerts...');
       
-      elements.alertsList.innerHTML = '<div class="no-alerts"><span class="no-alerts-icon">⏳</span>Loading alerts...</div>';
-      
-      debugLog('Starting to load alerts...');
+      if (btn) btn.disabled = true;
+      list.innerHTML = '<div class="no-alerts"><span class="no-alerts-icon">⏳</span>Loading...</div>';
       
       try {
-        if (!state.supabaseClient) {
-          throw new Error('Supabase client not initialized');
-        }
-        
-        debugLog('Querying alerts table...');
-        
-        // Simplified query without joins
-        const { data, error } = await state.supabaseClient
+        const { data, error } = await supabase
           .from('alerts')
           .select('*')
           .eq('status', 'active')
           .order('created_at', { ascending: false })
           .limit(20);
         
-        debugLog('Query completed:', { 
-          dataCount: data?.length || 0, 
-          error: error?.message || 'none',
-          hasData: !!data
-        });
+        console.log('📊 Result:', { count: data?.length || 0, error: error?.message || 'none' });
         
-        if (error) {
-          debugLog('Supabase error details:', error);
-          throw error;
-        }
+        if (error) throw error;
         
         if (!data || data.length === 0) {
-          debugLog('No alerts found');
-          elements.alertsList.innerHTML = '<div class="no-alerts"><span class="no-alerts-icon">📭</span>No active alerts at the moment.</div>';
-          if (elements.alertCount) elements.alertCount.textContent = '0';
+          console.log('📭 No alerts');
+          list.innerHTML = '<div class="no-alerts"><span class="no-alerts-icon">📭</span>No active alerts</div>';
+          badge.textContent = '0';
           return;
         }
         
-        debugLog(`Rendering ${data.length} alerts`);
+        console.log(`✅ ${data.length} alerts`);
+        badge.textContent = data.length;
+        list.innerHTML = '';
         
-        if (elements.alertCount) elements.alertCount.textContent = data.length;
-        elements.alertsList.innerHTML = '';
-        
-        // Render each alert
-        for (const alert of data) {
-          await renderAlertWithTeacher(alert);
-        }
-        
-        debugLog('All alerts rendered successfully');
-        
-      } catch (error) {
-        console.error('Error loading alerts:', error);
-        debugLog('Full error:', error);
-        
-        elements.alertsList.innerHTML = `
-          <div class="no-alerts">
-            <span class="no-alerts-icon">⚠️</span>
-            <strong>Error loading alerts</strong><br>
-            ${escapeHtml(error.message || 'Unknown error')}<br>
-            <small>Check console for details (F12)</small>
-          </div>
-        `;
-      } finally {
-        state.isRefreshing = false;
-        if (elements.refreshAlertsBtn) {
-          elements.refreshAlertsBtn.disabled = false;
-        }
-      }
-    }
-
-    async function renderAlertWithTeacher(alert) {
-      debugLog('Rendering alert:', alert.id);
-      
-      let teacherName = 'Teacher';
-      
-      // Try to get teacher name
-      if (alert.teacher_id) {
-        try {
-          // Try profiles table first
-          const { data: profile } = await state.supabaseClient
-            .from('profiles')
-            .select('full_name')
-            .eq('id', alert.teacher_id)
-            .single();
+        data.forEach(alert => {
+          const div = document.createElement('div');
+          const isUnread = !state.viewedAlerts.has(alert.id);
+          div.className = `alert-item ${isUnread ? 'unread' : ''}`;
+          div.onclick = () => showAlertDetail(alert);
           
-          if (profile && profile.full_name) {
-            teacherName = profile.full_name;
-          }
-        } catch (err) {
-          debugLog('Could not fetch teacher name:', err.message);
-        }
+          div.innerHTML = `
+            <div class="alert-room">📍 ${escapeHtml(alert.room_number)}</div>
+            <div class="alert-desc">${escapeHtml(alert.description)}</div>
+            <div class="alert-footer">
+              <div class="alert-time">${getTimeAgo(new Date(alert.created_at))}</div>
+            </div>
+          `;
+          
+          list.appendChild(div);
+        });
+        
+      } catch (e) {
+        console.error('❌ Error:', e);
+        list.innerHTML = `<div class="no-alerts"><span class="no-alerts-icon">⚠️</span>Error: ${e.message}</div>`;
+      } finally {
+        if (btn) btn.disabled = false;
       }
-      
-      const alertDiv = document.createElement('div');
-      const isUnread = !state.viewedAlerts.has(alert.id);
-      alertDiv.className = `alert-item ${isUnread ? 'unread' : ''}`;
-      alertDiv.onclick = () => showAlertDetail({...alert, teacherName});
-      
-      const timeAgo = getTimeAgo(new Date(alert.created_at));
-      
-      alertDiv.innerHTML = `
-        <div class="alert-room">
-          📍 ${escapeHtml(alert.room_number)}
-        </div>
-        <div class="alert-desc">${escapeHtml(alert.description || 'No description')}</div>
-        <div class="alert-footer">
-          <div class="alert-time">${timeAgo}</div>
-        </div>
-        <div class="alert-teacher">From: ${escapeHtml(teacherName)}</div>
-      `;
-      
-      elements.alertsList.appendChild(alertDiv);
     }
 
     function showAlertDetail(alert) {
-      debugLog('Showing alert detail:', alert.id);
-      
       state.currentAlertId = alert.id;
       state.viewedAlerts.add(alert.id);
       
       document.getElementById('modalRoom').textContent = alert.room_number;
-      document.getElementById('modalDescription').textContent = alert.description || 'No description provided';
-      document.getElementById('modalTeacher').textContent = alert.teacherName || 'Unknown Teacher';
+      document.getElementById('modalDescription').textContent = alert.description;
       document.getElementById('modalTime').textContent = new Date(alert.created_at).toLocaleString();
       
-      elements.alertDetailModal?.classList.add('active');
-      elements.alertDetailModal?.setAttribute('aria-hidden', 'false');
-      
-      // Refresh alerts list to update unread status
+      document.getElementById('alertDetailModal').classList.add('active');
       loadAlerts();
     }
 
     function closeModal() {
-      elements.alertDetailModal?.classList.remove('active');
-      elements.alertDetailModal?.setAttribute('aria-hidden', 'true');
+      document.getElementById('alertDetailModal').classList.remove('active');
       state.currentAlertId = null;
     }
 
@@ -1444,34 +1093,28 @@
       if (!state.currentAlertId) return;
       
       try {
-        const { error } = await state.supabaseClient
+        const { error } = await supabase
           .from('alerts')
-          .update({ 
-            status: 'responded',
-            responded_at: new Date().toISOString()
-          })
+          .update({ status: 'responded' })
           .eq('id', state.currentAlertId);
         
         if (error) throw error;
         
-        showNotification('✓ Marked as responding to alert', 'success');
+        showNotification('✓ Marked as responding', 'success');
         closeModal();
         loadAlerts();
-      } catch (error) {
-        console.error('Error responding to alert:', error);
-        showNotification('❌ Error updating alert status', 'error');
+      } catch (e) {
+        console.error('❌ Error:', e);
+        showNotification('❌ Error updating alert', 'error');
       }
     }
 
     async function handleDismissAlert() {
       if (!state.currentAlertId) return;
-      
-      if (!confirm('Are you sure you want to dismiss this alert?')) {
-        return;
-      }
+      if (!confirm('Dismiss this alert?')) return;
       
       try {
-        const { error } = await state.supabaseClient
+        const { error } = await supabase
           .from('alerts')
           .update({ status: 'dismissed' })
           .eq('id', state.currentAlertId);
@@ -1481,389 +1124,236 @@
         showNotification('✓ Alert dismissed', 'success');
         closeModal();
         loadAlerts();
-      } catch (error) {
-        console.error('Error dismissing alert:', error);
+      } catch (e) {
+        console.error('❌ Error:', e);
         showNotification('❌ Error dismissing alert', 'error');
       }
     }
 
     function getTimeAgo(date) {
       const seconds = Math.floor((new Date() - date) / 1000);
-      
       if (seconds < 60) return 'Just now';
       if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
       if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
       return `${Math.floor(seconds / 86400)}d ago`;
     }
 
-    // ============= LOGOUT =============
-    function handleLogout() {
-      debugLog('Logging out...');
-      sessionStorage.removeItem('nurseProfile');
-      showNotification('✓ Logged out successfully', 'success');
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 1000);
+    function showScreen(screenId) {
+      document.querySelectorAll('.nav-screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId)?.classList.add('active');
+      
+      if (screenId === 'gradeLevelScreen') loadGradeLevels();
+      if (screenId === 'homeScreen') loadAlerts();
     }
 
-    // ============= GRADE LEVELS =============
     async function loadGradeLevels() {
-      const container = document.getElementById('gradeLevelsContainer');
-      if (!container) return;
-      
-      container.innerHTML = '<div class="loading">Loading grade levels</div>';
+      const c = document.getElementById('gradeLevelsContainer');
+      c.innerHTML = '<div class="loading">Loading...</div>';
       
       try {
-        const { data, error } = await state.supabaseClient
-          .from('grade_sections')
-          .select('grade_level')
-          .order('grade_level');
-        
+        const { data, error } = await supabase.from('grade_sections').select('grade_level').order('grade_level');
         if (error) throw error;
         
-        const gradeLevels = [...new Set(data.map(item => item.grade_level))];
+        const grades = [...new Set(data.map(g => g.grade_level))];
+        c.innerHTML = '';
         
-        if (gradeLevels.length === 0) {
-          container.innerHTML = '<div class="loading">No grade levels found.</div>';
-          return;
-        }
-        
-        container.innerHTML = '';
-        gradeLevels.forEach(grade => {
+        grades.forEach(grade => {
           const btn = document.createElement('button');
           btn.className = 'grid-btn';
-          btn.textContent = grade === 'Kindergarten' ? 'Kindergarten' : `Grade ${grade}`;
-          btn.addEventListener('click', () => loadSections(grade));
-          container.appendChild(btn);
+          btn.textContent = `Grade ${grade}`;
+          btn.onclick = () => loadSections(grade);
+          c.appendChild(btn);
         });
-      } catch (error) {
-        console.error('Error loading grade levels:', error);
-        container.innerHTML = '<div class="loading" style="color: #ef5350;">Error loading grade levels</div>';
-        showNotification('❌ Error loading grade levels', 'error');
+      } catch (e) {
+        c.innerHTML = '<div class="loading">Error</div>';
       }
     }
 
-    // ============= SECTIONS =============
-    async function loadSections(gradeLevel) {
-      state.currentGradeSection = null;
-      const container = document.getElementById('sectionsContainer');
-      if (!container) return;
-      
-      container.innerHTML = '<div class="loading">Loading sections</div>';
+    async function loadSections(grade) {
+      const c = document.getElementById('sectionsContainer');
+      c.innerHTML = '<div class="loading">Loading...</div>';
       
       try {
-        const { data, error } = await state.supabaseClient
-          .from('grade_sections')
-          .select('*')
-          .eq('grade_level', gradeLevel)
-          .order('section');
-        
+        const { data, error } = await supabase.from('grade_sections').select('*').eq('grade_level', grade).order('section');
         if (error) throw error;
         
-        if (!data || data.length === 0) {
-          container.innerHTML = '<div class="loading">No sections found for this grade.</div>';
-          return;
-        }
-        
-        container.innerHTML = '';
+        c.innerHTML = '';
         data.forEach(section => {
           const btn = document.createElement('button');
           btn.className = 'grid-btn';
           btn.textContent = `${section.grade_level} - ${section.section}`;
-          btn.addEventListener('click', () => loadStudents(section));
-          container.appendChild(btn);
+          btn.onclick = () => loadStudents(section);
+          c.appendChild(btn);
         });
         
         showScreen('sectionsScreen');
-      } catch (error) {
-        console.error('Error loading sections:', error);
-        container.innerHTML = '<div class="loading" style="color: #ef5350;">Error loading sections</div>';
-        showNotification('❌ Error loading sections', 'error');
+      } catch (e) {
+        c.innerHTML = '<div class="loading">Error</div>';
       }
     }
 
-    // ============= STUDENTS =============
     async function loadStudents(section) {
       state.currentGradeSection = section;
-      const container = document.getElementById('studentsContainer');
-      if (!container) return;
-      
-      container.innerHTML = '<div class="loading">Loading students</div>';
+      const c = document.getElementById('studentsContainer');
+      c.innerHTML = '<div class="loading">Loading...</div>';
       
       try {
-        const { data, error } = await state.supabaseClient
-          .from('students')
-          .select('*')
-          .eq('grade_section_id', section.id)
-          .order('full_name');
-        
+        const { data, error } = await supabase.from('students').select('*').eq('grade_section_id', section.id).order('full_name');
         if (error) throw error;
         
-        if (!data || data.length === 0) {
-          container.innerHTML = '<div class="loading">No students found in this section.</div>';
-          return;
-        }
-        
-        container.innerHTML = '';
+        c.innerHTML = '';
         data.forEach(student => {
           const card = document.createElement('div');
           card.className = 'student-card';
-          card.addEventListener('click', () => showStudentForm(student));
-          
-          const allergiesInfo = student.allergies 
-            ? `Allergies: ${escapeHtml(student.allergies)}` 
-            : 'No known allergies';
+          card.onclick = () => showStudentForm(student);
           
           card.innerHTML = `
             <div class="student-name">${escapeHtml(student.full_name)}</div>
             <div class="student-details">
               Age: ${student.age || 'N/A'}<br>
-              ${allergiesInfo}
+              ${student.allergies ? `Allergies: ${escapeHtml(student.allergies)}` : 'No known allergies'}
             </div>
           `;
-          container.appendChild(card);
+          c.appendChild(card);
         });
         
         showScreen('studentsScreen');
-      } catch (error) {
-        console.error('Error loading students:', error);
-        container.innerHTML = '<div class="loading" style="color: #ef5350;">Error loading students</div>';
-        showNotification('❌ Error loading students', 'error');
+      } catch (e) {
+        c.innerHTML = '<div class="loading">Error</div>';
       }
     }
 
-    // ============= NURSE VISIT FORM =============
-    async function showStudentForm(student) {
+    function showStudentForm(student) {
       state.currentStudent = student;
       
-      // Populate student information
       document.getElementById('studentInfo').value = 
         `${student.full_name} - ${state.currentGradeSection.grade_level} ${state.currentGradeSection.section}`;
-      
       document.getElementById('age').value = student.age || '';
       
-      // Set current date/time
-      const now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      document.getElementById('timeIn').value = now.toISOString().slice(0, 16);
+      ['symptoms', 'intervention', 'pr', 'spo2', 'bp', 'temp'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
       
-      // Clear form fields
-      document.getElementById('symptoms').value = '';
-      document.getElementById('intervention').value = '';
-      document.getElementById('pr').value = '';
-      document.getElementById('spo2').value = '';
-      document.getElementById('bp').value = '';
-      document.getElementById('temp').value = '';
-      
-      // Reset status message and email box
-      hideStatusMessage();
-      elements.emailStatusBox.classList.remove('show');
-      
-      // Load parent emails
-      await loadParentEmails(student.id);
-      
+      document.getElementById('emailStatusBox').classList.remove('show');
+      loadParentEmails(student.id);
       showScreen('nurseVisitForm');
     }
 
     async function loadParentEmails(studentId) {
       state.parentEmails = [];
       
-      try {
-        // Get parent email from students table
-        if (state.currentStudent.parent_email) {
-          state.parentEmails.push({
-            parent_name: 'Parent/Guardian',
-            parent_email: state.currentStudent.parent_email
-          });
-        }
-        
-        // Get additional parent emails from parents table
-        const { data, error } = await state.supabaseClient
-          .from('parents')
-          .select('parent_name, parent_email')
-          .eq('student_id', studentId);
-        
-        if (error) {
-          debugLog('Error loading parents table:', error);
-        }
-        
-        if (data && data.length > 0) {
-          const additionalParents = data.filter(p => p.parent_email);
-          state.parentEmails.push(...additionalParents);
-        }
-        
-        // Remove duplicates based on email
-        const uniqueEmails = new Map();
-        state.parentEmails.forEach(parent => {
-          if (!uniqueEmails.has(parent.parent_email)) {
-            uniqueEmails.set(parent.parent_email, parent);
-          }
+      if (state.currentStudent.parent_email) {
+        state.parentEmails.push({
+          parent_name: 'Parent/Guardian',
+          parent_email: state.currentStudent.parent_email
         });
-        state.parentEmails = Array.from(uniqueEmails.values());
+      }
+      
+      try {
+        const { data } = await supabase.from('parents').select('parent_name, parent_email').eq('student_id', studentId);
+        if (data) state.parentEmails.push(...data.filter(p => p.parent_email));
         
-        debugLog('Parent emails loaded:', state.parentEmails);
-        
-      } catch (error) {
-        console.error('Error loading parent emails:', error);
+        const unique = new Map();
+        state.parentEmails.forEach(p => unique.set(p.parent_email, p));
+        state.parentEmails = Array.from(unique.values());
+      } catch (e) {
+        console.error('Error:', e);
       }
     }
 
     async function submitVisit() {
-      hideStatusMessage();
-      
-      // Validation
-      if (!state.currentNurseId) {
-        showStatusMessage('❌ Nurse authentication error. Please re-login.', 'error');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
-        return;
-      }
-      
       const symptoms = document.getElementById('symptoms').value.trim();
       if (!symptoms) {
-        showStatusMessage('❌ Please describe the symptoms.', 'error');
-        document.getElementById('symptoms').focus();
+        alert('Please describe symptoms');
         return;
       }
       
-      // Disable submit button during submission
-      elements.submitVisitBtn.disabled = true;
-      elements.submitVisitBtn.textContent = '⏳ Submitting...';
+      const btn = document.getElementById('submitVisitBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Submitting...';
       
       try {
-        // Prepare visit data
-        const visitData = {
-          student_id: state.currentStudent.id,
-          nurse_id: state.currentNurseId,
-          time_in: document.getElementById('timeIn').value,
-          symptoms: symptoms,
-          intervention_given: document.getElementById('intervention').value.trim()
-        };
-        
-        debugLog('Submitting visit:', visitData);
-        
-        // Insert visit record
-        const { data: visit, error: visitError } = await state.supabaseClient
+        const { data: visit, error: visitError } = await supabase
           .from('nurse_visits')
-          .insert([visitData])
+          .insert({
+            student_id: state.currentStudent.id,
+            nurse_id: state.currentNurseId,
+            time_in: document.getElementById('timeIn').value,
+            symptoms: symptoms,
+            intervention_given: document.getElementById('intervention').value.trim()
+          })
           .select()
           .single();
         
         if (visitError) throw visitError;
         
-        state.savedVisitId = visit.id;
-        debugLog('Visit created:', visit.id);
-        
-        // Save vital signs
-        const vitalSigns = {
-          pr: document.getElementById('pr').value.trim(),
-          spo2: document.getElementById('spo2').value.trim(),
-          bp: document.getElementById('bp').value.trim(),
-          temp: document.getElementById('temp').value.trim()
-        };
-        
-        // Always insert vital signs record with email_sent = false
-        const vitalData = {
-          nurse_visit_id: visit.id,
-          pr: vitalSigns.pr || null,
-          spo2: vitalSigns.spo2 || null,
-          bp: vitalSigns.bp || null,
-          temperature: vitalSigns.temp || null,
-          email_sent: false  // This triggers the Google Apps Script
-        };
-        
-        const { error: vitalError } = await state.supabaseClient
+        const { error: vitalError } = await supabase
           .from('vital_signs')
-          .insert([vitalData]);
+          .insert({
+            nurse_visit_id: visit.id,
+            pr: document.getElementById('pr').value.trim() || null,
+            spo2: document.getElementById('spo2').value.trim() || null,
+            bp: document.getElementById('bp').value.trim() || null,
+            temperature: document.getElementById('temp').value.trim() || null,
+            email_sent: false
+          });
         
         if (vitalError) throw vitalError;
         
-        debugLog('Vital signs saved');
-        
-        // Show success message
-        showStatusMessage('✅ Visit recorded successfully!', 'success');
-        showNotification('✓ Visit recorded successfully', 'success');
-        
-        // Show email notification status
+        showNotification('✅ Visit recorded!', 'success');
         displayEmailStatus();
         
-      } catch (error) {
-        console.error('Submit error:', error);
-        showStatusMessage(`❌ Error: ${error.message}`, 'error');
-        showNotification('❌ Error submitting visit record', 'error');
+      } catch (e) {
+        console.error('❌ Error:', e);
+        showNotification('❌ Error: ' + e.message, 'error');
       } finally {
-        // Re-enable submit button
-        elements.submitVisitBtn.disabled = false;
-        elements.submitVisitBtn.textContent = '📤 Submit Visit Record';
+        btn.disabled = false;
+        btn.textContent = '📤 Submit Visit Record';
       }
     }
 
     function displayEmailStatus() {
+      const box = document.getElementById('emailStatusBox');
+      const msg = document.getElementById('emailStatusMessage');
+      const list = document.getElementById('emailRecipientsList');
+      
       if (state.parentEmails.length === 0) {
-        elements.emailStatusMessage.textContent = 
-          'No parent email addresses found for this student. Emails will not be sent.';
-        elements.emailRecipientsList.innerHTML = 
-          '<div style="color: var(--text-muted); font-style: italic;">No recipients</div>';
+        msg.textContent = 'No parent emails found';
+        list.innerHTML = '<div style="color: var(--text-muted)">No recipients</div>';
       } else {
-        elements.emailStatusMessage.textContent = 
-          'Parent notification emails will be sent automatically by Google Apps Script within a few minutes.';
-        
-        elements.emailRecipientsList.innerHTML = '';
-        state.parentEmails.forEach(parent => {
-          const recipientDiv = document.createElement('div');
-          recipientDiv.className = 'email-recipient-item';
-          recipientDiv.innerHTML = `
-            ✉️ ${escapeHtml(parent.parent_name)} - ${escapeHtml(parent.parent_email)}
-          `;
-          elements.emailRecipientsList.appendChild(recipientDiv);
-        });
+        msg.textContent = 'Emails will be sent automatically by Google Apps Script';
+        list.innerHTML = state.parentEmails.map(p => 
+          `<div class="email-recipient-item">✉️ ${escapeHtml(p.parent_name)} - ${escapeHtml(p.parent_email)}</div>`
+        ).join('');
       }
       
-      elements.emailStatusBox.classList.add('show');
+      box.classList.add('show');
     }
 
-    // ============= UTILITY FUNCTIONS =============
-    function showStatusMessage(message, type) {
-      if (!elements.statusMessage) return;
-      
-      elements.statusMessage.className = `status-message ${type}`;
-      elements.statusMessage.textContent = message;
+    function handleLogout() {
+      sessionStorage.clear();
+      showNotification('✓ Logged out', 'success');
+      setTimeout(() => window.location.href = 'index.html', 1000);
     }
 
-    function hideStatusMessage() {
-      if (!elements.statusMessage) return;
-      
-      elements.statusMessage.className = 'status-message';
-      elements.statusMessage.textContent = '';
-    }
-
-    function showNotification(message, type) {
-      const notification = document.createElement('div');
-      notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? 'rgba(76, 175, 80, 0.9)' : 'rgba(211, 47, 47, 0.9)'};
-        color: white;
-        padding: 15px 25px;
-        border-radius: 8px;
-        z-index: 1001;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    function showNotification(msg, type) {
+      const n = document.createElement('div');
+      n.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 1001;
+        background: ${type === 'success' ? 'rgba(76,175,80,0.9)' : 'rgba(211,47,47,0.9)'};
+        color: white; padding: 15px 25px; border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6); font-weight: 600;
         animation: slideInNotif 0.3s ease;
-        font-weight: 600;
       `;
-      notification.textContent = message;
-      document.body.appendChild(notification);
-      
+      n.textContent = msg;
+      document.body.appendChild(n);
       setTimeout(() => {
-        notification.style.animation = 'slideOutNotif 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-      }, CONFIG.NOTIFICATION_TIMEOUT);
+        n.style.animation = 'slideOutNotif 0.3s ease';
+        setTimeout(() => n.remove(), 300);
+      }, 3000);
     }
 
     function escapeHtml(text) {
-      if (!text) return '';
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
