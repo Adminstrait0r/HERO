@@ -332,6 +332,41 @@
             background: rgba(244, 67, 54, 0.1);
         }
 
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .status-active {
+            background: rgba(198, 40, 40, 0.2);
+            color: #c62828;
+            border: 1px solid rgba(198, 40, 40, 0.3);
+        }
+
+        .status-resolved {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .status-cancelled {
+            background: rgba(158, 158, 158, 0.2);
+            color: #9E9E9E;
+            border: 1px solid rgba(158, 158, 158, 0.3);
+        }
+
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -491,6 +526,38 @@
             transform: translateY(-2px);
         }
 
+        /* Student Detail View */
+        .student-detail-view {
+            padding: 10px 0;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-muted);
+            min-width: 200px;
+        }
+
+        .detail-value {
+            flex: 1;
+            color: var(--text-main);
+        }
+
+        .detail-value ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .detail-value li {
+            margin-bottom: 5px;
+        }
+
         /* Loading State */
         .loading {
             text-align: center;
@@ -512,7 +579,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Form Grid for Add Student */
+        /* Form Grid for Add/Edit Student */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -639,6 +706,15 @@
             .btn {
                 width: 100%;
             }
+            
+            .detail-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .detail-label {
+                min-width: auto;
+            }
         }
     </style>
 </head>
@@ -732,7 +808,7 @@
         </div>
     </div>
 
-    <!-- Alert Modal -->
+    <!-- Alert Modal with Status Field -->
     <div class="modal" id="alertModal">
         <div class="modal-content modal-medium">
             <div class="modal-header">
@@ -749,6 +825,19 @@
                     <div class="form-group">
                         <label class="form-label" for="alertDescription">What's happening?</label>
                         <textarea class="form-textarea" id="alertDescription" placeholder="Describe the incident, emergency, or student situation in detail..." required></textarea>
+                    </div>
+                    
+                    <!-- Status Field Added Back -->
+                    <div class="form-group">
+                        <label class="form-label" for="alertStatus">Status</label>
+                        <select class="form-select" id="alertStatus" required>
+                            <option value="">Select Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="active">Active</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <div class="info-text">Set the initial status of this alert</div>
                     </div>
                     
                     <div class="form-actions">
@@ -834,6 +923,108 @@
         </div>
     </div>
 
+    <!-- View Student Modal (Internal - No External HTML) -->
+    <div class="modal" id="viewStudentModal">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h2><i class="fas fa-user"></i> Student Details</h2>
+                <button class="close-modal" id="closeViewStudentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="viewStudentMessage" class="message"></div>
+                <div class="student-detail-view" id="studentDetailsContent">
+                    <!-- Student details will be loaded here -->
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Loading student details...</div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" id="closeViewStudentModalBtn">Close</button>
+                    <button type="button" class="btn btn-submit" id="editStudentFromViewBtn">
+                        <i class="fas fa-edit"></i> Edit Student
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal (Internal - No External HTML) -->
+    <div class="modal" id="editStudentModal">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Edit Student</h2>
+                <button class="close-modal" id="closeEditStudentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="editStudentMessage" class="message"></div>
+                
+                <form id="editStudentForm">
+                    <input type="hidden" id="edit_student_id">
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="edit_full_name">Full Name</label>
+                            <input type="text" id="edit_full_name" class="form-input" placeholder="Enter student's full name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="edit_age">Age</label>
+                            <input type="number" id="edit_age" class="form-input" placeholder="Enter student's age" min="3" max="25" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="edit_parent_email">Parent/Guardian Email</label>
+                            <input type="email" id="edit_parent_email" class="form-input" placeholder="parent@example.com" required>
+                            <div class="info-text">Required for notifications and communication</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="edit_parent_phone">Parent/Guardian Phone</label>
+                            <input type="tel" id="edit_parent_phone" class="form-input" placeholder="(123) 456-7890">
+                            <div class="info-text">Optional - for emergency contact</div>
+                        </div>
+                        
+                        <div class="dropdowns-container">
+                            <div class="form-group">
+                                <label class="form-label" for="edit_grade">Grade Level</label>
+                                <select id="edit_grade" class="form-select" required>
+                                    <option value="">Select Grade Level</option>
+                                </select>
+                                <div class="info-text" id="edit_gradeInfo"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="edit_section">Section</label>
+                                <select id="edit_section" class="form-select" required disabled>
+                                    <option value="">Select Section</option>
+                                </select>
+                                <div class="info-text" id="edit_sectionInfo"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="full-width">
+                            <div class="selected-section-info" id="edit_selectedSectionInfo">
+                                <strong>Selected:</strong> <span id="edit_selectedGradeSection"></span>
+                                <input type="hidden" id="edit_grade_section_id">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label" for="edit_allergies">Allergies & Medical Notes</label>
+                            <textarea id="edit_allergies" class="form-textarea" rows="4" placeholder="List any allergies or medical conditions (optional)"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-cancel" id="cancelEditStudent">Cancel</button>
+                        <button type="submit" class="btn btn-submit">Update Student</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Font Awesome for icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     
@@ -846,6 +1037,7 @@
         let gradeSections = [];
         let sectionsByGrade = {};
         let gradeLevels = new Set();
+        let currentStudentId = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
@@ -894,6 +1086,16 @@
             document.getElementById('gradeFilter').addEventListener('change', filterStudents);
             document.getElementById('sectionFilter').addEventListener('change', filterStudents);
             
+            // View Student Modal
+            document.getElementById('closeViewStudentModal').addEventListener('click', closeViewStudentModal);
+            document.getElementById('closeViewStudentModalBtn').addEventListener('click', closeViewStudentModal);
+            document.getElementById('editStudentFromViewBtn').addEventListener('click', openEditStudentFromView);
+            
+            // Edit Student Modal
+            document.getElementById('editStudentForm').addEventListener('submit', submitEditStudent);
+            document.getElementById('closeEditStudentModal').addEventListener('click', closeEditStudentModal);
+            document.getElementById('cancelEditStudent').addEventListener('click', closeEditStudentModal);
+            
             const gradeSelect = document.getElementById('grade');
             const sectionSelect = document.getElementById('section');
             const selectedSectionInfo = document.getElementById('selectedSectionInfo');
@@ -906,8 +1108,8 @@
                 selectedSectionInfo.classList.remove('active');
                 
                 if (selectedGrade) {
-                    populateSections(selectedGrade);
-                    updateGradeInfo(selectedGrade);
+                    populateSections(selectedGrade, 'section');
+                    updateGradeInfo(selectedGrade, 'gradeInfo');
                 } else {
                     document.getElementById('sectionInfo').textContent = '';
                     document.getElementById('gradeInfo').textContent = '';
@@ -923,13 +1125,65 @@
                         document.getElementById('grade_section_id').value = selectedSection.id;
                         document.getElementById('selectedGradeSection').textContent = `Grade ${selectedSection.grade_level} - Section ${selectedSection.section}`;
                         selectedSectionInfo.classList.add('active');
-                        updateSectionInfo(selectedSection.section);
+                        updateSectionInfo(selectedSection.section, 'sectionInfo');
                     }
                 } else {
                     document.getElementById('grade_section_id').value = '';
                     selectedSectionInfo.classList.remove('active');
                     document.getElementById('sectionInfo').textContent = '';
                 }
+            });
+            
+            // Edit form grade/section handlers
+            const editGradeSelect = document.getElementById('edit_grade');
+            const editSectionSelect = document.getElementById('edit_section');
+            const editSelectedSectionInfo = document.getElementById('edit_selectedSectionInfo');
+            
+            editGradeSelect.addEventListener('change', function() {
+                const selectedGrade = this.value;
+                editSectionSelect.disabled = !selectedGrade;
+                editSectionSelect.value = '';
+                document.getElementById('edit_grade_section_id').value = '';
+                editSelectedSectionInfo.classList.remove('active');
+                
+                if (selectedGrade) {
+                    populateSections(selectedGrade, 'edit_section');
+                    updateGradeInfo(selectedGrade, 'edit_gradeInfo');
+                } else {
+                    document.getElementById('edit_sectionInfo').textContent = '';
+                    document.getElementById('edit_gradeInfo').textContent = '';
+                }
+            });
+
+            editSectionSelect.addEventListener('change', function() {
+                const selectedSectionId = this.value;
+                
+                if (selectedSectionId) {
+                    const selectedSection = gradeSections.find(s => s.id === selectedSectionId);
+                    if (selectedSection) {
+                        document.getElementById('edit_grade_section_id').value = selectedSection.id;
+                        document.getElementById('edit_selectedGradeSection').textContent = `Grade ${selectedSection.grade_level} - Section ${selectedSection.section}`;
+                        editSelectedSectionInfo.classList.add('active');
+                        updateSectionInfo(selectedSection.section, 'edit_sectionInfo');
+                    }
+                } else {
+                    document.getElementById('edit_grade_section_id').value = '';
+                    editSelectedSectionInfo.classList.remove('active');
+                    document.getElementById('edit_sectionInfo').textContent = '';
+                }
+            });
+            
+            // Window click handlers for modals
+            window.addEventListener('click', function(event) {
+                const alertModal = document.getElementById('alertModal');
+                const addStudentModal = document.getElementById('addStudentModal');
+                const viewStudentModal = document.getElementById('viewStudentModal');
+                const editStudentModal = document.getElementById('editStudentModal');
+                
+                if (event.target === alertModal) closeAlertModal();
+                if (event.target === addStudentModal) closeAddStudentModal();
+                if (event.target === viewStudentModal) closeViewStudentModal();
+                if (event.target === editStudentModal) closeEditStudentModal();
             });
         }
 
@@ -971,15 +1225,23 @@
                 });
                 
                 const gradeSelect = document.getElementById('grade');
+                const editGradeSelect = document.getElementById('edit_grade');
                 gradeSections.forEach(section => {
                     gradeLevels.add(section.grade_level);
                 });
                 
                 Array.from(gradeLevels).sort((a, b) => a - b).forEach(grade => {
+                    // For add student form
                     const option = document.createElement('option');
                     option.value = grade;
                     option.textContent = `Grade ${grade}`;
                     gradeSelect.appendChild(option);
+                    
+                    // For edit student form
+                    const editOption = document.createElement('option');
+                    editOption.value = grade;
+                    editOption.textContent = `Grade ${grade}`;
+                    editGradeSelect.appendChild(editOption);
                 });
                 
                 gradeSections.forEach(section => {
@@ -995,8 +1257,8 @@
             }
         }
 
-        function populateSections(grade) {
-            const sectionSelect = document.getElementById('section');
+        function populateSections(grade, sectionSelectId) {
+            const sectionSelect = document.getElementById(sectionSelectId);
             sectionSelect.innerHTML = '<option value="">Select Section</option>';
             
             if (sectionsByGrade[grade]) {
@@ -1009,15 +1271,15 @@
             }
         }
 
-        function updateGradeInfo(grade) {
+        function updateGradeInfo(grade, infoElementId) {
             const sections = sectionsByGrade[grade] || [];
             const count = sections.length;
-            document.getElementById('gradeInfo').textContent = 
+            document.getElementById(infoElementId).textContent = 
                 count === 1 ? '1 section available' : `${count} sections available`;
         }
 
-        function updateSectionInfo(sectionName) {
-            document.getElementById('sectionInfo').textContent = `Section: ${sectionName}`;
+        function updateSectionInfo(sectionName, infoElementId) {
+            document.getElementById(infoElementId).textContent = `Section: ${sectionName}`;
         }
 
         function updateSectionFilter() {
@@ -1058,6 +1320,8 @@
                         full_name,
                         age,
                         allergies,
+                        parent_email,
+                        parent_phone,
                         created_at,
                         grade_section_id,
                         grade_sections (id, grade_level, section)
@@ -1189,8 +1453,9 @@
             
             const roomNumber = document.getElementById('roomNumber').value.trim();
             const description = document.getElementById('alertDescription').value.trim();
+            const status = document.getElementById('alertStatus').value;
             
-            if (!roomNumber || !description) {
+            if (!roomNumber || !description || !status) {
                 showError('Please fill in all fields');
                 return;
             }
@@ -1203,14 +1468,15 @@
                     return;
                 }
                 
-                // REMOVED STATUS FIELD - Just insert room_number, description, and teacher_id
+                // INCLUDING STATUS FIELD AS REQUESTED
                 const { data, error } = await supabase
                     .from('alerts')
                     .insert([
                         {
                             teacher_id: user.id,
                             room_number: roomNumber,
-                            description: description
+                            description: description,
+                            status: status
                         }
                     ]);
                 
@@ -1247,7 +1513,7 @@
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             
             if (userError || !user) {
-                showMessageInForm('Please log in to add students', 'error');
+                showMessageInForm('Please log in to add students', 'error', 'addStudentMessage');
                 return;
             }
 
@@ -1274,7 +1540,7 @@
 
                 if (error) throw error;
 
-                showMessageInForm(`Student "${studentData.full_name}" added successfully!`, 'success');
+                showMessageInForm(`Student "${studentData.full_name}" added successfully!`, 'success', 'addStudentMessage');
                 
                 document.getElementById('addStudentForm').reset();
                 document.getElementById('section').disabled = true;
@@ -1289,57 +1555,294 @@
 
             } catch (error) {
                 console.error('Error adding student:', error);
-                showMessageInForm(`Error: ${error.message}`, 'error');
+                showMessageInForm(`Error: ${error.message}`, 'error', 'addStudentMessage');
             }
         }
 
         function validateStudentForm(data) {
             if (!data.full_name) {
-                showMessageInForm('Please enter student name', 'error');
+                showMessageInForm('Please enter student name', 'error', 'addStudentMessage');
                 return false;
             }
 
             if (!data.age || data.age < 3 || data.age > 25) {
-                showMessageInForm('Please enter a valid age (3-25)', 'error');
+                showMessageInForm('Please enter a valid age (3-25)', 'error', 'addStudentMessage');
                 return false;
             }
 
             if (!data.parent_email) {
-                showMessageInForm('Please enter parent/guardian email', 'error');
+                showMessageInForm('Please enter parent/guardian email', 'error', 'addStudentMessage');
                 return false;
             }
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(data.parent_email)) {
-                showMessageInForm('Please enter a valid email address', 'error');
+                showMessageInForm('Please enter a valid email address', 'error', 'addStudentMessage');
                 return false;
             }
 
             if (!data.grade_section_id) {
-                showMessageInForm('Please select both grade level and section', 'error');
+                showMessageInForm('Please select both grade level and section', 'error', 'addStudentMessage');
                 return false;
             }
 
             return true;
         }
 
-        function showMessageInForm(text, type) {
-            const messageDiv = document.getElementById('addStudentMessage');
-            messageDiv.textContent = text;
-            messageDiv.className = 'message ' + type;
-            messageDiv.style.display = 'block';
+        async function viewStudent(studentId) {
+            currentStudentId = studentId;
+            
+            try {
+                const { data: student, error } = await supabase
+                    .from('students')
+                    .select(`
+                        id,
+                        full_name,
+                        age,
+                        parent_email,
+                        parent_phone,
+                        allergies,
+                        created_at,
+                        grade_section_id,
+                        grade_sections (id, grade_level, section)
+                    `)
+                    .eq('id', studentId)
+                    .single();
+
+                if (error) throw error;
+
+                displayStudentDetails(student);
+                openViewStudentModal();
+                
+            } catch (error) {
+                console.error('Error loading student:', error);
+                showError('Failed to load student details.');
+            }
         }
 
-        function viewStudent(studentId) {
-            window.location.href = `student-details.html?id=${studentId}`;
+        function displayStudentDetails(student) {
+            const contentDiv = document.getElementById('studentDetailsContent');
+            
+            const gradeSection = student.grade_sections ? 
+                `Grade ${student.grade_sections.grade_level} - Section ${student.grade_sections.section}` : 
+                'Not assigned';
+            
+            let allergiesHtml = '<em>None</em>';
+            if (student.allergies && student.allergies.trim() !== '') {
+                const allergies = student.allergies.split(',').map(a => a.trim());
+                allergiesHtml = '<ul>' + allergies.map(allergy => 
+                    `<li>${escapeHtml(allergy)}</li>`
+                ).join('') + '</ul>';
+            }
+            
+            const formattedDate = new Date(student.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            contentDiv.innerHTML = `
+                <div class="detail-row">
+                    <div class="detail-label">Full Name:</div>
+                    <div class="detail-value">${escapeHtml(student.full_name)}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Age:</div>
+                    <div class="detail-value">${escapeHtml(student.age)}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Parent/Guardian Email:</div>
+                    <div class="detail-value">${escapeHtml(student.parent_email)}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Parent/Guardian Phone:</div>
+                    <div class="detail-value">${escapeHtml(student.parent_phone || 'Not provided')}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Grade & Section:</div>
+                    <div class="detail-value">${escapeHtml(gradeSection)}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Allergies & Medical Notes:</div>
+                    <div class="detail-value">${allergiesHtml}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Date Added:</div>
+                    <div class="detail-value">${formattedDate}</div>
+                </div>
+            `;
         }
 
-        function editStudent(studentId) {
-            window.location.href = `edit-student.html?id=${studentId}`;
+        function openViewStudentModal() {
+            document.getElementById('viewStudentModal').style.display = 'flex';
+        }
+
+        function closeViewStudentModal() {
+            document.getElementById('viewStudentModal').style.display = 'none';
+            document.getElementById('viewStudentMessage').className = 'message';
+            document.getElementById('viewStudentMessage').style.display = 'none';
+            currentStudentId = null;
+        }
+
+        function openEditStudentFromView() {
+            closeViewStudentModal();
+            setTimeout(() => editStudent(currentStudentId), 300);
+        }
+
+        async function editStudent(studentId) {
+            currentStudentId = studentId;
+            
+            try {
+                const { data: student, error } = await supabase
+                    .from('students')
+                    .select(`
+                        id,
+                        full_name,
+                        age,
+                        parent_email,
+                        parent_phone,
+                        allergies,
+                        created_at,
+                        grade_section_id,
+                        grade_sections (id, grade_level, section)
+                    `)
+                    .eq('id', studentId)
+                    .single();
+
+                if (error) throw error;
+
+                populateEditForm(student);
+                openEditStudentModal();
+                
+            } catch (error) {
+                console.error('Error loading student for edit:', error);
+                showError('Failed to load student for editing.');
+            }
+        }
+
+        function populateEditForm(student) {
+            document.getElementById('edit_student_id').value = student.id;
+            document.getElementById('edit_full_name').value = student.full_name || '';
+            document.getElementById('edit_age').value = student.age || '';
+            document.getElementById('edit_parent_email').value = student.parent_email || '';
+            document.getElementById('edit_parent_phone').value = student.parent_phone || '';
+            document.getElementById('edit_allergies').value = student.allergies || '';
+            
+            // Clear messages
+            document.getElementById('editStudentMessage').className = 'message';
+            document.getElementById('editStudentMessage').style.display = 'none';
+            
+            // Handle grade/section selection
+            if (student.grade_sections) {
+                const grade = student.grade_sections.grade_level;
+                const sectionId = student.grade_section_id;
+                
+                // Set grade
+                document.getElementById('edit_grade').value = grade;
+                document.getElementById('edit_grade_section_id').value = sectionId;
+                
+                // Populate sections for this grade
+                populateSections(grade, 'edit_section');
+                updateGradeInfo(grade, 'edit_gradeInfo');
+                
+                // Enable section select
+                document.getElementById('edit_section').disabled = false;
+                
+                // Set section
+                setTimeout(() => {
+                    document.getElementById('edit_section').value = sectionId;
+                    
+                    const selectedSection = gradeSections.find(s => s.id === sectionId);
+                    if (selectedSection) {
+                        document.getElementById('edit_selectedGradeSection').textContent = 
+                            `Grade ${selectedSection.grade_level} - Section ${selectedSection.section}`;
+                        document.getElementById('edit_selectedSectionInfo').classList.add('active');
+                        updateSectionInfo(selectedSection.section, 'edit_sectionInfo');
+                    }
+                }, 100);
+            }
+        }
+
+        function openEditStudentModal() {
+            document.getElementById('editStudentModal').style.display = 'flex';
+        }
+
+        function closeEditStudentModal() {
+            document.getElementById('editStudentModal').style.display = 'none';
+            document.getElementById('editStudentForm').reset();
+            document.getElementById('edit_section').disabled = true;
+            document.getElementById('edit_selectedSectionInfo').classList.remove('active');
+            document.getElementById('edit_gradeInfo').textContent = '';
+            document.getElementById('edit_sectionInfo').textContent = '';
+            document.getElementById('editStudentMessage').className = 'message';
+            document.getElementById('editStudentMessage').style.display = 'none';
+            currentStudentId = null;
+        }
+
+        async function submitEditStudent(event) {
+            event.preventDefault();
+            
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError || !user) {
+                showMessageInForm('Please log in to edit students', 'error', 'editStudentMessage');
+                return;
+            }
+
+            const studentId = document.getElementById('edit_student_id').value;
+            const studentData = {
+                full_name: document.getElementById('edit_full_name').value.trim(),
+                age: parseInt(document.getElementById('edit_age').value),
+                parent_email: document.getElementById('edit_parent_email').value.trim(),
+                parent_phone: document.getElementById('edit_parent_phone').value.trim() || null,
+                grade_section_id: document.getElementById('edit_grade_section_id').value || null,
+                allergies: document.getElementById('edit_allergies').value.trim() || null,
+                updated_by: user.id,
+                updated_at: new Date().toISOString()
+            };
+
+            // Basic validation
+            if (!studentData.full_name || !studentData.age || !studentData.parent_email || !studentData.grade_section_id) {
+                showMessageInForm('Please fill in all required fields', 'error', 'editStudentMessage');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('students')
+                    .update(studentData)
+                    .eq('id', studentId)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                showMessageInForm('Student updated successfully!', 'success', 'editStudentMessage');
+                
+                // Update local data
+                const index = allStudents.findIndex(s => s.id === studentId);
+                if (index !== -1) {
+                    allStudents[index] = data;
+                }
+                
+                const filteredIndex = filteredStudents.findIndex(s => s.id === studentId);
+                if (filteredIndex !== -1) {
+                    filteredStudents[filteredIndex] = data;
+                }
+                
+                setTimeout(() => {
+                    closeEditStudentModal();
+                    displayStudents();
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error updating student:', error);
+                showMessageInForm(`Error: ${error.message}`, 'error', 'editStudentMessage');
+            }
         }
 
         async function deleteStudent(studentId, studentName) {
-            if (!confirm(`Are you sure you want to delete ${studentName}? This action cannot be undone.`)) {
+            if (!confirm(`Are you sure you want to delete "${studentName}"? This action cannot be undone.`)) {
                 return;
             }
             
@@ -1362,6 +1865,13 @@
                 console.error('Error deleting student:', error);
                 showError('Failed to delete student.');
             }
+        }
+
+        function showMessageInForm(text, type, elementId) {
+            const messageDiv = document.getElementById(elementId);
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
         }
 
         async function handleLogout() {
@@ -1444,18 +1954,6 @@
             }
         `;
         document.head.appendChild(style);
-
-        window.addEventListener('click', function(event) {
-            const alertModal = document.getElementById('alertModal');
-            const addStudentModal = document.getElementById('addStudentModal');
-            
-            if (event.target === alertModal) {
-                closeAlertModal();
-            }
-            if (event.target === addStudentModal) {
-                closeAddStudentModal();
-            }
-        });
     </script>
 </body>
 </html>
