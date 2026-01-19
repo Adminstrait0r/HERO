@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HERO – Health Emergency Response Operations</title>
+  <title>HERO – Nurse Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -1148,11 +1148,67 @@
     // ============= INITIALIZATION =============
     document.addEventListener('DOMContentLoaded', function() {
       debugLog('DOM Content Loaded');
+      checkNurseAuth(); // CHECK AUTH FIRST - THIS WAS THE BUG!
       setupEventListeners();
       setDefaultDateTime();
-      loadInitialData();
-      startAlertPolling();
     });
+
+    // ============= AUTHENTICATION CHECK =============
+    function checkNurseAuth() {
+      debugLog('Checking nurse authentication...');
+      
+      // Get nurse profile from sessionStorage (set by index.html)
+      const nurseProfileStr = sessionStorage.getItem('nurseProfile');
+      
+      if (!nurseProfileStr) {
+        debugLog('No nurse profile found in sessionStorage - redirecting to login');
+        showNotification('⚠️ Please login first', 'error');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+        return;
+      }
+      
+      try {
+        const nurseProfile = JSON.parse(nurseProfileStr);
+        debugLog('Nurse profile found:', nurseProfile);
+        
+        // Verify it's actually a nurse
+        if (nurseProfile.role !== 'nurse') {
+          debugLog('Invalid role:', nurseProfile.role);
+          showNotification('⚠️ Unauthorized access', 'error');
+          sessionStorage.removeItem('nurseProfile');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+          return;
+        }
+        
+        // Set nurse info in state
+        state.currentNurseId = nurseProfile.id;
+        state.currentNurseEmail = nurseProfile.email;
+        state.currentNurseName = nurseProfile.full_name || nurseProfile.email.split('@')[0];
+        
+        // Display nurse name
+        if (elements.nurseName) {
+          elements.nurseName.textContent = state.currentNurseName;
+        }
+        
+        debugLog('Nurse authenticated:', state.currentNurseName);
+        
+        // Now load data
+        loadInitialData();
+        startAlertPolling();
+        
+      } catch (error) {
+        debugLog('Error parsing nurse profile:', error);
+        showNotification('❌ Authentication error', 'error');
+        sessionStorage.removeItem('nurseProfile');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+      }
+    }
 
     function setupEventListeners() {
       // Navigation
@@ -1201,7 +1257,6 @@
     }
 
     function loadInitialData() {
-      loadNurseProfile();
       loadAlerts();
     }
 
@@ -1441,69 +1496,14 @@
       return `${Math.floor(seconds / 86400)}d ago`;
     }
 
-    // ============= NURSE AUTHENTICATION =============
-    async function loadNurseProfile() {
-      try {
-        const { data: { user }, error } = await state.supabaseClient.auth.getUser();
-        
-        if (error || !user) {
-          showNotification('⚠️ Please login first', 'error');
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 2000);
-          return;
-        }
-        
-        debugLog('User authenticated:', user.email);
-        
-        // Set nurse info in state
-        state.currentNurseId = user.id;
-        state.currentNurseEmail = user.email;
-        
-        // Fetch full nurse details from database
-        const { data: nurseData, error: nurseError } = await state.supabaseClient
-          .from('nurse')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        
-        if (nurseError) {
-          debugLog('Error loading nurse details:', nurseError);
-          state.currentNurseName = user.email.split('@')[0];
-        } else {
-          state.currentNurseName = nurseData.full_name || user.email.split('@')[0];
-        }
-        
-        // Display nurse name
-        if (elements.nurseName) {
-          elements.nurseName.textContent = state.currentNurseName;
-        }
-        
-        debugLog('Nurse profile loaded:', state.currentNurseName);
-        
-      } catch (error) {
-        console.error('Error loading nurse profile:', error);
-        showNotification('❌ Error loading profile', 'error');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
-      }
-    }
-
-    async function handleLogout() {
-      try {
-        const { error } = await state.supabaseClient.auth.signOut();
-        
-        if (error) throw error;
-        
-        showNotification('✓ Logged out successfully', 'success');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 1000);
-      } catch (error) {
-        console.error('Error logging out:', error);
-        showNotification('❌ Error logging out', 'error');
-      }
+    // ============= LOGOUT =============
+    function handleLogout() {
+      debugLog('Logging out...');
+      sessionStorage.removeItem('nurseProfile');
+      showNotification('✓ Logged out successfully', 'success');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1000);
     }
 
     // ============= GRADE LEVELS =============
