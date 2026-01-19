@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HERO – Health Emergency Response Operations</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-main: radial-gradient(circle at top, #141414, #000000 70%);
@@ -66,16 +67,6 @@
             align-items: center;
             justify-content: center;
             font-size: 14px;
-        }
-
-        .theme-toggle {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: var(--text-muted);
-            cursor: pointer;
-            user-select: none;
         }
 
         /* Main Auth Container */
@@ -302,6 +293,12 @@
             box-shadow: 0 8px 25px rgba(198, 40, 40, 0.4);
         }
 
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-secondary {
             background: var(--btn-dark);
             color: var(--text-main);
@@ -499,7 +496,7 @@
             width: 20px;
             height: 20px;
             border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid var(--red-main);
+            border-top: 2px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-right: 8px;
@@ -677,6 +674,11 @@
 
                 <form id="nurse-register-form" class="auth-form hidden">
                     <div class="form-group">
+                        <label>FULL NAME</label>
+                        <input type="text" id="nurse-fullname" required placeholder="Jane Doe">
+                    </div>
+
+                    <div class="form-group">
                         <label>EMAIL ADDRESS</label>
                         <input type="email" id="nurse-email" required placeholder="nurse@school.edu">
                     </div>
@@ -714,7 +716,7 @@
     <div id="toast" class="toast hidden"></div>
 
     <!-- Corner Dot -->
-    <div class="corner-dot">N</div>
+    <div class="corner-dot">H</div>
 
     <script type="module">
         import { supabase } from './supabase.js';
@@ -915,7 +917,7 @@
             }
 
             const loginButton = document.getElementById('login-button');
-            const originalText = loginButton.textContent;
+            const originalText = loginButton.innerHTML;
             loginButton.innerHTML = '<div class="spinner"></div> VERIFYING...';
             loginButton.disabled = true;
 
@@ -941,8 +943,8 @@
                     if (profile && profile.role === 'teacher') {
                         showToast('✅ Teacher access granted', 'success');
                         redirectToTeacherDashboard();
+                        return;
                     }
-                    return;
                 } catch (teacherError) {
                     console.log('Trying nurse login...');
                 }
@@ -962,10 +964,11 @@
                     throw new Error('Invalid email or password');
                 }
 
-                // Nurse login successful
+                // Nurse login successful - store with full_name
                 sessionStorage.setItem('nurseProfile', JSON.stringify({
                     id: nurseData.id,
                     email: nurseData.email,
+                    full_name: nurseData.full_name || nurseData.email.split('@')[0],
                     role: 'nurse'
                 }));
                 showToast('✅ Nurse access granted', 'success');
@@ -982,7 +985,7 @@
                 }
                 showAuthMessage(errorMessage, 'error');
             } finally {
-                loginButton.textContent = originalText;
+                loginButton.innerHTML = originalText;
                 loginButton.disabled = false;
             }
         }
@@ -1016,7 +1019,7 @@
         }
 
         async function handleTeacherRegistration() {
-            const fullName = document.getElementById('teacher-fullname').value;
+            const fullName = document.getElementById('teacher-fullname').value.trim();
             const email = document.getElementById('teacher-email').value.trim().toLowerCase();
             const password = document.getElementById('teacher-password').value;
             const confirmPassword = document.getElementById('teacher-confirm-password').value;
@@ -1041,7 +1044,7 @@
             }
 
             const registerButton = document.getElementById('teacher-register-button');
-            const originalText = registerButton.textContent;
+            const originalText = registerButton.innerHTML;
             registerButton.innerHTML = '<div class="spinner"></div> PROCESSING...';
             registerButton.disabled = true;
 
@@ -1097,17 +1100,18 @@
                 }
                 showAuthMessage(errorMessage, 'error');
             } finally {
-                registerButton.textContent = originalText;
+                registerButton.innerHTML = originalText;
                 registerButton.disabled = false;
             }
         }
 
         async function handleNurseRegistration() {
+            const fullName = document.getElementById('nurse-fullname').value.trim();
             const email = document.getElementById('nurse-email').value.trim().toLowerCase();
             const password = document.getElementById('nurse-password').value;
             const confirmPassword = document.getElementById('nurse-confirm-password').value;
 
-            if (!email || !password || !confirmPassword) {
+            if (!fullName || !email || !password || !confirmPassword) {
                 showAuthMessage('All fields required.', 'error');
                 return;
             }
@@ -1121,7 +1125,7 @@
             }
 
             const registerButton = document.getElementById('nurse-register-button');
-            const originalText = registerButton.textContent;
+            const originalText = registerButton.innerHTML;
             registerButton.innerHTML = '<div class="spinner"></div> PROCESSING...';
             registerButton.disabled = true;
 
@@ -1137,10 +1141,11 @@
                     throw new Error('Nurse with this email already exists');
                 }
 
-                // Create nurse in nurse table
+                // Create nurse in nurse table with full_name
                 const { data: nurse, error: nurseError } = await supabase
                     .from('nurse')
                     .insert({
+                        full_name: fullName,
                         email: email,
                         password: password
                     })
@@ -1151,10 +1156,11 @@
 
                 showAuthMessage('✅ Nurse registered successfully! You can now login.', 'success');
                 nurseRegisterForm.reset();
+                showToast('✅ Registration successful! Please login.', 'success');
                 
                 setTimeout(() => {
                     switchTab('login');
-                }, 3000);
+                }, 2000);
                 
             } catch (error) {
                 let errorMessage = 'Registration failed. ';
@@ -1165,7 +1171,7 @@
                 }
                 showAuthMessage(errorMessage, 'error');
             } finally {
-                registerButton.textContent = originalText;
+                registerButton.innerHTML = originalText;
                 registerButton.disabled = false;
             }
         }
